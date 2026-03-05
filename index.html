@@ -266,6 +266,26 @@ h2.sec-title em{font-style:normal;background:linear-gradient(135deg,var(--blue2)
 .workers-section-title::before,.workers-section-title::after{content:"";flex:1;height:1px;background:var(--border)}
 .workers-section-title:first-of-type{margin-top:0}
 
+.workers-explainer{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;background:var(--s1);border:1px solid var(--border);border-radius:24px;padding:40px;margin-bottom:48px;position:relative;overflow:hidden}
+.workers-explainer::before{content:"";position:absolute;top:0;left:15%;right:15%;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.15}
+.we-tag{font-family:"Syne",sans-serif;font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.we-tag::before{content:"";width:20px;height:1px;background:var(--cyan);opacity:.5}
+.we-title{font-family:"Syne",sans-serif;font-size:clamp(22px,3vw,30px);font-weight:800;line-height:1.1;letter-spacing:-.02em;color:var(--text);margin-bottom:16px}
+.we-title em{font-style:normal;background:linear-gradient(135deg,var(--blue2),var(--green2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.we-body{font-size:13.5px;color:var(--text2);line-height:1.75}
+.we-list-label{font-family:"Syne",sans-serif;font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:14px}
+.we-list{list-style:none;display:flex;flex-direction:column}
+.we-list li{display:flex;align-items:flex-start;gap:14px;padding:11px 0;border-bottom:1px solid rgba(26,46,72,.6);font-size:13px;color:var(--text2)}
+.we-list li:last-child{border-bottom:none}
+.we-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.we-worker-name{font-family:"Syne",sans-serif;font-size:12px;font-weight:700;color:var(--text);min-width:54px}
+.we-worker-role{color:var(--text2);font-size:12.5px}
+.we-footer{margin-top:20px;padding-top:20px;border-top:1px solid var(--border)}
+.we-steps{display:flex;flex-direction:column;gap:4px}
+.we-steps span{font-family:"Syne",sans-serif;font-size:15px;font-weight:800;line-height:1.3;letter-spacing:-.015em;background:linear-gradient(135deg,var(--blue2),var(--green2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.we-steps span:first-child{font-size:18px}
+.we-steps span:last-child{font-size:13px;font-weight:700;color:var(--text2);-webkit-text-fill-color:var(--text2);background:none}
+
 /* worker card */
 .wcard{
   background:var(--s1);border:1px solid var(--border);border-radius:24px;
@@ -1037,6 +1057,31 @@ nav {
       <h2 class="sec-title">Conoce a tus <em>Workers</em></h2>
       <p class="sec-desc">Cinco trabajadores especializados. Cada uno con un rol concreto. Elige el que mejor se adapte a lo que necesitas hoy.</p>
     </div>
+
+    <div class="workers-explainer">
+  <div class="we-left">
+    <div class="we-tag">¿Qué son los Workers?</div>
+    <h3 class="we-title">No son bots.<br>Son <em>empleados digitales.</em></h3>
+    <p class="we-body">Cada worker tiene un rol concreto dentro de tu negocio. Trabajan todos los días, ejecutan tareas específicas y te permiten crecer sin aumentar tu equipo humano.</p>
+    <div class="we-footer">
+      <div class="we-steps">
+        <span>Empiezas con uno.</span>
+        <span>Subes por niveles según lo que tu negocio necesite.</span>
+        <span>Tu equipo digital crece contigo.</span>
+      </div>
+    </div>
+  </div>
+  <div class="we-right">
+    <div class="we-list-label">Cada worker tiene una función concreta</div>
+    <ul class="we-list">
+      <li><span class="we-dot" style="background:#a78bfa;box-shadow:0 0 5px rgba(167,139,250,.4)"></span><span><span class="we-worker-name">Sophie</span><span class="we-worker-role"> — Atiende y agenda citas por WhatsApp</span></span></li>
+      <li><span class="we-dot" style="background:#3d8ef5;box-shadow:0 0 5px rgba(61,142,245,.4)"></span><span><span class="we-worker-name">Valery</span><span class="we-worker-role"> — Organiza y mantiene el orden de tus clientes</span></span></li>
+      <li><span class="we-dot" style="background:#22c98a;box-shadow:0 0 5px rgba(34,201,138,.4)"></span><span><span class="we-worker-name">Tim</span><span class="we-worker-role"> — Reactiva clientes y genera nuevas ventas</span></span></li>
+      <li><span class="we-dot" style="background:#e8b84b;box-shadow:0 0 5px rgba(232,184,75,.4)"></span><span><span class="we-worker-name">Max</span><span class="we-worker-role"> — Analiza resultados y aconseja decisiones</span></span></li>
+      <li><span class="we-dot" style="background:#ff5e7a;box-shadow:0 0 5px rgba(255,94,122,.4)"></span><span><span class="we-worker-name">Luke</span><span class="we-worker-role"> — Responde llamadas y gestiona citas por teléfono</span></span></li>
+    </ul>
+  </div>
+</div>
 
     <div class="workers-section-title">Workers por WhatsApp</div>
 
