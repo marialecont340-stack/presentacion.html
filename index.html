@@ -856,18 +856,16 @@ nav {
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap');
 
 .tw2-card {
-  background: linear-gradient(160deg, #0f1c2e 0%, #0a1520 60%, #0d1e35 100%);
-  border: 1px solid rgba(61, 142, 245, 0.2);
-  border-radius: 20px;
-  padding: 28px 24px 24px;
-  width: 100%;
-  max-width: 480px;
-  font-family: 'Syne', sans-serif;
-  color: #e2eaf5;
-  box-sizing: border-box;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 32px 28px 26px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(61, 142, 245, 0.15);
+  transition: transform .35s cubic-bezier(.22,.68,0,1.2), box-shadow .35s ease, border-color .35s ease;
+  cursor: default;
+  --ac: var(--green);
+  --ac-g: var(--green-g);
 
 }
   
@@ -878,9 +876,36 @@ nav {
   left: 15%;
   right: 15%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(61, 142, 245, 0.4), transparent);
+  background: linear-gradient(90deg, transparent, var(--ac, var(--green)), transparent);
+  opacity: .2;
+  transition: opacity .35s, left .35s, right .35s;
+}
+  .tw2-card::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 70px;
+  height: 70px;
+  background: radial-gradient(circle at top right, var(--ac-g, transparent), transparent 70%);
+  border-radius: 0 24px 0 0;
+  opacity: 0;
+  transition: opacity .35s;
+
 }
 
+.tw2-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--ac, var(--green));
+  box-shadow: 0 0 0 1px var(--ac, var(--green)), 0 30px 60px rgba(0,0,0,.6), 0 0 40px var(--ac-g, transparent);
+
+}
+  .tw2-card:hover::before { opacity: 1; left: 0; right: 0; }
+.tw2-card:hover::after  { opacity: 1; }
+.tw2-card:hover .tw2-ibox {
+  border-color: var(--ac, var(--green));
+  box-shadow: 0 0 16px var(--ac-g, transparent);
+}
 .tw2-top {
   display: flex;
   justify-content: space-between;
