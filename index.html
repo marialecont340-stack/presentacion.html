@@ -856,8 +856,8 @@ nav {
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap');
 
 .tw2-card {
-  background: #0f1c2e;
-  border: 1px solid rgba(61, 142, 245, 0.15);
+  background: linear-gradient(160deg, #0f1c2e 0%, #0a1520 60%, #0d1e35 100%);
+  border: 1px solid rgba(61, 142, 245, 0.2);
   border-radius: 20px;
   padding: 28px 24px 24px;
   width: 100%;
@@ -865,6 +865,20 @@ nav {
   font-family: 'Syne', sans-serif;
   color: #e2eaf5;
   box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(61, 142, 245, 0.15);
+
+}
+  
+.tw2-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(61, 142, 245, 0.4), transparent);
 }
 
 .tw2-top {
