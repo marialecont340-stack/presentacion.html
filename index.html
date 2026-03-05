@@ -855,6 +855,10 @@ nav {
 }
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap');
 
+} 
+
+/* ===== TIM — Worker 02 CSS ===== */
+
 .tw2-card {
   background: var(--s1);
   border: 1px solid var(--border);
@@ -866,9 +870,8 @@ nav {
   cursor: default;
   --ac: var(--green);
   --ac-g: var(--green-g);
-
 }
-  
+
 .tw2-card::before {
   content: "";
   position: absolute;
@@ -876,36 +879,38 @@ nav {
   left: 15%;
   right: 15%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--ac, var(--green)), transparent);
+  background: linear-gradient(90deg, transparent, var(--ac), transparent);
   opacity: .2;
   transition: opacity .35s, left .35s, right .35s;
 }
-  .tw2-card::after {
+
+.tw2-card::after {
   content: "";
   position: absolute;
   top: -2px;
   right: -2px;
   width: 70px;
   height: 70px;
-  background: radial-gradient(circle at top right, var(--ac-g, transparent), transparent 70%);
+  background: radial-gradient(circle at top right, var(--ac-g), transparent 70%);
   border-radius: 0 24px 0 0;
   opacity: 0;
   transition: opacity .35s;
-
 }
 
 .tw2-card:hover {
   transform: translateY(-6px);
-  border-color: var(--ac, var(--green));
-  box-shadow: 0 0 0 1px var(--ac, var(--green)), 0 30px 60px rgba(0,0,0,.6), 0 0 40px var(--ac-g, transparent);
-
+  border-color: var(--ac);
+  box-shadow: 0 0 0 1px var(--ac), 0 30px 60px rgba(0,0,0,.6), 0 0 40px var(--ac-g);
 }
-  .tw2-card:hover::before { opacity: 1; left: 0; right: 0; }
+
+.tw2-card:hover::before { opacity: 1; left: 0; right: 0; }
 .tw2-card:hover::after  { opacity: 1; }
 .tw2-card:hover .tw2-ibox {
-  border-color: var(--ac, var(--green));
-  box-shadow: 0 0 16px var(--ac-g, transparent);
+  border-color: var(--ac);
+  box-shadow: 0 0 16px var(--ac-g);
 }
+
+/* Top row */
 .tw2-top {
   display: flex;
   justify-content: space-between;
@@ -913,41 +918,49 @@ nav {
   margin-bottom: 24px;
 }
 
+/* Worker 02 · WhatsApp */
 .tw2-num {
+  font-family: "Syne", sans-serif;
   font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-weight: 700;
+  letter-spacing: .22em;
   text-transform: uppercase;
-  color: #4a7abf;
+  color: var(--text3);
   margin-bottom: 4px;
 }
 
+/* Tim */
 .tw2-name {
+  font-family: "Syne", sans-serif;
   font-size: 42px;
   font-weight: 800;
   font-style: italic;
-  color: #ffffff;
+  color: var(--text);
   line-height: 1;
   letter-spacing: -1px;
   margin-bottom: 4px;
 }
 
+/* El que trae clientes de vuelta */
 .tw2-role {
+  font-family: "DM Sans", sans-serif;
   font-size: 13px;
   font-style: italic;
-  color: #7a9bbf;
+  color: var(--text2);
 }
 
+/* Caja ícono SVG */
 .tw2-ibox {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #1a3560, #0f2240);
-  border: 1px solid rgba(61, 142, 245, 0.3);
+  background: var(--s2);
+  border: 1px solid var(--border);
   border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: border-color .35s, box-shadow .35s;
 }
 
 .tw2-ibox svg {
@@ -955,6 +968,7 @@ nav {
   height: 26px;
 }
 
+/* Avatar */
 .tw2-avatar {
   display: flex;
   justify-content: center;
@@ -966,22 +980,30 @@ nav {
   height: 190px;
   object-fit: cover;
   border-radius: 16px;
-  border: 1px solid rgba(61, 142, 245, 0.2);
+  border: 1px solid var(--border);
 }
 
+/* Descripción */
 .tw2-desc {
+  font-family: "DM Sans", sans-serif;
+  font-size: 13px;
+  line-height: 1.7;
   color: var(--text2);
+  margin: 0 0 18px 0;
 }
 
+/* Label ¿Qué hace? */
 .tw2-label {
+  font-family: "Syne", sans-serif;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: .22em;
   text-transform: uppercase;
-  color: #3d8ef5;
+  color: var(--green);
   margin-bottom: 10px;
 }
 
+/* Lista de tareas */
 .tw2-tasks {
   list-style: none;
   padding: 0;
@@ -992,46 +1014,53 @@ nav {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 13.5px;
+  font-family: "DM Sans", sans-serif;
+  font-size: 13px;
   color: var(--text2);
   padding: 10px 0;
-  border-bottom: 1px solid rgba(61, 142, 245, 0.1);
+  border-bottom: 1px solid var(--border);
 }
 
 .tw2-card .tw2-tasks li:last-child {
   border-bottom: none;
-  
 }
 
 .tw2-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: #3ecf8e;
+  background: var(--green);
   flex-shrink: 0;
 }
 
+/* Caja ejemplo */
 .tw2-example {
-  background: rgba(61, 142, 245, 0.06);
-  border: 1px solid rgba(61, 142, 245, 0.18);
-  border-radius: 10px;
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
   padding: 14px 16px;
   margin-bottom: 20px;
 }
 
 .tw2-ex-label {
-  font-size: 9.5px;
+  font-family: "Syne", sans-serif;
+  font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: .18em;
   text-transform: uppercase;
-  color: #4a7abf;
+  color: var(--green);
   margin-bottom: 8px;
 }
 
 .tw2-ex-text {
+  font-family: "DM Sans", sans-serif;
+  font-size: 13px;
+  font-style: italic;
   color: var(--text2);
+  line-height: 1.65;
 }
 
+/* Canal WhatsApp */
 .tw2-ch {
   margin-bottom: 20px;
 }
@@ -1040,20 +1069,23 @@ nav {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--s2);
+  border: 1px solid var(--border);
   border-radius: 20px;
   padding: 5px 14px;
+  font-family: "DM Sans", sans-serif;
   font-size: 12.5px;
-  color: #c8d8ec;
+  color: var(--text2);
 }
 
+/* Divisor */
 .tw2-divider {
   height: 1px;
-  background: rgba(61, 142, 245, 0.12);
+  background: var(--border);
   margin-bottom: 18px;
 }
 
+/* Footer */
 .tw2-footer {
   display: flex;
   justify-content: space-between;
@@ -1061,25 +1093,32 @@ nav {
 }
 
 .tw2-plan-name {
+  font-family: "Syne", sans-serif;
   font-size: 15px;
-  font-weight: 700;
-  color: #ffffff;
+  font-weight: 800;
+  color: var(--text);
 }
 
 .tw2-plan-sub {
+  font-family: "DM Sans", sans-serif;
+  font-size: 12px;
   color: var(--text2);
+  margin-top: 2px;
 }
 
+/* Badge TIM */
 .tw2-badge {
-  background: linear-gradient(135deg, #1a4a2e, #0f3020);
-  border: 1px solid rgba(62, 207, 142, 0.3);
-  color: #3ecf8e;
+  background: linear-gradient(135deg, rgba(34,201,138,.15), rgba(34,201,138,.05));
+  border: 1px solid rgba(34,201,138,.3);
+  color: var(--green);
+  font-family: "Syne", sans-serif;
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-weight: 800;
+  letter-spacing: .12em;
   text-transform: uppercase;
   padding: 6px 14px;
   border-radius: 20px;
+}
 }
 </style>
 </head>
