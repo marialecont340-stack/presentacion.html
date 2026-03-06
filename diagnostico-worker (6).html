@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico Worker Digital · Nissi Tech</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #04070f;
+    --s1: #0a1628;
+    --s2: #0e1c32;
+    --s3: #12223c;
+    --border: #1a2e48;
+    --border2: #243d5e;
+    --blue: #3d8ef5;
+    --blue2: #5aa3ff;
+    --green: #22c98a;
+    --green2: #30e09a;
+    --green-g: rgba(34,201,138,.15);
+    --gold: #e8b84b;
+    --purple: #a78bfa;
+    --red: #ff5e7a;
+    --text: #dde8f8;
+    --text2: #7a94b3;
+    --text3: #3d5570;
+    --accent: #22c98a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 20px 60px;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -20%;
+    left: -15%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(34,201,138,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -15%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(61,142,245,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 640px;
+  }
+
+  /* PROGRESS */
+  .progress-wrap { margin-bottom: 32px; display: none; }
+  .progress-wrap.visible { display: block; }
+  .progress-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .progress-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+  .progress-pct {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--green);
+  }
+  .progress-bar { height: 3px; background: var(--s2); border-radius: 99px; overflow: hidden; }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), var(--green2));
+    border-radius: 99px;
+    transition: width .5s cubic-bezier(.4,0,.2,1);
+    width: 0%;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 48px 44px;
+    box-shadow: 0 32px 80px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.04);
+    display: none;
+    animation: fadeUp .4s cubic-bezier(.22,1,.36,1) both;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 15%; right: 15%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(34,201,138,.2), transparent);
+  }
+  .card.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* BADGE */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(34,201,138,.08);
+    border: 1px solid rgba(34,201,138,.25);
+    border-radius: 99px;
+    padding: 6px 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--green2);
+    margin-bottom: 28px;
+  }
+
+  /* INTRO */
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(26px, 5vw, 40px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -.025em;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+  h1 em {
+    font-style: normal;
+    background: linear-gradient(135deg, var(--blue2), var(--green2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .sub {
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--text2);
+    margin-bottom: 12px;
+    font-weight: 300;
+  }
+
+  .sub-time {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--green);
+    margin-bottom: 28px;
+  }
+
+  .bullets {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 36px;
+    padding: 20px 22px;
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+  .bullets li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--text2);
+  }
+  .bullets li::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+    box-shadow: 0 0 6px rgba(34,201,138,.4);
+  }
+
+  /* QUESTION */
+  .q-eyebrow {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 12px;
+  }
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(18px, 3.5vw, 26px);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -.02em;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .q-helper {
+    font-size: 13px;
+    color: var(--text3);
+    margin-bottom: 24px;
+  }
+
+  /* OPTIONS */
+  .options { display: flex; flex-direction: column; gap: 9px; margin-bottom: 28px; }
+
+  .option {
+    position: relative;
+    padding: 14px 18px;
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: all .2s ease;
+    user-select: none;
+  }
+  .option:hover {
+    border-color: rgba(34,201,138,.35);
+    background: rgba(34,201,138,.04);
+    transform: translateX(3px);
+  }
+  .option.selected {
+    border-color: var(--green);
+    background: rgba(34,201,138,.07);
+  }
+  .option.selected .opt-dot {
+    background: var(--green);
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(34,201,138,.2);
+  }
+  .option.selected .opt-dot::after { opacity: 1; }
+
+  /* Single select style */
+  .option.single .opt-dot { border-radius: 50%; }
+
+  .opt-dot {
+    width: 20px; height: 20px; min-width: 20px;
+    border-radius: 5px;
+    border: 2px solid var(--border2);
+    margin-top: 2px;
+    position: relative;
+    transition: all .2s ease;
+    flex-shrink: 0;
+  }
+  .opt-dot::after {
+    content: '✓';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    font-size: 11px;
+    font-weight: 900;
+    color: #04100a;
+    opacity: 0;
+    transition: opacity .2s;
+    line-height: 1;
+  }
+  .opt-text { flex: 1; font-size: 14px; line-height: 1.45; color: var(--text); }
+  .opt-emoji { font-size: 18px; margin-top: 1px; flex-shrink: 0; }
+
+  /* Note under option */
+  .opt-note {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 3px;
+    font-style: italic;
+  }
+
+  /* INFO NOTE */
+  .info-note {
+    background: rgba(34,201,138,.05);
+    border: 1px solid rgba(34,201,138,.15);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: var(--text2);
+    margin-top: -12px;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+
+  /* FIELDS */
+  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+  .field { display: flex; flex-direction: column; gap: 7px; }
+  .field.full { grid-column: 1 / -1; }
+  .field label {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+  .field input, .field select {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 16px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    -webkit-appearance: none;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(34,201,138,.1);
+  }
+  .field input::placeholder { color: var(--text3); }
+  .field select option { background: var(--s1); }
+  .field input.error, .field select.error { border-color: var(--red) !important; }
+  .field-error { font-size: 12px; color: var(--red); display: none; }
+  .field-error.visible { display: block; }
+  .field-optional { font-size: 10px; color: var(--text3); font-style: italic; }
+
+  /* BUTTONS */
+  .btn {
+    width: 100%;
+    padding: 16px 24px;
+    border-radius: 14px;
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    letter-spacing: .02em;
+    transition: all .2s ease;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #1ab87a, #22c98a);
+    color: #03100a;
+    box-shadow: 0 8px 28px rgba(34,201,138,.3);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(34,201,138,.45); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: .35; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .btn-wa {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: linear-gradient(135deg, #25d366, #128c3e);
+    color: white;
+    box-shadow: 0 8px 24px rgba(37,211,102,.3);
+    text-decoration: none;
+    margin-top: 10px;
+  }
+  .btn-wa:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(37,211,102,.4); }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    font-size: 13px;
+    margin-top: 10px;
+  }
+  .btn-ghost:hover { border-color: var(--green); color: var(--text); }
+
+  /* RESULT */
+  .res-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 6px;
+  }
+
+  .res-plan-name {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 6vw, 44px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -.03em;
+    margin-bottom: 6px;
+  }
+  .res-plan-name .green { background: linear-gradient(135deg, var(--green), var(--green2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+  .res-because {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin: 20px 0 10px;
+  }
+
+  .res-checks { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+  .res-check {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; color: var(--text2);
+  }
+  .res-check::before { content: '✔'; color: var(--green); font-weight: 700; font-size: 13px; flex-shrink: 0; }
+
+  .res-workers { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+  .res-worker {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+  }
+  .res-worker-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .res-worker-features { display: flex; flex-direction: column; gap: 5px; }
+  .res-worker-features span {
+    font-size: 12.5px;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .res-worker-features span::before { content: '·'; color: var(--green); font-weight: 700; }
+
+  /* Price box */
+  .res-price-box {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+  }
+  .res-price-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
+  .res-price-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+  .res-price-label { font-size: 12px; color: var(--text2); }
+  .res-price-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .res-price-old {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text3);
+    text-decoration: line-through;
+  }
+  .res-promo-badge {
+    font-family: 'Syne', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--green);
+    background: rgba(34,201,138,.1);
+    border: 1px solid rgba(34,201,138,.25);
+    padding: 3px 8px;
+    border-radius: 99px;
+  }
+
+  /* Upgrade box */
+  .upgrade-box {
+    border: 1px solid rgba(91,163,255,.2);
+    background: rgba(61,142,245,.04);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .upgrade-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--blue2);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .upgrade-text { font-size: 13px; color: var(--text2); line-height: 1.7; }
+  .upgrade-text strong { color: var(--blue2); }
+
+  /* Complements */
+  .complements {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .complement-tag {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    color: var(--text2);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 120px;
+  }
+  .complement-tag strong {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .complement-tag span { font-size: 11px; color: var(--text3); }
+
+  /* Emotional close */
+  .emotional-close {
+    text-align: center;
+    font-size: 14px;
+    color: var(--text2);
+    margin-bottom: 24px;
+    line-height: 1.7;
+    padding: 18px;
+    background: var(--s2);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+  }
+  .emotional-close strong { color: var(--text); font-family: 'Syne', sans-serif; }
+
+  /* Social proof */
+  .social-proof {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 12px;
+    font-style: italic;
+  }
+
+  /* Legal */
+  .legal-box {
+    margin-top: 20px;
+    padding: 14px 18px;
+    background: rgba(255,255,255,.02);
+    border: 1px solid rgba(255,255,255,.05);
+    border-radius: 12px;
+    font-size: 11.5px;
+    color: var(--text3);
+    line-height: 1.65;
+  }
+  .legal-box strong { color: rgba(221,232,248,.5); }
+
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+  @media (max-width: 560px) {
+    body { padding: 24px 16px 48px; }
+    .card { padding: 30px 22px; }
+    .fields { grid-template-columns: 1fr; }
+    .complements { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-top">
+      <div class="progress-label">Paso <span id="stepLabel">1</span> de 6</div>
+      <div class="progress-pct" id="progressPct">0%</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <!-- INTRO -->
+  <div class="card active" id="step0">
+    <div class="badge">◈ Diagnóstico inteligente · Nissi Tech</div>
+    <h1>Descubre qué <em>Worker Digital</em> necesita tu negocio</h1>
+    <p class="sub">En 60 segundos te decimos con qué plan debes empezar y cuál es el upgrade ideal para el mes 2.</p>
+    <ul class="bullets">
+      <li>WhatsApp atendido sin depender de ti</li>
+      <li>Agenda llena y recordatorios automáticos</li>
+      <li>Clientes ordenados y campañas para vender más</li>
+      <li>Recomendación clara: qué activar hoy y qué activar después</li>
+    </ul>
+    <button class="btn btn-primary" onclick="goTo(1)">Empezar diagnóstico →</button>
+  </div>
+
+  <!-- Q1: Fricción principal -->
+  <div class="card" id="step1">
+    <div class="q-eyebrow">Paso 1 · Fricción principal</div>
+    <h2>¿Qué te está frenando hoy?</h2>
+    <p class="q-helper">Selecciona todas las que apliquen a tu negocio.</p>
+    <div class="options" id="q1opts">
+      <div class="option" onclick="selectOpt(this,'q1','sofi_wa')">
+        <span class="opt-emoji">💬</span>
+        <div><div class="opt-text">No alcanzo a responder WhatsApp a tiempo</div></div>
+        <div class="opt-dot"></div>
+      </div>
+      <div class="option" onclick="selectOpt(this,'q1','sofi_citas')">
+        <span class="opt-emoji">📅</span>
+        <div><div class="opt-text">Se me pasan citas / la gente no llega</div></div>
+        <div class="opt-dot"></div>
+      </div>
+      <div class="option" onclick="selectOpt(this,'q1','tim')">
+        <span class="opt-emoji">🔄</span>
+        <div><div class="opt-text">Tengo clientes que preguntan y no vuelven</div></div>
+        <div class="opt-dot"></div>
+      </div>
+      <div class="option" onclick="selectOpt(this,'q1','valery')">
+        <span class="opt-emoji">📊</span>
+        <div><div class="opt-text">Tengo muchos chats y todo es un desorden</div></div>
+        <div class="opt-dot"></div>
+      </div>
+      <div class="option" onclick="selectOpt(this,'q1','max')">
+        <span class="opt-emoji">📈</span>
+        <div><div class="opt-text">Quiero entender qué funciona y qué no para crecer</div></div>
+        <div class="opt-dot"></div>
+      </div>
+      <div class="option" onclick="selectOpt(this,'q1','luke')">
+        <span class="opt-emoji">📞</span>
+        <div><div class="opt-text">Pierdo llamadas por no contestar</div></div>
+        <div class="opt-dot"></div>
+      </div>
+      <div class="option" onclick="selectOpt(this,'q1','unsure')">
+        <span class="opt-emoji">🤔</span>
+        <div><div class="opt-text">No estoy seguro</div></div>
+        <div class="opt-dot"></div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="btn1" disabled onclick="goTo(2)">Continuar →</button>
+  </div>
+
+  <!-- Q2: Impacto real -->
+  <div class="card" id="step2">
+    <div class="q-eyebrow">Paso 2 · Impacto real</div>
+    <h2>¿Qué está pasando por culpa de eso?</h2>
+    <p class="q-helper">Selecciona todas las que se apliquen ahora mismo.</p>
+    <div class="options" id="q2opts">
+      <div class="option" onclick="selectOpt(this,'q2','ventas')">
+        <span class="opt-emoji">💸</span>
+        <div class="opt-text">Estoy perdiendo ventas</div>
+        <div class="opt-dot"></div>
+      </div>
+      <div class="option" onclick="selectOpt(this,'q2','agenda')">
+        <span class="opt-emoji">📅</span>
+        <div class="opt-text">Mi agenda no se llena como debería</div>
+        <div class="opt-dot"></div>
+      </div>
+      <div class="option" onclick="selectOpt(this,'q2','saturado')">
+        <span class="opt-emoji">😩</span>
+        <div class="opt-text">Mi equipo está saturado</div>
+        <div class="opt-dot"></div>
+      </div>
+      <div class="option" onclick="selectOpt(this,'q2','dependencia')">
+        <span class="opt-emoji">🔒</span>
+        <div class="opt-text">Todo depende de mí, no puedo desconectarme</div>
+        <div class="opt-dot"></div>
+      </div>
+      <div class="option" onclick="selectOpt(this,'q2','control')">
+        <span class="opt-emoji">🌀</span>
+        <div class="opt-text">No tengo control del negocio / no sé qué está pasando</div>
+        <div class="opt-dot"></div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="btn2" disabled onclick="goTo(3)">Continuar →</button>
+  </div>
+
+  <!-- Q3: Objetivo -->
+  <div class="card" id="step3">
+    <div class="q-eyebrow">Paso 3 · Tu objetivo</div>
+    <h2>¿Qué quieres lograr en 3 meses?</h2>
+    <p class="q-helper">Puedes marcar más de uno — todos cuentan para tu diagnóstico.</p>
+    <div class="options" id="q3opts">
+      <div class="option" onclick="selectOpt(this,'q3','agenda')">
+        <span class="opt-emoji">📆</span>
+        <div class="opt-text">Llenar mi agenda de forma constante</div>
+        <div class="opt-dot"></div>
+      </div>
+      <div class="option" onclick="selectOpt(this,'q3','campanas')">
+        <span class="opt-emoji">🚀</span>
+        <div class="opt-text">Vender más con campañas por WhatsApp</div>
+        <div class="opt-dot"></div>
+      </div>
+      <div class="option" onclick="selectOpt(this,'q3','orden')">
+        <span class="opt-emoji">🗂️</span>
+        <div class="opt-text">Tener orden y memoria de clientes (CRM)</div>
+        <div class="opt-dot"></div>
+      </div>
+      <div class="option" onclick="selectOpt(this,'q3','datos')">
+        <span class="opt-emoji">📊</span>
+        <div class="opt-text">Entender qué mejorar para crecer (precios / horarios / servicios)</div>
+        <div class="opt-dot"></div>
+      </div>
+      <div class="option" onclick="selectOpt(this,'q3','llamadas')">
+        <span class="opt-emoji">📞</span>
+        <div class="opt-text">No perder llamadas y agendar también por teléfono</div>
+        <div class="opt-dot"></div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="btn3" disabled onclick="goTo(4)">Continuar →</button>
+  </div>
+
+  <!-- Q4: CRM -->
+  <div class="card" id="step4">
+    <div class="q-eyebrow">Paso 4 · Organización</div>
+    <h2>¿Dónde tienes organizada tu base de clientes hoy?</h2>
+    <p class="q-helper">Una sola respuesta.</p>
+    <div class="options" id="q4opts">
+      <div class="option single" onclick="selectSingle(this,'q4','crm')">
+        <span class="opt-emoji">✅</span>
+        <div class="opt-text">Ya tengo CRM (Kommo / HubSpot / Excel / otro)</div>
+        <div class="opt-dot"></div>
+      </div>
+      <div class="option single" onclick="selectSingle(this,'q4','sheets')">
+        <span class="opt-emoji">📋</span>
+        <div class="opt-text">Tengo algo en Sheets pero es incompleto</div>
+        <div class="opt-dot"></div>
+      </div>
+      <div class="option single" onclick="selectSingle(this,'q4','nada')">
+        <span class="opt-emoji">💬</span>
+        <div class="opt-text">No tengo nada: todo está en WhatsApp</div>
+        <div class="opt-dot"></div>
+      </div>
+    </div>
+    <div class="info-note">💡 Si no tienes CRM, lo creamos por ti en Notion o Sheets — simple y funcional.</div>
+    <button class="btn btn-primary" id="btn4" disabled onclick="goTo(5)">Continuar →</button>
+  </div>
+
+  <!-- Q5: Campañas -->
+  <div class="card" id="step5">
+    <div class="q-eyebrow">Paso 5 · Campañas</div>
+    <h2>¿Quieres enviar promociones por WhatsApp a tu base?</h2>
+    <p class="q-helper">Una sola respuesta.</p>
+    <div class="options" id="q5opts">
+      <div class="option single" onclick="selectSingle(this,'q5','si_campanas')">
+        <span class="opt-emoji">🔥</span>
+        <div class="opt-text">Sí, quiero campañas cada mes</div>
+        <div class="opt-dot"></div>
+      </div>
+      <div class="option single" onclick="selectSingle(this,'q5','si_ocasional')">
+        <span class="opt-emoji">💡</span>
+        <div class="opt-text">Sí, pero solo cuando haya promo o mes bajo</div>
+        <div class="opt-dot"></div>
+      </div>
+      <div class="option single" onclick="selectSingle(this,'q5','no')">
+        <span class="opt-emoji">⏸️</span>
+        <div class="opt-text">No por ahora</div>
+        <div class="opt-dot"></div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="btn5" disabled onclick="goTo(6)">Continuar →</button>
+  </div>
+
+  <!-- DATOS -->
+  <div class="card" id="step6">
+    <div class="q-eyebrow">Último paso · Tus datos</div>
+    <h2>¿A quién le mostramos el resultado?</h2>
+    <p class="q-helper">Tu diagnóstico personalizado está listo. Solo necesitamos esto para mostrártelo.</p>
+    <div class="fields">
+      <div class="field">
+        <label>Nombre *</label>
+        <input type="text" id="fname" placeholder="Tu nombre" oninput="clearErr('fname')" />
+        <span class="field-error" id="err-fname">Por favor ingresa tu nombre</span>
+      </div>
+      <div class="field">
+        <label>WhatsApp *</label>
+        <input type="tel" id="fwa" placeholder="+1 999 000 000" oninput="clearErr('fwa')" />
+        <span class="field-error" id="err-fwa">Ingresa tu número de WhatsApp</span>
+      </div>
+      <div class="field full">
+        <label>Rubro del negocio *</label>
+        <input type="text" id="frubro" placeholder="Ej: Clínica, Restaurante, Salón..." oninput="clearErr('frubro')" />
+        <span class="field-error" id="err-frubro">Cuéntanos el rubro de tu negocio</span>
+      </div>
+      <div class="field full">
+        <label>¿Cuántos mensajes o llamadas recibes por día? *</label>
+        <select id="fvolumen" onchange="clearErr('fvolumen')">
+          <option value="" disabled selected>Selecciona un rango</option>
+          <option value="bajo">1 a 20</option>
+          <option value="medio">20 a 50</option>
+          <option value="alto">50 a 150</option>
+          <option value="muyalto">150 a 500</option>
+          <option value="masivo">Más de 500</option>
+        </select>
+        <span class="field-error" id="err-fvolumen">Selecciona un rango de volumen</span>
+      </div>
+      <div class="field full">
+        <label>Email <span class="field-optional">(opcional)</span></label>
+        <input type="email" id="femail" placeholder="tu@email.com" />
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="showResult()">Ver mi resultado →</button>
+    <button class="btn btn-ghost" onclick="goTo(5)">← Volver</button>
+  </div>
+
+  <!-- RESULT -->
+  <div class="card" id="step7">
+    <div id="resultContent"></div>
+  </div>
+</div>
+
+<script>
+  const answers = { q1: [], q2: [], q3: [], q4: null, q5: null };
+
+  const TOTAL_STEPS = 6;
+
+  function goTo(step) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById('step' + step).classList.add('active');
+    const wrap = document.getElementById('progressWrap');
+    if (step === 0) { wrap.classList.remove('visible'); return; }
+    wrap.classList.add('visible');
+    const pct = Math.round((step / TOTAL_STEPS) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressPct').textContent = pct + '%';
+    document.getElementById('stepLabel').textContent = step <= TOTAL_STEPS ? step : TOTAL_STEPS;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function selectOpt(el, qKey, val) {
+    if (el.classList.contains('selected')) {
+      el.classList.remove('selected');
+      answers[qKey] = answers[qKey].filter(v => v !== val);
+    } else {
+      el.classList.add('selected');
+      if (!answers[qKey].includes(val)) answers[qKey].push(val);
+    }
+    const btnMap = { q1:'btn1', q2:'btn2', q3:'btn3' };
+    if (btnMap[qKey]) {
+      document.getElementById(btnMap[qKey]).disabled = answers[qKey].length === 0;
+    }
+  }
+
+  function selectSingle(el, qKey, val) {
+    document.querySelectorAll('#q' + qKey.replace('q','') + 'opts .option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    answers[qKey] = val;
+    const btnMap = { q4:'btn4', q5:'btn5' };
+    if (btnMap[qKey]) document.getElementById(btnMap[qKey]).disabled = false;
+  }
+
+  function clearErr(id) {
+    const el = document.getElementById(id);
+    const err = document.getElementById('err-' + id);
+    if (el) el.classList.remove('error');
+    if (err) err.classList.remove('visible');
+  }
+
+  function showErr(id, msg) {
+    const el = document.getElementById(id);
+    const err = document.getElementById('err-' + id);
+    if (el) el.classList.add('error');
+    if (err) { if (msg) err.textContent = msg; err.classList.add('visible'); }
+  }
+
+  function validateForm() {
+    let valid = true;
+    const fname   = document.getElementById('fname').value.trim();
+    const fwa     = document.getElementById('fwa').value.trim();
+    const frubro  = document.getElementById('frubro').value.trim();
+    const fvolumen= document.getElementById('fvolumen').value;
+    if (!fname)    { showErr('fname'); valid = false; }
+    if (!fwa || fwa.replace(/\D/g,'').length < 7) { showErr('fwa','Ingresa un número válido'); valid = false; }
+    if (!frubro)   { showErr('frubro'); valid = false; }
+    if (!fvolumen) { showErr('fvolumen'); valid = false; }
+    return valid;
+  }
+
+  function diagnose() {
+    const q1 = answers.q1;
+    const q2 = answers.q2;
+    const q3 = answers.q3;
+    const q4 = answers.q4;
+    const q5 = answers.q5;
+    const vol = document.getElementById('fvolumen').value;
+
+    let sofi = 0, valery = 0, max = 0, tim = false, luke = false;
+
+    // Q1 scoring
+    if (q1.includes('sofi_wa') || q1.includes('sofi_citas') || q1.includes('unsure')) sofi += 3;
+    if (q1.includes('valery')) { sofi += 2; valery += 3; }
+    if (q1.includes('max'))    { sofi += 1; max += 3; }
+    if (q1.includes('tim'))    tim = true;
+    if (q1.includes('luke'))   luke = true;
+
+    // Q2
+    if (q2.includes('saturado') || q2.includes('dependencia')) { sofi += 2; valery += 1; }
+    if (q2.includes('control')) max += 2;
+    if (q2.includes('ventas') || q2.includes('agenda')) sofi += 1;
+
+    // Q3
+    if (q3.includes('agenda'))   sofi += 2;
+    if (q3.includes('campanas')) tim = true;
+    if (q3.includes('orden'))    { valery += 2; sofi += 1; }
+    if (q3.includes('datos'))    max += 3;
+    if (q3.includes('llamadas')) luke = true;
+
+    // Q4 — CRM
+    if (q4 === 'nada' || q4 === 'sheets') valery += 2;
+
+    // Q5 — Campañas
+    if (q5 === 'si_campanas' || q5 === 'si_ocasional') tim = true;
+
+    // Volume
+    if (vol === 'alto' || vol === 'muyalto' || vol === 'masivo') { valery += 2; max += 1; }
+    if (vol === 'masivo') max += 2;
+
+    // Determine plan level
+    let plan = 'sofi';
+    if (sofi > 0 && (valery >= 2 || max >= 3)) plan = 'completo';
+    else if (sofi > 0 && valery >= 1) plan = 'sofi_valery';
+
+    return { plan, tim, luke, sofi, valery, max };
+  }
+
+  function showResult() {
+    if (!validateForm()) {
+      const firstErr = document.querySelector('.field input.error, .field select.error');
+      if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const name = document.getElementById('fname').value.trim();
+    const wa   = document.getElementById('fwa').value.trim();
+    const { plan, tim, luke } = diagnose();
+
+    // Submit silently
+    fetch('https://formspree.io/f/mreavzny', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        nombre: name,
+        whatsapp: wa,
+        email: document.getElementById('femail').value,
+        rubro: document.getElementById('frubro').value,
+        volumen: document.getElementById('fvolumen').value,
+        q1: answers.q1.join(', '),
+        q2: answers.q2.join(', '),
+        q3: answers.q3.join(', '),
+        q4: answers.q4,
+        q5: answers.q5,
+        plan_recomendado: plan,
+        _subject: `Diagnóstico Worker · ${name}`
+      })
+    }).catch(() => {});
+
+    const waConsulta = `https://wa.me/51982247314?text=${encodeURIComponent('Hola, acabo de completar el diagnóstico y quiero activar mi plan recomendado.')}`;
+    const firstName = name.charAt(0).toUpperCase() + name.slice(1);
+
+    const PLANS = {
+      sofi: {
+        title: 'Plan Sofi',
+        tagline: 'Nivel 1 — Base',
+        checks: [
+          'Responder WhatsApp al instante, 24/7',
+          'Llenar la agenda automáticamente',
+          'Eliminar citas perdidas con recordatorios',
+          'Liberar tu tiempo de tareas repetitivas',
+        ],
+        story: 'Primero resolvemos el caos (Sofi)',
+        workers: [
+          { name: 'Sofi', color: '#a78bfa', emoji: '💜', features: ['Responde WhatsApp 24/7','Agenda citas automáticamente','Confirma y recuerda citas','Permite reprogramar','Reporte diario'] }
+        ],
+        precio_normal: '$135 / mes',
+        precio_promo: null,
+        precio_promo_old: null,
+        upgrade: {
+          mes: 2,
+          plan: 'Sofi + Valery',
+          precio: '$185 USD',
+          desc: 'Cuando quieras orden y memoria de clientes, Valery conecta tu CRM y da contexto a cada conversación.'
+        }
+      },
+      sofi_valery: {
+        title: 'Sofi + Valery',
+        tagline: 'Nivel 2 — Recomendado',
+        checks: [
+          'Responder WhatsApp al instante',
+          'Llenar agenda automáticamente',
+          'Evitar que se pierdan citas',
+          'Organizar tu base de clientes',
+          'Atender con información clara y contexto',
+        ],
+        story: 'Primero resolvemos el caos (Sofi) → Luego damos orden y memoria (Valery)',
+        workers: [
+          { name: 'Sofi', color: '#a78bfa', emoji: '💜', features: ['Responde WhatsApp 24/7','Agenda citas automáticamente','Confirma y recuerda citas','Permite reprogramar','Reporte diario'] },
+          { name: 'Valery', color: '#e8b84b', emoji: '💛', features: ['CRM conectado o embebido (Notion o Sheets)','Historial completo por cliente','Etiquetas e intereses','Atención personalizada','Base de datos organizada'] }
+        ],
+        precio_normal: '$235 / mes',
+        precio_promo: '$185 / mes',
+        precio_promo_old: '$235',
+        upgrade: {
+          mes: 2,
+          plan: 'Sofi + Valery + Max',
+          precio: '$240 USD',
+          desc: 'Max analiza qué servicios convierten, qué horarios pierden clientes y qué precios no funcionan — para que crezcas con datos reales.'
+        }
+      },
+      completo: {
+        title: 'Sofi + Valery + Max',
+        tagline: 'Nivel 3 — Plan Completo',
+        checks: [
+          'Atención y agenda automática 24/7',
+          'CRM y orden de clientes',
+          'Análisis de qué servicios convierten',
+          'Detección de horarios y precios que no funcionan',
+          'Decisiones basadas en datos reales',
+        ],
+        story: 'Resolvemos el caos + damos orden + analizamos para crecer',
+        workers: [
+          { name: 'Sofi', color: '#a78bfa', emoji: '💜', features: ['Responde WhatsApp 24/7','Agenda citas automáticamente','Confirma y recuerda citas'] },
+          { name: 'Valery', color: '#e8b84b', emoji: '💛', features: ['CRM conectado','Historial completo por cliente','Base de datos organizada'] },
+          { name: 'Max', color: '#22c98a', emoji: '💚', features: ['Qué servicios convierten','Qué horarios pierden clientes','Qué precios no funcionan','Qué campañas dieron resultado','Te recomienda qué cambiar'] }
+        ],
+        precio_normal: '$335 / mes',
+        precio_promo: '$240 / mes',
+        precio_promo_old: '$335',
+        upgrade: null,
+        max_note: '* Max aplica desde el 2do mes — necesita al menos un mes de datos para encontrar patrones y hacer recomendaciones útiles.'
+      }
+    };
+
+    const p = PLANS[plan];
+
+    const upgradeBox = p.upgrade ? `
+      <div class="upgrade-box">
+        <div class="upgrade-title">⭐ Upgrade mes ${p.upgrade.mes}</div>
+        <div class="upgrade-text">
+          Activar <strong>${p.upgrade.plan}</strong> — ${p.upgrade.desc}<br><br>
+          <strong>Promo mes ${p.upgrade.mes}:</strong> ${p.upgrade.plan} por <strong>${p.upgrade.precio}</strong>
+        </div>
+      </div>` : '';
+
+    const complementsBlock = (tim || luke) ? `
+      <div class="res-label" style="margin-bottom:10px;">Complementos para tu plan</div>
+      <div class="complements">
+        ${tim ? `<div class="complement-tag"><strong>Tim 💬</strong><span>Campañas y reactivación</span><span style="color:var(--green);font-weight:700;">Desde $130 / campaña</span></div>` : ''}
+        ${luke ? `<div class="complement-tag"><strong>Luke 📞</strong><span>Llamadas automáticas</span><span style="color:var(--red);font-weight:700;">Desde $90 / mes</span></div>` : ''}
+      </div>` : '';
+
+    const priceRow = p.precio_promo ? `
+      <div class="res-price-row">
+        <div class="res-price-label">Precio normal</div>
+        <div class="res-price-val res-price-old">${p.precio_normal}</div>
+      </div>
+      <div class="res-price-row">
+        <div class="res-price-label">🔥 Promoción activa</div>
+        <div class="res-price-val">${p.precio_promo} <span class="res-promo-badge">Promo</span></div>
+      </div>` :
+      `<div class="res-price-row">
+        <div class="res-price-label">Mensualidad</div>
+        <div class="res-price-val">${p.precio_normal}</div>
+      </div>`;
+
+    const maxNote = p.max_note ? `<p style="font-size:11.5px;color:var(--text3);margin-bottom:20px;font-style:italic;">${p.max_note}</p>` : '';
+
+    document.getElementById('resultContent').innerHTML = `
+      <div class="res-label">Tu plan recomendado hoy</div>
+      <div class="res-plan-name"><span class="green">${p.title}</span></div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:20px;">${p.tagline}</div>
+
+      <div class="res-because">Porque hoy tu negocio necesita:</div>
+      <div class="res-checks">
+        ${p.checks.map(c => `<div class="res-check">${c}</div>`).join('')}
+      </div>
+
+      <div style="font-size:13px;color:var(--text2);margin-bottom:20px;font-style:italic;">${p.story}</div>
+
+      <div class="res-label" style="margin-bottom:10px;">Qué incluye</div>
+      <div class="res-workers">
+        ${p.workers.map(w => `
+          <div class="res-worker">
+            <div class="res-worker-name"><span style="color:${w.color}">${w.emoji} ${w.name}</span></div>
+            <div class="res-worker-features">
+              ${w.features.map(f => `<span>${f}</span>`).join('')}
+            </div>
+          </div>`).join('')}
+      </div>
+
+      ${maxNote}
+
+      <div class="res-label" style="margin-bottom:10px;">Precio</div>
+      <div class="res-price-box">${priceRow}</div>
+
+      ${upgradeBox}
+      ${complementsBlock}
+
+      <div class="emotional-close">
+        <strong>${firstName}, tu negocio ya tiene clientes.</strong><br>
+        Ahora necesita sistema para crecer.<br>
+        ${plan === 'sofi' ? 'Empieza con Sofi. Activa Valery el segundo mes.' : ''}
+        ${plan === 'sofi_valery' ? 'Empieza con Sofi + Valery. Activa Max el segundo mes.' : ''}
+        ${plan === 'completo' ? 'Empieza con Sofi + Valery. Max se activa el segundo mes con tus primeros datos.' : ''}
+      </div>
+
+      <button class="btn btn-primary" onclick="window.open('https://calendly.com/marialecont340/30min','_blank')">
+        Activar mi plan recomendado →
+      </button>
+      <p style="text-align:center;font-size:12px;color:var(--text3);margin-top:10px;">
+        Te contactamos por WhatsApp para dejarlo funcionando.
+      </p>
+
+      <a href="${waConsulta}" target="_blank" class="btn btn-wa">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Consultar por WhatsApp
+      </a>
+
+      <div class="divider"></div>
+
+      <p class="social-proof">💡 El 80% de los negocios empieza en este nivel antes de activar el plan completo.</p>
+
+      <div class="legal-box" style="margin-top:16px;">
+        <strong>Aviso:</strong> Este resultado es una <strong>recomendación preliminar</strong> basada en tus respuestas. La propuesta final se define en una <strong>reunión virtual de diagnóstico</strong> donde analizamos tu negocio en detalle.
+      </div>
+    `;
+
+    goTo(7);
+    document.getElementById('progressFill').style.width = '100%';
+    document.getElementById('progressPct').textContent = '✓';
+    document.getElementById('stepLabel').textContent = '✓';
+  }
+</script>
+</body>
+</html>
