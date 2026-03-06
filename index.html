@@ -1161,6 +1161,240 @@ nav {
   font-weight: 600;
   margin: 10px 0 0;
 }
+  /* ===== PLANES Y ESCALERA ===== */
+#planes {
+  padding: 80px 0;
+}
+
+.planes-box {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 40px 36px;
+  max-width: 560px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.planes-box::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--blue), transparent);
+  opacity: .15;
+}
+
+.planes-title {
+  font-family: "Syne", sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.planes-sub {
+  font-family: "DM Sans", sans-serif;
+  font-size: 13px;
+  color: var(--text2);
+  margin: 6px 0 28px;
+  font-style: italic;
+}
+
+/* Tabla de niveles */
+.planes-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.planes-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  transition: background .2s;
+}
+
+.planes-row:last-child {
+  border-bottom: none;
+}
+
+.planes-row:hover {
+  background: var(--s2);
+}
+
+.planes-nivel {
+  font-family: "Syne", sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--text3);
+  min-width: 52px;
+}
+
+.planes-nombre {
+  font-family: "DM Sans", sans-serif;
+  font-size: 13px;
+  color: var(--text2);
+  flex: 1;
+}
+
+.planes-precio {
+  font-family: "Syne", sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.planes-precio span {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text3);
+}
+
+/* Extras */
+.planes-extras {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.planes-extra-item {
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-family: "DM Sans", sans-serif;
+  font-size: 12px;
+  color: var(--text2);
+}
+
+/* Promos activas — rojo Luke */
+.ppromo-box {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1.5px solid rgba(255, 94, 122, 0.45);
+}
+
+.ppromo-header {
+  background: linear-gradient(90deg, #7a0a1a, #ff5e7a, #7a0a1a);
+  padding: 13px 16px;
+  text-align: center;
+  font-family: "Syne", sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.2px;
+}
+
+.ppromo-body {
+  background: rgba(255, 94, 122, 0.06);
+  padding: 16px 20px;
+}
+
+.ppromo-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.ppromo-label {
+  font-family: "DM Sans", sans-serif;
+  font-size: 13px;
+  color: var(--text2);
+}
+
+.ppromo-price {
+  font-family: "Syne", sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--red);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ppromo-old {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text3);
+  text-decoration: line-through;
+}
+
+.ppromo-divider {
+  height: 1px;
+  background: rgba(255, 94, 122, 0.15);
+}
+
+/* ===== RESPONSIVE MÓVIL ===== */
+@media (max-width: 540px) {
+  .planes-box {
+    padding: 28px 20px;
+    border-radius: 18px;
+  }
+
+  .planes-title {
+    font-size: 16px;
+  }
+
+  .planes-row {
+    padding: 12px 14px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .planes-nivel {
+    min-width: 100%;
+    margin-bottom: 2px;
+  }
+
+  .planes-nombre {
+    font-size: 13px;
+    flex: 1;
+  }
+
+  .planes-precio {
+    font-size: 14px;
+  }
+
+  .planes-extras {
+    gap: 8px;
+  }
+
+  .planes-extra-item {
+    font-size: 11.5px;
+    padding: 5px 10px;
+  }
+
+  .ppromo-header {
+    font-size: 13px;
+    padding: 12px 14px;
+  }
+
+  .ppromo-body {
+    padding: 14px 16px;
+  }
+
+  .ppromo-label {
+    font-size: 12.5px;
+  }
+
+  .ppromo-price {
+    font-size: 15px;
+  }
+}
 </style>
 </head>
 <body>
@@ -1616,7 +1850,7 @@ nav {
     <div class="vpromo-body">
       <p class="vpromo-sub">Combina Sophie + Valery y obtén</p>
       <p class="vpromo-price">$185 USD / mes 🔥</p>
-      <p class="vpromo-note">Sofi + Valery juntas, al mismo precio combo.</p>
+      <p class="vpromo-note">Sophie + Valery juntas, al mismo precio combo.</p>
     </div>
   </div>
 
@@ -1687,10 +1921,10 @@ nav {
   <div class="mpromo-box">
     <div class="mpromo-header">Recomendado 🔥</div>
     <div class="mpromo-body">
-      <p class="mpromo-sub">💼 Plan Completo: Sofi + Valery + Max</p>
+      <p class="mpromo-sub">💼 Plan Completo: Sophie + Valery + Max</p>
       <p class="mpromo-price">$240 USD / mes 🔥</p>
       <p class="mpromo-old">$335 USD / mes</p>
-      <p class="mpromo-note">Sofi + Valery + Max juntos, al precio combo.</p>
+      <p class="mpromo-note">Sophie + Valery + Max juntos, al precio combo.</p>
     </div>
   </div>
 
@@ -1764,7 +1998,58 @@ nav {
   </div>
 </div>
   </section>
-      
+      <!-- PLANES Y ESCALERA -->
+<section id="planes">
+  <div class="wrap">
+    <div class="planes-box">
+
+      <div class="planes-title">
+        <span>💼</span> Planes y escalera
+        <p class="planes-sub">Empieza simple. Crece por niveles.</p>
+      </div>
+
+      <div class="planes-table">
+        <div class="planes-row">
+          <div class="planes-nivel">Nivel 1</div>
+          <div class="planes-nombre">Sofi</div>
+          <div class="planes-precio">$135 <span>/ mes</span></div>
+        </div>
+        <div class="planes-row">
+          <div class="planes-nivel">Nivel 2</div>
+          <div class="planes-nombre">Sofi + Valery</div>
+          <div class="planes-precio">$235 <span>/ mes</span></div>
+        </div>
+        <div class="planes-row">
+          <div class="planes-nivel">Nivel 3</div>
+          <div class="planes-nombre">Sofi + Valery + Max</div>
+          <div class="planes-precio">$335 <span>/ mes</span></div>
+        </div>
+      </div>
+
+      <div class="planes-extras">
+        <span class="planes-extra-item">+ Tim por campaña</span>
+        <span class="planes-extra-item">+ Luke por voz</span>
+      </div>
+
+      <!-- Promos activas — estilo rojo Luke -->
+      <div class="ppromo-box">
+        <div class="ppromo-header">🔥 Promociones activas</div>
+        <div class="ppromo-body">
+          <div class="ppromo-row">
+            <span class="ppromo-label">Sofi + Valery</span>
+            <span class="ppromo-price">$185 <s class="ppromo-old">$235</s></span>
+          </div>
+          <div class="ppromo-divider"></div>
+          <div class="ppromo-row">
+            <span class="ppromo-label">Sofi + Valery + Max</span>
+            <span class="ppromo-price">$240 <s class="ppromo-old">$335</s></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
 <!-- ═══ CÓMO TRABAJAN JUNTOS ═══ -->
 <section id="juntos">
   <div class="wrap">
