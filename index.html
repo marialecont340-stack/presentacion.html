@@ -632,17 +632,7 @@ footer{border-top:1px solid var(--border);padding:40px;text-align:center;positio
   .workers-explainer{padding:22px 18px;gap:22px}
   .we-steps span:first-child{font-size:15px}
 }
-  /* Tabla de precios mobile */
-  .pc-header{display:none}
-  .pc-row{display:flex;flex-direction:column;gap:12px;padding:20px 18px;border-bottom:1px solid rgba(26,46,72,.5)}
-  .pc-col-canal::before{content:"Canal: ";font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-right:4px}
-  .pc-col-price{display:flex;align-items:center;gap:8px}
-  .pc-col-price .price-num{font-size:14px}
-  .pc-col-price:first-of-type::before{content:"Instalación · "}
-  .pc-col-price:last-of-type::before{content:"Mensualidad · "}
-  .pc-col-price::before{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)}
-  .pc-col-price .price-sub{display:none}
-}
+ 
 
 /* ── WORKER AVATAR ── */
 .wavatar {
@@ -1445,6 +1435,9 @@ nav {
 #servicios .serv-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 @media (max-width: 900px) { #servicios .serv-grid { grid-template-columns: repeat(2,1fr); } }
 @media (max-width: 560px) { #servicios .serv-grid { grid-template-columns: 1fr; } }
+
+.wavatar { text-align: center; }
+.wavatar img { display: block; margin: 0 auto; }
   
 </style>
 </head>
