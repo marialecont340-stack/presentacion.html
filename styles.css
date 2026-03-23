@@ -121,6 +121,7 @@ nav{
   text-align:center;width:100%;max-width:420px;
   border:1px solid transparent;
   position:relative;z-index:1;
+
 }
 .nav-mobile a:hover{
   color:var(--text);
@@ -138,7 +139,11 @@ nav{
   letter-spacing:.12em !important;
   text-transform:uppercase !important;
   padding:15px 52px !important;
+  width: 80% !important;
 }
+
+
+
 .nav-cta{
   background:linear-gradient(135deg,var(--blue),#2260d8);color:#fff;
   border:none;padding:9px 22px;border-radius:100px;
