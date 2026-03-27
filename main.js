@@ -158,7 +158,11 @@ function initWorkersSlider() {
     const originalCount = cards.length;
     const gap = 24;
 
-    // 1. Inyectar imágenes en las tarjetas originales antes de clonar
+    const getCardWidth = () => {
+        return Math.round(track.querySelector('.wcard').getBoundingClientRect().width) + gap;
+    };
+
+    // 1. Inyectar imágenes en las tarjetas originales antes de clonar para que los clones hereden el contenido
     if (typeof images !== 'undefined') {
         cards.forEach((card, index) => {
             const avatar = card.querySelector('.wavatar');
@@ -167,16 +171,28 @@ function initWorkersSlider() {
         });
     }
 
-    // Clonar para efecto infinito
-    const clonesBefore = cards.map(card => card.cloneNode(true));
-    const clonesAfter = cards.map(card => card.cloneNode(true));
-    
-    // Inserción correcta para evitar duplicados adyacentes
-    clonesBefore.forEach(clone => track.insertBefore(clone, track.firstChild));
-    clonesAfter.forEach(clone => track.appendChild(clone));
+    // 2. Clonar para efecto infinito: [ABC] -> [ABC][ABC][ABC]
+    cards.forEach(card => track.appendChild(card.cloneNode(true)));
+    // Usamos reverse para insertar al principio manteniendo el orden original A, B, C
+    [...cards].reverse().forEach(card => track.insertBefore(card.cloneNode(true), track.firstChild));
 
     const allCards = track.querySelectorAll('.wcard');
-    const cardWidth = cards[0].offsetWidth + gap;
+    let cardWidth = getCardWidth();
+    window.addEventListener('resize', () => { cardWidth = getCardWidth(); });
+
+    // 3. Lógica de Enfoque (Focus) para desenfocar los laterales
+    const updateFocus = () => {
+        const centerX = wrapper.scrollLeft + (wrapper.offsetWidth / 2);
+        allCards.forEach(card => {
+            const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
+            const distance = Math.abs(centerX - cardCenter);
+            if (distance < cardWidth / 2) {
+                card.classList.add('focused');
+            } else {
+                card.classList.remove('focused');
+            }
+        });
+    };
 
     // Lógica para voltear cartas al hacer click
     allCards.forEach(card => {
@@ -188,6 +204,8 @@ function initWorkersSlider() {
                 setTimeout(() => {
                     this.classList.remove('flipped');
                 }, 5000);
+            } else {
+                this.classList.toggle('flipped');
             }
         });
     });
@@ -208,11 +226,11 @@ function initWorkersSlider() {
 
     // Listeners para flechas
     if (prevBtn) prevBtn.onclick = () => {
-        wrapper.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+        wrapper.scrollTo({ left: wrapper.scrollLeft - cardWidth, behavior: 'smooth' });
         resetAutoScroll();
     };
     if (nextBtn) nextBtn.onclick = () => {
-        wrapper.scrollBy({ left: cardWidth, behavior: 'smooth' });
+        wrapper.scrollTo({ left: wrapper.scrollLeft + cardWidth, behavior: 'smooth' });
         resetAutoScroll();
     };
 
@@ -229,23 +247,30 @@ function initWorkersSlider() {
     function resetAutoScroll() { stopAutoScroll(); startAutoScroll(); }
 
     // Scroll sync
-    wrapper.addEventListener('scroll', () => {
+  let isTicking = false;
+  wrapper.addEventListener('scroll', () => {
         const currentScroll = wrapper.scrollLeft;
         const oneSetWidth = originalCount * cardWidth;
 
-        // Teletransporte sin saltos bruscos: ajustamos el punto de anclaje del drag
-        if (currentScroll <= 10) {
-            wrapper.style.scrollBehavior = 'auto';
+        // Teletransporte infinito: detectamos cuando salimos del set central
+        // Dejamos un margen para que las animaciones de las flechas no se corten
+        if (currentScroll < cardWidth) { 
             wrapper.scrollLeft = currentScroll + oneSetWidth;
             if (isDown) scrollLeft += oneSetWidth;
-        } else if (currentScroll >= oneSetWidth * 2) {
-            wrapper.style.scrollBehavior = 'auto';
+        } else if (currentScroll > oneSetWidth * 2) {
             wrapper.scrollLeft = currentScroll - oneSetWidth;
             if (isDown) scrollLeft -= oneSetWidth;
         }
 
+    if (!isTicking) {
+      window.requestAnimationFrame(() => {
         const activeIndex = Math.round(wrapper.scrollLeft / cardWidth) % originalCount;
         dots.forEach((d, i) => d.classList.toggle('active', i === activeIndex));
+        updateFocus();
+        isTicking = false;
+      });
+      isTicking = true;
+    }
     });
 
     // Drag events
@@ -281,4 +306,5 @@ function initWorkersSlider() {
     });
 
     startAutoScroll();
+    updateFocus();
 }
