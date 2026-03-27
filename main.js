@@ -152,41 +152,40 @@ function initWorkersSlider() {
     if (!track) return;
 
     let autoScrollInterval;
+    let scrollDirection = 1; // 1 para derecha, -1 para izquierda
     let dragged = false;
     const wrapper = document.querySelector('.workers-slider-wrapper');
-    let cards = Array.from(track.querySelectorAll('.wcard'));
-    const originalCount = cards.length;
+    const cards = Array.from(track.querySelectorAll('.wcard'));
+    const totalCards = cards.length;
     const gap = 24;
+    let cardWidth = 0;
+    let cardCenters = [];
 
-    const getCardWidth = () => {
-        return Math.round(track.querySelector('.wcard').getBoundingClientRect().width) + gap;
+    const calculateLayout = () => {
+        const firstCard = track.querySelector('.wcard');
+        if (!firstCard) return;
+
+        // Calculamos el ancho real de la tarjeta
+        const pureCardWidth = Math.round(firstCard.getBoundingClientRect().width);
+        cardWidth = pureCardWidth + gap;
+
+        // Calculamos el padding necesario para que la tarjeta quede centrada al inicio y al final
+        const wrapperWidth = wrapper.offsetWidth;
+        const sidePadding = (wrapperWidth - pureCardWidth) / 2;
+
+        track.style.paddingLeft = `${sidePadding}px`;
+        track.style.paddingRight = `${sidePadding}px`;
+
+        // Cacheamos los centros para optimizar el scroll
+        cardCenters = cards.map(card => card.offsetLeft + (card.offsetWidth / 2));
     };
 
-    // 1. Inyectar imágenes en las tarjetas originales antes de clonar para que los clones hereden el contenido
-    if (typeof images !== 'undefined') {
-        cards.forEach((card, index) => {
-            const avatar = card.querySelector('.wavatar');
-            const key = 'imagen' + (index + 3);
-            if (avatar && images[key]) avatar.innerHTML = `<img src="${images[key]}" alt="Worker">`;
-        });
-    }
-
-    // 2. Clonar para efecto infinito: [ABC] -> [ABC][ABC][ABC]
-    cards.forEach(card => track.appendChild(card.cloneNode(true)));
-    // Usamos reverse para insertar al principio manteniendo el orden original A, B, C
-    [...cards].reverse().forEach(card => track.insertBefore(card.cloneNode(true), track.firstChild));
-
-    const allCards = track.querySelectorAll('.wcard');
-    let cardWidth = getCardWidth();
-    window.addEventListener('resize', () => { cardWidth = getCardWidth(); });
-
-    // 3. Lógica de Enfoque (Focus) para desenfocar los laterales
+    // Lógica de Enfoque (Focus) optimizada
     const updateFocus = () => {
-        const centerX = wrapper.scrollLeft + (wrapper.offsetWidth / 2);
-        allCards.forEach(card => {
-            const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
-            const distance = Math.abs(centerX - cardCenter);
-            if (distance < cardWidth / 2) {
+        const scrollCenter = wrapper.scrollLeft + (wrapper.offsetWidth / 2);
+        cards.forEach((card, i) => {
+            const distance = Math.abs(scrollCenter - cardCenters[i]);
+            if (distance < cardWidth / 1.5) {
                 card.classList.add('focused');
             } else {
                 card.classList.remove('focused');
@@ -194,30 +193,29 @@ function initWorkersSlider() {
         });
     };
 
+    const updateButtonStates = () => {
+        const maxScroll = wrapper.scrollWidth - wrapper.clientWidth;
+        if (prevBtn) prevBtn.classList.toggle('disabled', wrapper.scrollLeft <= 5);
+        if (nextBtn) nextBtn.classList.toggle('disabled', wrapper.scrollLeft >= maxScroll - 5);
+    };
+
     // Lógica para voltear cartas al hacer click
-    allCards.forEach(card => {
+    cards.forEach(card => {
         card.addEventListener('click', function(e) {
             if (dragged || e.target.closest('.w-wa-btn')) return;
             e.preventDefault();
-            if (!this.classList.contains('flipped')) {
-                this.classList.add('flipped');
-                setTimeout(() => {
-                    this.classList.remove('flipped');
-                }, 5000);
-            } else {
-                this.classList.toggle('flipped');
-            }
+            this.classList.toggle('flipped');
         });
     });
 
     // Crear Dots
     dotsContainer.innerHTML = '';
-    for (let i = 0; i < originalCount; i++) {
+    for (let i = 0; i < totalCards; i++) {
         const dot = document.createElement('div');
         dot.classList.add('dot');
         if (i === 0) dot.classList.add('active');
         dot.addEventListener('click', () => {
-            wrapper.scrollTo({ left: (i + originalCount) * cardWidth, behavior: 'smooth' });
+            wrapper.scrollTo({ left: i * cardWidth, behavior: 'smooth' });
             resetAutoScroll();
         });
         dotsContainer.appendChild(dot);
@@ -226,47 +224,43 @@ function initWorkersSlider() {
 
     // Listeners para flechas
     if (prevBtn) prevBtn.onclick = () => {
-        wrapper.scrollTo({ left: wrapper.scrollLeft - cardWidth, behavior: 'smooth' });
+        wrapper.scrollBy({ left: -cardWidth, behavior: 'smooth' });
         resetAutoScroll();
     };
     if (nextBtn) nextBtn.onclick = () => {
-        wrapper.scrollTo({ left: wrapper.scrollLeft + cardWidth, behavior: 'smooth' });
+        wrapper.scrollBy({ left: cardWidth, behavior: 'smooth' });
         resetAutoScroll();
     };
-
-    // Posicionamiento inicial
-    wrapper.scrollLeft = originalCount * cardWidth;
 
     // Auto-scroll logic
     function startAutoScroll() {
         autoScrollInterval = setInterval(() => {
-            wrapper.scrollBy({ left: cardWidth, behavior: 'smooth' });
+            const maxScroll = wrapper.scrollWidth - wrapper.clientWidth;
+
+            // Si llega al final, cambia dirección a la izquierda
+            if (scrollDirection === 1 && wrapper.scrollLeft >= maxScroll - 20) {
+                scrollDirection = -1;
+            } 
+            // Si llega al inicio, cambia dirección a la derecha
+            else if (scrollDirection === -1 && wrapper.scrollLeft <= 20) {
+                scrollDirection = 1;
+            }
+
+            wrapper.scrollBy({ left: cardWidth * scrollDirection, behavior: 'smooth' });
         }, 5000);
     }
     function stopAutoScroll() { clearInterval(autoScrollInterval); }
     function resetAutoScroll() { stopAutoScroll(); startAutoScroll(); }
 
     // Scroll sync
-  let isTicking = false;
-  wrapper.addEventListener('scroll', () => {
-        const currentScroll = wrapper.scrollLeft;
-        const oneSetWidth = originalCount * cardWidth;
-
-        // Teletransporte infinito: detectamos cuando salimos del set central
-        // Dejamos un margen para que las animaciones de las flechas no se corten
-        if (currentScroll < cardWidth) { 
-            wrapper.scrollLeft = currentScroll + oneSetWidth;
-            if (isDown) scrollLeft += oneSetWidth;
-        } else if (currentScroll > oneSetWidth * 2) {
-            wrapper.scrollLeft = currentScroll - oneSetWidth;
-            if (isDown) scrollLeft -= oneSetWidth;
-        }
-
+    let isTicking = false;
+    wrapper.addEventListener('scroll', () => {
     if (!isTicking) {
       window.requestAnimationFrame(() => {
-        const activeIndex = Math.round(wrapper.scrollLeft / cardWidth) % originalCount;
+        const activeIndex = Math.round(wrapper.scrollLeft / cardWidth);
         dots.forEach((d, i) => d.classList.toggle('active', i === activeIndex));
         updateFocus();
+        updateButtonStates();
         isTicking = false;
       });
       isTicking = true;
@@ -305,6 +299,14 @@ function initWorkersSlider() {
         wrapper.scrollLeft = scrollLeft - walk;
     });
 
+    // Inicialización
+    calculateLayout();
+    window.addEventListener('resize', () => {
+        calculateLayout();
+        updateFocus();
+        updateButtonStates();
+    });
     startAutoScroll();
     updateFocus();
+    updateButtonStates();
 }
