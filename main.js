@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const hero = document.getElementById('hero-banner');
     if (hero) {
         const img = document.createElement('img');
-        img.src = 'images/hero-workers-ia-automatizacion-whatsapp-negocios-nissitech.webp';
+        img.src = 'image/hero-workers-ia-automatizacion-whatsapp-negocios-nissitech.webp';
         img.className = 'banner-img';
         img.alt = 'Workers IA que automatizan negocios por WhatsApp - Nissi Tech';
         hero.insertBefore(img, hero.firstChild);
@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const brand = document.querySelector('.nav-brand');
     if (brand) {
         const img = document.createElement('img');
-        img.src = 'images/logo-nissitech-automatizacion-flujos-bots.webp';
+        img.src = 'image/logo-nissitech-automatizacion-flujos-bots.webp';
         img.className = 'nav-logo';
         img.alt = 'Nissi Tech automatizacion workers IA';
         brand.insertBefore(img, brand.firstChild);
@@ -145,11 +145,11 @@ document.addEventListener("DOMContentLoaded", () => {
    // 3. Inyectar imágenes en los Workers
     const avatars = document.querySelectorAll('.wavatar');
     const workerImages = [
-        'images/sophie-bot-whatsapp-agendamiento-automatico-nissitech.webp',
-        'images/valery-crm-automatico-historial-clientes-whatsapp-nissitech.webp',
-        'images/max-analitica-automatizada-flujos-negocio-nissitech.webp',
-        'images/tim-campanas-automaticas-whatsapp-reactivacion-clientes-nissitech.webp',
-        'images/luke-llamadas-automaticas-voz-ia-negocio-nissitech.webp'
+        'image/sophie-bot-whatsapp-agendamiento-automatico-nissitech.webp',
+        'image/valery-crm-automatico-historial-clientes-whatsapp-nissitech.webp',
+        'image/max-analitica-automatizada-flujos-negocio-nissitech.webp',
+        'image/tim-campanas-automaticas-whatsapp-reactivacion-clientes-nissitech.webp',
+        'image/luke-llamadas-automaticas-voz-ia-negocio-nissitech.webp'
     ];
     const workerAlts = [
         'Sophie bot WhatsApp agendamiento automatico negocios',
