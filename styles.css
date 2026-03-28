@@ -730,13 +730,15 @@ footer{border-top:1px solid var(--border);padding:40px;text-align:center;positio
   }
 }
 @media(max-width:540px){
+
+  .diff-combo {text-align: center;}
   /* h2 {font-size:40px} */
   .mejoras-grid{grid-template-columns:1fr}
   .steps{grid-template-columns:1fr}
   nav{padding:10px 16px}
   .wrap{padding:0 16px}
   .nav-cta{padding:8px 6px;font-size:8px;letter-spacing:.06em;  text-align: center;}
-  .nav-name{font-size:14px}
+  /* .nav-name{font-size:14px} */
   .nav-logo{width:30px;height:30px}
   h1{font-size:42px}
   .hero-sub{font-size:15px}
