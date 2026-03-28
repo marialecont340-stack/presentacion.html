@@ -122,49 +122,49 @@ function enviarWhatsApp(event) {
 
 /* ── INYECCIÓN DE IMÁGENES Y SLIDER ── */
 document.addEventListener("DOMContentLoaded", () => {
-    if (typeof images === 'undefined') return;
 
     // 1. Hero Banner
     const hero = document.getElementById('hero-banner');
-    if (hero && images.imagen1) {
+    if (hero) {
         const img = document.createElement('img');
-        img.src = images.imagen1;
+        img.src = 'images/hero-workers-ia-automatizacion-whatsapp-negocios-nissitech.jpg';
         img.className = 'banner-img';
-        img.alt = 'Hero Banner';
+        img.alt = 'Workers IA que automatizan negocios por WhatsApp - Nissi Tech';
         hero.insertBefore(img, hero.firstChild);
     }
-
     // 2. Logo Navbar
     const brand = document.querySelector('.nav-brand');
-    if (brand && images.imagen2) {
+    if (brand) {
         const img = document.createElement('img');
-        img.src = images.imagen2;
+        img.src = 'images/logo-nissitech-automatizacion-flujos-bots.jpg';
         img.className = 'nav-logo';
-        img.alt = 'Nissi Tech Logo';
+        img.alt = 'Nissi Tech automatizacion workers IA';
         brand.insertBefore(img, brand.firstChild);
     }
 
-    // 3. Inyectar imágenes en los Workers originales antes de clonar
+   // 3. Inyectar imágenes en los Workers
     const avatars = document.querySelectorAll('.wavatar');
-    
-    /**
-     * Mapeo de imágenes para corregir el orden:
-     * Index 0 (Sophie) -> imagen3
-     * Index 1 (Valery) -> imagen5 (Contiene a Valery)
-     * Index 2 (Max)    -> imagen6 (Contiene a Max)
-     * Index 3 (Tim)    -> imagen4 (Contiene a Tim)
-     * Index 4 (Luke)   -> imagen7
-     */
-    const workerImageOrder = [3, 5, 6, 4, 7];
-
+    const workerImages = [
+        'images/sophie-bot-whatsapp-agendamiento-automatico-nissitech.jpg',
+        'images/valery-crm-automatico-historial-clientes-whatsapp-nissitech.jpg',
+        'images/max-analitica-automatizada-flujos-negocio-nissitech.jpg',
+        'images/tim-campanas-automaticas-whatsapp-reactivacion-clientes-nissitech.jpg',
+        'images/luke-llamadas-automaticas-voz-ia-negocio-nissitech.jpg'
+    ];
+    const workerAlts = [
+        'Sophie bot WhatsApp agendamiento automatico negocios',
+        'Valery CRM automatico historial clientes WhatsApp',
+        'Max analitica automatizada flujos negocio',
+        'Tim campanas automaticas WhatsApp reactivacion clientes',
+        'Luke llamadas automaticas voz IA negocio'
+    ];
     avatars.forEach((el, index) => {
-        const key = 'imagen' + workerImageOrder[index];
-        if (images[key]) {
-            el.innerHTML = `<img src="${images[key]}" alt="Worker">`;
+        if (workerImages[index]) {
+            el.innerHTML = `<img src="${workerImages[index]}" alt="${workerAlts[index]}">`;
         }
     });
 
-    // 4. Inicializar Slider (ahora los clones tendrán las imágenes)
+    // 4. Inicializar Slider
     initWorkersSlider();
 });
 
