@@ -71,35 +71,48 @@ sections.forEach(s=>observer2.observe(s));
 
 /* ── STATS ANIMATION ── */
 const stats = document.querySelectorAll('.stat-num');
-const animateStats = () => {
-    stats.forEach(stat => {
-        const target = +stat.getAttribute('data-target');
-        const suffix = stat.getAttribute('data-suffix') || '';
-        const duration = 2000; 
-        const increment = target / (duration / 16);
-        let current = 0;
-        const updateCount = () => {
-            current += increment;
-            if (current < target) {
-                stat.textContent = Math.ceil(current) + suffix;
-                requestAnimationFrame(updateCount);
-            } else {
-                stat.textContent = target + suffix;
-            }
-        };
-        updateCount();
+
+const statsObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const stat = entry.target;
+            const target = +stat.getAttribute('data-target');
+            const suffix = stat.getAttribute('data-suffix') || '';
+            const duration = 2000; 
+            const increment = target / (duration / 16);
+            let current = 0;
+            const updateCount = () => {
+                current += increment;
+                if (current < target) {
+                    stat.textContent = Math.ceil(current) + suffix;
+                    requestAnimationFrame(updateCount);
+                } else {
+                    stat.textContent = target + suffix;
+                }
+            };
+            updateCount();
+            // Dejamos de observar una vez que la animación ha comenzado
+            statsObserver.unobserve(stat);
+        }
     });
-};
-window.addEventListener('load', animateStats);
+}, { threshold: 0.2 }); // El 20% del elemento debe estar visible para iniciar
+
+stats.forEach(s => statsObserver.observe(s));
 
 /* ── ENVÍO WHATSAPP ── */
 function enviarWhatsApp(event) {
     event.preventDefault();
-    const nombre = document.getElementById('name').value;
-    const tel = document.getElementById('whatsapp_user').value;
-    const email = document.getElementById('email').value;
+    const nombre = document.getElementById('name').value.trim();
+    const tel = document.getElementById('whatsapp_user').value.trim();
+    const email = document.getElementById('email').value.trim();
     const vol = document.getElementById('volume').value;
-    const msg = document.getElementById('textarea').value;
+    const msg = document.getElementById('textarea').value.trim();
+
+    if (!nombre || !tel || !email) {
+        // La validación del navegador con 'required' suele manejar esto, 
+        // pero esto asegura que no se envíe si los campos están vacíos.
+        return;
+    }
 
     const miNumero = "51982247314";
     const texto = `*NUEVO LEAD NISSI TECH*%0A*Nombre:* ${nombre}%0A*WhatsApp:* ${tel}%0A*Email:* ${email}%0A*Volumen:* ${vol}%0A*Interés:* ${msg}`;
@@ -133,8 +146,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 3. Inyectar imágenes en los Workers originales antes de clonar
     const avatars = document.querySelectorAll('.wavatar');
+    
+    /**
+     * Mapeo de imágenes para corregir el orden:
+     * Index 0 (Sophie) -> imagen3
+     * Index 1 (Valery) -> imagen5 (Contiene a Valery)
+     * Index 2 (Max)    -> imagen6 (Contiene a Max)
+     * Index 3 (Tim)    -> imagen4 (Contiene a Tim)
+     * Index 4 (Luke)   -> imagen7
+     */
+    const workerImageOrder = [3, 5, 6, 4, 7];
+
     avatars.forEach((el, index) => {
-        const key = 'imagen' + (index + 3);
+        const key = 'imagen' + workerImageOrder[index];
         if (images[key]) {
             el.innerHTML = `<img src="${images[key]}" alt="Worker">`;
         }
@@ -204,7 +228,20 @@ function initWorkersSlider() {
         card.addEventListener('click', function(e) {
             if (dragged || e.target.closest('.w-wa-btn')) return;
             e.preventDefault();
-            this.classList.toggle('flipped');
+
+            // Limpiar el temporizador previo si el usuario hace clic de nuevo
+            if (this._flipTimeout) {
+                clearTimeout(this._flipTimeout);
+            }
+
+            const isFlipped = this.classList.toggle('flipped');
+
+            // Si la carta quedó volteada (mostrando el reverso), programamos el regreso
+            if (isFlipped) {
+                this._flipTimeout = setTimeout(() => {
+                    this.classList.remove('flipped');
+                }, 5000);
+            }
         });
     });
 
