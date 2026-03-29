@@ -297,11 +297,8 @@
         <p>El 26 de marzo, en un comité estratégico con una de las multinacionales líderes en energía y estaciones de servicio con presencia en Perú, realizamos algo sin precedentes: medimos el criterio humano bajo presión — en tiempo real — orquestado íntegramente por un Worker IA de Nissitech.</p>
       </div>
       <div class="img-side">
-        <!-- Reemplaza por: <img src="assets/blog/sala-operaciones-energetica.webp" alt="Sala de operaciones energética automatizada"> -->
-        <div class="img-placeholder-side">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="#60a5fa"/></svg>
-          <span class="img-placeholder-label">Imagen IA — sala de operaciones</span>
-        </div>
+        <!-- Reemplaza por: <img src="image/sala-operaciones-energetica-automatizacion-ia-nissitech.webp" alt="Sala de operaciones energética con automatización IA Nissitech"> -->
+        <img src="image/sala-operaciones-energetica-automatizacion-ia-nissitech.webp" alt="Sala de operaciones energética con automatización IA Nissitech">
       </div>
     </div>
 
@@ -365,11 +362,7 @@
 
       <!-- Imagen comité -->
       <div class="img-block">
-        <!-- Reemplaza por: <img src="assets/blog/comite-estrategico-gerentes.webp" alt="Gerentes en comité estratégico"> -->
-        <div class="img-placeholder-bottom">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round"/></svg>
-          <span class="img-placeholder-label" style="font-family:Arial,sans-serif;font-size:11px;color:#60a5fa;text-align:center;padding:0 12px;line-height:1.4;">Imagen IA — gerentes en comité estratégico</span>
-        </div>
+        <img src="image/comite-estrategico-gerentes-automatizacion-nissitech.webp" alt="Comité estratégico de gerentes con análisis de datos automatizado Nissitech">
       </div>
 
     </div>
