@@ -2837,5 +2837,7 @@ nav {
 @media (max-width: 768px) {
   .blog-cards-grid { grid-template-columns: 1fr; }
 }
-  
+  #blog .sec-title {
+  text-align: center;
+}
  
