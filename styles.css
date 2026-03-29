@@ -335,8 +335,8 @@ h2.sec-title em{font-style:normal;background:linear-gradient(135deg,var(--blue2)
 .wcard.flipped .wibox{border-color:var(--ac,var(--blue));box-shadow:0 0 16px var(--ac-g,transparent)}
 
 .wblue  {--ac:var(--blue); --ac-g:var(--blue-g); --bg-card: linear-gradient(145deg, #0a1628, #0e1c32, #091520); }
-.wgreen {--ac:var(--green);--ac-g:var(--green-g); --bg-card: linear-gradient(145deg, #0a1d1a, #0e2a22, #091a15); }
-.wgold  {--ac:var(--gold); --ac-g:var(--gold-g); --bg-card: linear-gradient(145deg, #0c1a30, #101f3a, #091520); border-color:rgba(232,184,75,.2)}
+.wgreen {--ac:var(--green);--ac-g:var(--green-g); --bg-card: linear-gradient(145deg, #0a0f1d, #0d1428, #080c1a); }
+.wgold  {--ac:var(--gold); --ac-g:var(--gold-g); --bg-card: linear-gradient(145deg, #1a1200, #2a1e00, #1a1500); border-color:rgba(232,184,75,.2)}
 .wpurple{--ac:var(--purple);--ac-g:var(--purple-g); --bg-card: linear-gradient(145deg, #100d28, #140f30, #0a0820); border-color:rgba(167,139,250,.2)}
 .wred   {--ac:var(--red);   --ac-g:rgba(255,94,122,.14); --bg-card: linear-gradient(145deg, #1a0a10, #240e12, #15090d); }
 
