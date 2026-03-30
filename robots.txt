@@ -1,0 +1,6 @@
+# Instrucciones para todos los robots
+User-agent: *
+Allow: /
+
+# Enlace al mapa del sitio para facilitar el rastreo
+Sitemap: https://nissitech.cloud/sitemap.xml

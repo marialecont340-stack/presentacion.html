@@ -1,0 +1,53 @@
+================================================================================
+REGISTRO OFICIAL DE OPTIMIZACIONES SEO Y RENDIMIENTO (WPO) - NISSI TECH
+================================================================================
+Fecha: 29 de Marzo, 2026
+Dominio Oficial: https://nissitech.cloud/
+
+1. INFRAESTRUCTURA TÉCNICA (SEO ON-PAGE)
+--------------------------------------------------------------------------------
+* Dominio y Canonical: Configuración de <link rel="canonical"> hacia nissitech.cloud
+  para consolidar la autoridad y evitar problemas de contenido duplicado.
+* Indexación Controlada: Implementación de robots.txt con acceso total a rastreadores
+  y vinculación directa al Sitemap.
+* Sitemap XML Dinámico: Creación de sitemap.xml incluyendo la página principal (index)
+  y páginas de contenido profundo (nissiblogmultinacional.html).
+* Meta-Data: Títulos y meta-descripciones optimizados con palabras clave de alta
+  intención (Workers IA, automatización WhatsApp, CRM negocios).
+
+2. VISIBILIDAD SOCIAL Y ESTRUCTURADA
+--------------------------------------------------------------------------------
+* Open Graph (OG): Etiquetas para Facebook y WhatsApp configuradas con imágenes
+  en formato WebP para una previsualización profesional al compartir el link.
+* Twitter Cards: Implementación de summary_large_image para máxima visibilidad en X.
+* Datos Estructurados (JSON-LD): Inyección de esquema "Organization" de Schema.org
+  para ayudar a Google a mostrar Rich Snippets (fragmentos enriquecidos) de la empresa.
+* Favicons: Vinculación de logo oficial en formato WebP y apple-touch-icon para 
+  reconocimiento de marca en pestañas del navegador y dispositivos móviles.
+
+3. RENDIMIENTO Y VELOCIDAD DE CARGA (WPO)
+--------------------------------------------------------------------------------
+* Adiós a Base64: Eliminación total de imágenes en código JS. Reducción masiva del
+  peso del archivo main.js.
+* Formatos de Nueva Generación: Migración total a .webp (reducción de hasta un 80%
+  en el peso de las imágenes sin pérdida de calidad).
+* Prioridad de Carga: Imágenes críticas (Hero Banner y Logo) movidas al HTML para
+  un descubrimiento inmediato por el navegador (Mejora del LCP).
+* Carga Diferida (Lazy Loading): Atributo loading="lazy" implementado en todos los
+  avatares de workers, fondos de tarjetas (reverso), capturas de pantalla y 
+  miniaturas del blog para optimizar el ahorro de ancho de banda.
+* Limpieza de Estilos: Eliminación de más de 100 líneas de CSS duplicado y
+  redundancias en Media Queries para acelerar el renderizado.
+
+4. ACCESIBILIDAD Y SEO DE CONTENIDO visual
+--------------------------------------------------------------------------------
+* Naming de Archivos: Renombramiento de imágenes con palabras clave (Ej: "sophie-bot-
+  whatsapp-agendamiento-automatico-nissitech.webp") en lugar de nombres genéricos.
+* Atributos ALT: Descripciones detalladas en cada etiqueta <img> para indexación en
+  Google Imágenes y soporte para lectores de pantalla.
+* Seguridad: Implementación de rel="noopener" en enlaces externos.
+
+5. EXPERIENCIA DE USUARIO (UX)
+--------------------------------------------------------------------------------
+* Scroll-Padding: Ajuste de 80px en CSS para que la navegación fija no tape los
+  encabezados de las secciones al navegar por el menú.

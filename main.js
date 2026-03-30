@@ -20,7 +20,7 @@ class P {
         const a = Math.sin((this.life/this.maxL)*Math.PI)*.5;
         ctx.beginPath(); ctx.arc(this.x,this.y,this.s,0,Math.PI*2);
         ctx.fillStyle=`rgba(${this.col},${a})`; ctx.fill();
-    }
+    } 
 }
 for(let i=0;i<90;i++){const p=new P();p.life=Math.floor(Math.random()*p.maxL);pts.push(p)}
 function loop(){ ctx.clearRect(0,0,W,H); pts.forEach(p=>p.tick()); requestAnimationFrame(loop) }
@@ -114,57 +114,14 @@ function enviarWhatsApp(event) {
         return;
     }
 
-    const miNumero = "51982247314";
+    const miNumero = "51941693270";
     const texto = `*NUEVO LEAD NISSI TECH*%0A*Nombre:* ${nombre}%0A*WhatsApp:* ${tel}%0A*Email:* ${email}%0A*Volumen:* ${vol}%0A*Interés:* ${msg}`;
 
     window.open(`https://wa.me/${miNumero}?text=${texto}`, '_blank');
 }
 
-/* ── INYECCIÓN DE IMÁGENES Y SLIDER ── */
+/* ── INICIALIZACIÓN ── */
 document.addEventListener("DOMContentLoaded", () => {
-
-    // 1. Hero Banner
-    const hero = document.getElementById('hero-banner');
-    if (hero) {
-        const img = document.createElement('img');
-        img.src = 'image/hero-workers-ia-automatizacion-whatsapp-negocios-nissitech.webp';
-        img.className = 'banner-img';
-        img.alt = 'Workers IA que automatizan negocios por WhatsApp - Nissi Tech';
-        hero.insertBefore(img, hero.firstChild);
-    }
-    // 2. Logo Navbar
-    const brand = document.querySelector('.nav-brand');
-    if (brand) {
-        const img = document.createElement('img');
-        img.src = 'image/logo-nissitech-automatizacion-flujos-bots.webp';
-        img.className = 'nav-logo';
-        img.alt = 'Nissi Tech automatizacion workers IA';
-        brand.insertBefore(img, brand.firstChild);
-    }
-
-   // 3. Inyectar imágenes en los Workers
-    const avatars = document.querySelectorAll('.wavatar');
-    const workerImages = [
-        'image/sophie-bot-whatsapp-agendamiento-automatico-nissitech.webp',
-        'image/valery-crm-automatico-historial-clientes-whatsapp-nissitech.webp',
-        'image/max-analitica-automatizada-flujos-negocio-nissitech.webp',
-        'image/tim-campanas-automaticas-whatsapp-reactivacion-clientes-nissitech.webp',
-        'image/luke-llamadas-automaticas-voz-ia-negocio-nissitech.webp'
-    ];
-    const workerAlts = [
-        'Sophie bot WhatsApp agendamiento automatico negocios',
-        'Valery CRM automatico historial clientes WhatsApp',
-        'Max analitica automatizada flujos negocio',
-        'Tim campanas automaticas WhatsApp reactivacion clientes',
-        'Luke llamadas automaticas voz IA negocio'
-    ];
-    avatars.forEach((el, index) => {
-        if (workerImages[index]) {
-            el.innerHTML = `<img src="${workerImages[index]}" alt="${workerAlts[index]}">`;
-        }
-    });
-
-    // 4. Inicializar Slider
     initWorkersSlider();
 });
 
