@@ -22,8 +22,8 @@ Dominio Oficial: https://nissitech.cloud/
 * Twitter Cards: Implementación de summary_large_image para máxima visibilidad en X.
 * Datos Estructurados (JSON-LD): Inyección de esquema "Organization" de Schema.org
   para ayudar a Google a mostrar Rich Snippets (fragmentos enriquecidos) de la empresa.
-* Favicons: Vinculación de logo oficial en formato WebP y apple-touch-icon para 
-  reconocimiento de marca en pestañas del navegador y dispositivos móviles.
+* Favicons: Implementación de estándares de visibilidad de Google Search (.ico y .png 48x48) 
+  con isotipo transparente para asegurar la aparición del icono en los resultados (SERP).
 
 3. RENDIMIENTO Y VELOCIDAD DE CARGA (WPO)
 --------------------------------------------------------------------------------
