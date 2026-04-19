@@ -304,15 +304,19 @@ function initWorkersSlider() {
     updateFocus();
     updateButtonStates();
 }
-// ── MODAL CORPORATIVO ──
+// ════════════════════════════════════════
+// CORPORATIVO — final de main.js
+// ════════════════════════════════════════
+
 document.addEventListener('DOMContentLoaded', function() {
+
+  // ── MODAL ──
   const overlay  = document.getElementById('cp-modal-overlay');
   const openBtn  = document.getElementById('cp-open-modal');
   const closeBtn = document.getElementById('cp-modal-close');
   const form     = document.getElementById('cp-modal-form');
   const success  = document.getElementById('cp-modal-success');
 
-  // Si no existe el botón (otras páginas) no hace nada
   if (!openBtn) return;
 
   // Abrir modal
@@ -322,21 +326,23 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Cerrar modal
-const closeModal = () => {
+  const closeModal = () => {
     overlay.classList.remove('open');
     document.body.style.overflow = '';
     setTimeout(() => {
-        form.style.display = '';
-        success.style.display = 'none';
-        form.reset();
-        const btn = form.querySelector('.cp-modal-submit');
-        btn.textContent = 'Enviar solicitud';
-        btn.disabled = false;
+      form.style.display = '';
+      success.style.display = 'none';
+      form.reset();
+      const btn = form.querySelector('.cp-modal-submit');
+      btn.textContent = 'Enviar solicitud';
+      btn.disabled = false;
     }, 300);
-};
-closeBtn.addEventListener('click', closeModal);
-overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+  };
+
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
   // Enviar por WhatsApp
   form.addEventListener('submit', function(e) {
     e.preventDefault();
@@ -355,25 +361,38 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal
     form.style.display = 'none';
     success.style.display = 'block';
   });
-});
-// DROPDOWN NAV
-const navDropdown = document.getElementById('navDropdown');
-const navDropdownToggle = document.getElementById('navDropdownToggle');
 
-if (navDropdownToggle) {
-  navDropdownToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    navDropdown.classList.toggle('open');
-  });
+  // ── PILARES ACORDEÓN ──
+  const pilares = document.querySelectorAll('.cp-pillar');
+  if (pilares.length) {
+    pilares.forEach(pillar => {
+      pillar.addEventListener('click', () => {
+        const isOpen = pillar.classList.contains('open');
+        pilares.forEach(p => p.classList.remove('open'));
+        if (!isOpen) pillar.classList.add('open');
+      });
+    });
+  }
 
-  document.addEventListener('click', () => {
-    navDropdown.classList.remove('open');
-  });
+  // ── DROPDOWN NAV ──
+  const navDropdown = document.getElementById('navDropdown');
+  const navDropdownToggle = document.getElementById('navDropdownToggle');
 
-  // Cerrar al hacer click en un link del dropdown
-  document.querySelectorAll('.nav-dropdown-menu a').forEach(link => {
-    link.addEventListener('click', () => {
+  if (navDropdownToggle) {
+    navDropdownToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navDropdown.classList.toggle('open');
+    });
+
+    document.addEventListener('click', () => {
       navDropdown.classList.remove('open');
     });
-  });
-}
+
+    document.querySelectorAll('.nav-dropdown-menu a').forEach(link => {
+      link.addEventListener('click', () => {
+        navDropdown.classList.remove('open');
+      });
+    });
+  }
+
+});
