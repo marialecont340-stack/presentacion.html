@@ -3198,3 +3198,6 @@ nav {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
+#corporativo-preview {
+  padding-bottom: 96px;
+}
