@@ -2706,6 +2706,11 @@ nav {
    SECCIÓN: CORPORATIVO / INDUSTRIA
 ════════════════════════════════════════ */
 
+/* ════════════════════════════════════════
+   SECCIÓN: CORPORATIVO / INDUSTRIA
+   Pegar al final de styles.css
+════════════════════════════════════════ */
+
 /* ── HERO GRID ── */
 .cp-hero-grid {
   display: grid;
@@ -2764,6 +2769,21 @@ nav {
   font-style: normal;
 }
 
+/* ── TAG ── */
+#corporativo-preview .tag {
+  font-family: "Syne", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--blue2);
+  background: var(--blue-g);
+  border: 1px solid rgba(61,142,245,.25);
+  border-radius: 6px;
+  padding: 4px 12px;
+  letter-spacing: .06em;
+  display: inline-block;
+  margin-bottom: 14px;
+}
+
 /* ── DIAGRAMA ── */
 .cp-diagram {
   background: var(--s1);
@@ -2796,12 +2816,19 @@ nav {
 .cp-diag-body {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
+  min-height: 160px;
 }
 
-.cp-d-col { display: flex; flex-direction: column; gap: 9px; }
-.cp-d-col.right { align-items: flex-end; }
+.cp-d-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+}
+
+.cp-d-col.right { align-items: flex-start; }
 
 .cp-d-node {
   background: var(--s2);
@@ -2816,6 +2843,7 @@ nav {
   gap: 7px;
   transition: border-color .2s, color .2s;
   white-space: nowrap;
+  width: 130px;
 }
 
 .cp-d-node:hover { border-color: var(--blue2); color: var(--text); }
@@ -2826,8 +2854,9 @@ nav {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 0 6px;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
 }
 
 .cp-d-ring {
@@ -2880,23 +2909,22 @@ nav {
   letter-spacing: .14em; text-transform: uppercase; font-weight: 700;
 }
 
-/* ── 3 PILARES ── */
+/* ── PILARES ACORDEÓN — DESKTOP Y MÓVIL ── */
 .cp-pillars {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   margin-bottom: 16px;
 }
-
-@media (max-width: 700px) { .cp-pillars { grid-template-columns: 1fr; } }
 
 .cp-pillar {
   background: var(--s1);
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 22px 20px;
+  padding: 18px 20px;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
   transition: border-color .3s;
 }
 
@@ -2913,15 +2941,54 @@ nav {
 .cp-pillar.p2::before { background: linear-gradient(90deg, var(--gold), var(--green)); }
 .cp-pillar.p3::before { background: linear-gradient(90deg, var(--green), var(--blue2)); }
 
-.cp-pillar-ico   { font-size: 18px; margin-bottom: 10px; }
+.cp-pillar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cp-pillar-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cp-pillar-ico { font-size: 18px; margin-bottom: 0; }
 
 .cp-pillar-title {
   font-family: "Syne", sans-serif;
   font-size: 13px; font-weight: 700;
-  color: var(--text); margin-bottom: 6px;
+  color: var(--text);
 }
 
-.cp-pillar-desc { font-size: 12px; color: var(--text2); line-height: 1.6; }
+.cp-pillar-chevron {
+  width: 16px; height: 16px;
+  color: var(--text3);
+  flex-shrink: 0;
+  transition: transform .3s ease;
+}
+
+.cp-pillar.open .cp-pillar-chevron {
+  transform: rotate(180deg);
+}
+
+.cp-pillar-desc {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.6;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height .35s ease, opacity .3s ease, margin .3s ease;
+  margin-top: 0;
+}
+
+.cp-pillar.open .cp-pillar-desc {
+  max-height: 120px;
+  opacity: 1;
+  margin-top: 12px;
+}
 
 /* ── MODELO DE INVERSIÓN ── */
 .cp-model {
@@ -3193,65 +3260,11 @@ nav {
 
 .cp-modal-success p { font-size: 13px; color: var(--text2); line-height: 1.65; }
 
-/* ── ANIMACIÓN DIAGRAMA ── */
-@keyframes cpSpin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-#corporativo-preview {
-  padding-bottom: 96px;
-}
-/* Fix tag NissiTech Enterprise */
-#corporativo-preview .tag {
-  font-family: "Syne", sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--blue2);
-  background: var(--blue-g);
-  border: 1px solid rgba(61,142,245,.25);
-  border-radius: 6px;
-  padding: 4px 12px;
-  letter-spacing: .06em;
-  display: inline-block;
-  margin-bottom: 14px;
-}
+/* ── PADDING BOTTOM SECCIÓN ── */
+#corporativo-preview { padding-bottom: 96px; }
 
-/* Fix diagrama — centrado vertical */
-.cp-diag-body {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 16px;
-  align-items: center;
-  min-height: 160px;
-}
-
-.cp-d-col {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  justify-content: center;
-}
-
-.cp-d-center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 12px;
-}
-/* Nodos misma anchura en ambos lados */
-.cp-d-node {
-  width: 130px;
-}
-
-.cp-d-col.right {
-  align-items: flex-start;
-}
 /* ── DROPDOWN NAV ── */
-.nav-dropdown {
-  position: relative;
-}
+.nav-dropdown { position: relative; }
 
 .nav-dropdown-toggle {
   font-size: 11px; color: var(--text2); text-decoration: none; font-weight: 700;
@@ -3276,9 +3289,7 @@ nav {
   flex-shrink: 0;
 }
 
-.nav-dropdown.open .nav-dropdown-toggle svg {
-  transform: rotate(180deg);
-}
+.nav-dropdown.open .nav-dropdown-toggle svg { transform: rotate(180deg); }
 
 .nav-dropdown-menu {
   position: absolute;
@@ -3325,11 +3336,15 @@ nav {
   margin: 6px 4px;
 }
 
-.nav-dropdown-menu .nav-dropdown-highlight {
-  color: var(--cyan);
-}
+.nav-dropdown-menu .nav-dropdown-highlight { color: var(--cyan); }
 
 .nav-dropdown-menu .nav-dropdown-highlight:hover {
   background: rgba(0,200,255,.07);
   border-color: rgba(0,200,255,.18);
+}
+
+/* ── ANIMACIÓN DIAGRAMA ── */
+@keyframes cpSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
