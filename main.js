@@ -304,3 +304,45 @@ function initWorkersSlider() {
     updateFocus();
     updateButtonStates();
 }
+<!-- ═══ SCRIPT CORPORATIVO ═══ -->
+<!-- Pegar después del modal, antes de </body> -->
+
+
+(function() {
+  const overlay  = document.getElementById('cp-modal-overlay');
+  const openBtn  = document.getElementById('cp-open-modal');
+  const closeBtn = document.getElementById('cp-modal-close');
+  const form     = document.getElementById('cp-modal-form');
+  const success  = document.getElementById('cp-modal-success');
+
+  // Abrir modal
+  openBtn.addEventListener('click', () => {
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+
+  // Cerrar modal
+  const closeModal = () => {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+  // Enviar formulario
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = form.querySelector('.cp-modal-submit');
+    btn.textContent = 'Enviando...';
+    btn.disabled = true;
+
+    // → Reemplazar con tu webhook n8n cuando esté listo:
+    // await fetch('TU_WEBHOOK_URL', { method: 'POST', body: new FormData(form) });
+
+    await new Promise(r => setTimeout(r, 800));
+    form.style.display = 'none';
+    success.style.display = 'block';
+  });
+})();
