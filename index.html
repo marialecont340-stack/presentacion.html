@@ -128,31 +128,47 @@
   <a href="#" class="nav-brand">
     <img src="image/logo-nissitech-automatizacion-flujos-bots.webp" alt="Nissi Tech automatizacion workers IA" class="nav-logo">
     <span class="nav-name">Nissi Tech</span>
-</a>
-<div class="nav-links">
+  </a>
+
+  <div class="nav-links">
     <a href="#quienes-somos">¿Quiénes somos?</a>
-    <a href="#workers">Workers IA</a>
-    <a href="#servicios">Servicios de crecimiento</a>
+
+    <!-- DROPDOWN SOLUCIONES -->
+    <div class="nav-dropdown" id="navDropdown">
+      <button class="nav-dropdown-toggle" id="navDropdownToggle">
+        Soluciones
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="nav-dropdown-menu">
+        <a href="#workers">Workers IA</a>
+        <a href="#servicios">Servicios de crecimiento</a>
+        <div class="nav-dropdown-divider"></div>
+        <a href="#corporativo-preview" class="nav-dropdown-highlight">Corporativo &amp; Industria</a>
+      </div>
+    </div>
+
     <a href="#proceso">¿Cómo funciona?</a>
     <a href="#casos">Casos de éxito</a>
     <a href="#blog">Nissi Blog</a>
   </div>
+
   <a href="diagnostico.html" class="nav-cta">Diagnostico Gratuito</a>
   <div class="nav-burger" id="burger" onclick="toggleMenu()">
     <span></span><span></span><span></span>
   </div>
 </nav>
+
 <!-- MOBILE MENU -->
 <div class="nav-mobile" id="mobileMenu">
-<a href="#quienes-somos" onclick="closeMenu()">¿Quiénes somos?</a>
+  <a href="#quienes-somos" onclick="closeMenu()">¿Quiénes somos?</a>
   <a href="#workers" onclick="closeMenu()">Workers IA</a>
   <a href="#servicios" onclick="closeMenu()">Servicios de crecimiento</a>
+  <a href="#corporativo-preview" onclick="closeMenu()" style="color:var(--cyan)">Corporativo &amp; Industria</a>
   <a href="#proceso" onclick="closeMenu()">¿Cómo funciona?</a>
   <a href="#casos" onclick="closeMenu()">Casos de éxito</a>
   <a href="#blog" onclick="closeMenu()">Nissi Blog</a>
   <a href="diagnostico.html" class="nav-mobile-cta">Demo Gratuita →</a>
 </div>
-
 <!-- ═══ HERO ═══ -->
 <!-- <section id="hero">
   <div class="hero-inner">
