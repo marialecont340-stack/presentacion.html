@@ -3201,3 +3201,42 @@ nav {
 #corporativo-preview {
   padding-bottom: 96px;
 }
+/* Fix tag NissiTech Enterprise */
+#corporativo-preview .tag {
+  font-family: "Syne", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--blue2);
+  background: var(--blue-g);
+  border: 1px solid rgba(61,142,245,.25);
+  border-radius: 6px;
+  padding: 4px 12px;
+  letter-spacing: .06em;
+  display: inline-block;
+  margin-bottom: 14px;
+}
+
+/* Fix diagrama — centrado vertical */
+.cp-diag-body {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 16px;
+  align-items: center;
+  min-height: 160px;
+}
+
+.cp-d-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+}
+
+.cp-d-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
+}
