@@ -356,3 +356,24 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal
     success.style.display = 'block';
   });
 });
+// DROPDOWN NAV
+const navDropdown = document.getElementById('navDropdown');
+const navDropdownToggle = document.getElementById('navDropdownToggle');
+
+if (navDropdownToggle) {
+  navDropdownToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    navDropdown.classList.toggle('open');
+  });
+
+  document.addEventListener('click', () => {
+    navDropdown.classList.remove('open');
+  });
+
+  // Cerrar al hacer click en un link del dropdown
+  document.querySelectorAll('.nav-dropdown-menu a').forEach(link => {
+    link.addEventListener('click', () => {
+      navDropdown.classList.remove('open');
+    });
+  });
+}
