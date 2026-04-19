@@ -304,16 +304,16 @@ function initWorkersSlider() {
     updateFocus();
     updateButtonStates();
 }
-<!-- ═══ SCRIPT CORPORATIVO ═══ -->
-<!-- Pegar después del modal, antes de </body> -->
-
-
-(function() {
+// ── MODAL CORPORATIVO ──
+document.addEventListener('DOMContentLoaded', function() {
   const overlay  = document.getElementById('cp-modal-overlay');
   const openBtn  = document.getElementById('cp-open-modal');
   const closeBtn = document.getElementById('cp-modal-close');
   const form     = document.getElementById('cp-modal-form');
   const success  = document.getElementById('cp-modal-success');
+
+  // Si no existe el botón (otras páginas) no hace nada
+  if (!openBtn) return;
 
   // Abrir modal
   openBtn.addEventListener('click', () => {
@@ -331,18 +331,22 @@ function initWorkersSlider() {
   overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
-  // Enviar formulario
-  form.addEventListener('submit', async function(e) {
+  // Enviar por WhatsApp
+  form.addEventListener('submit', function(e) {
     e.preventDefault();
-    const btn = form.querySelector('.cp-modal-submit');
-    btn.textContent = 'Enviando...';
-    btn.disabled = true;
 
-    // → Reemplazar con tu webhook n8n cuando esté listo:
-    // await fetch('TU_WEBHOOK_URL', { method: 'POST', body: new FormData(form) });
+    const empresa = form.querySelector('[name="empresa"]').value.trim();
+    const email   = form.querySelector('[name="email"]').value.trim();
+    const proceso = form.querySelector('[name="proceso"]').value.trim();
 
-    await new Promise(r => setTimeout(r, 800));
+    if (!empresa || !email || !proceso) return;
+
+    const miNumero = "51941693270";
+    const texto = `*NUEVO LEAD CORPORATIVO*%0A*Empresa:* ${empresa}%0A*Correo:* ${email}%0A*Proceso a automatizar:* ${proceso}`;
+
+    window.open(`https://wa.me/${miNumero}?text=${texto}`, '_blank');
+
     form.style.display = 'none';
     success.style.display = 'block';
   });
-})();
+});
