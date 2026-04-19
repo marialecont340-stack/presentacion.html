@@ -167,6 +167,96 @@
   </div>
 </section> -->
 
+  <!-- ═══ CORPORATIVO / INDUSTRIA ═══ -->
+<section id="corporativo-preview">
+  <div class="wrap">
+
+    <!-- HEADER -->
+    <div class="qs-header reveal">
+      <div class="sec-eyebrow">Corporativo &amp; Industria</div>
+      <h2 class="sec-title">Orquestación de Fuerza Laboral<br><em>Digital a Medida.</em></h2>
+    </div>
+
+    <!-- HERO GRID -->
+    <div class="cp-hero-grid reveal">
+
+      <div class="cp-left">
+        <span class="tag">NissiTech Enterprise</span>
+        <h2>No instalamos herramientas.<br><em>Desplegamos soluciones.</em></h2>
+        <p class="cp-desc">
+          Analizamos sus cuellos de botella en Logística, RRHH, Finanzas o Ventas y diseñamos un Digital Worker que se integra nativamente con su ecosistema actual — SAP, Salesforce, Oracle o sistemas legados.
+        </p>
+        <div class="cp-quote">
+          <p>"El 60% de las tareas corporativas son <strong>complejidad explicable</strong>. En NissiTech las convertimos en autonomía digital para que su capital humano se enfoque en <strong>La Invención.</strong>"</p>
+        </div>
+      </div>
+
+      <div class="cp-right">
+        <div class="cp-diagram">
+          <div class="cp-diag-label">Integración nativa con su ecosistema</div>
+          <div class="cp-diag-body">
+            <div class="cp-d-col">
+              <div class="cp-d-node"><span class="cp-d-dot" style="background:#0070f3"></span>SAP</div>
+              <div class="cp-d-node"><span class="cp-d-dot" style="background:#00a1e0"></span>Salesforce</div>
+              <div class="cp-d-node"><span class="cp-d-dot" style="background:#f80000"></span>Oracle</div>
+            </div>
+            <div class="cp-d-center">
+              <div class="cp-d-ring">
+                <div class="cp-d-core"><span>IA</span><span>Nissi</span></div>
+              </div>
+              <div class="cp-d-caption">Worker</div>
+            </div>
+            <div class="cp-d-col right">
+              <div class="cp-d-node"><span class="cp-d-dot" style="background:#e8b84b"></span>ERP</div>
+              <div class="cp-d-node"><span class="cp-d-dot" style="background:#22c98a"></span>RRHH</div>
+              <div class="cp-d-node"><span class="cp-d-dot" style="background:#a78bfa"></span>Legados</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 3 PILARES -->
+    <div class="cp-pillars reveal">
+      <div class="cp-pillar p1">
+        <div class="cp-pillar-ico">🔍</div>
+        <div class="cp-pillar-title">Auditoría de Procesos</div>
+        <div class="cp-pillar-desc">Identificamos tareas redundantes con potencial de automatización del <strong style="color:var(--blue2)">90%</strong>.</div>
+      </div>
+      <div class="cp-pillar p2">
+        <div class="cp-pillar-ico">🔒</div>
+        <div class="cp-pillar-title">Gobernanza e IA Ética</div>
+        <div class="cp-pillar-desc">Implementamos bajo estándares de seguridad y cumplimiento <strong style="color:var(--gold)">ISO 42001</strong>.</div>
+      </div>
+      <div class="cp-pillar p3">
+        <div class="cp-pillar-ico">📈</div>
+        <div class="cp-pillar-title">Escalabilidad Sin Costo Marginal</div>
+        <div class="cp-pillar-desc">Su Worker no duerme, no se equivoca y procesa volúmenes masivos <strong style="color:var(--green)">en tiempo real</strong>.</div>
+      </div>
+    </div>
+
+    <!-- MODELO DE INVERSIÓN -->
+    <div class="cp-model reveal">
+      <div class="cp-model-tag">Modelo de Inversión por Proyecto</div>
+      <div class="cp-model-title">Consultoría de Implementación + Soporte de Orquestación</div>
+      <div class="cp-model-desc">Cada corporación es un universo. El valor se define tras un diagnóstico técnico de sus flujos de trabajo.</div>
+    </div>
+
+    <!-- CTA FINAL -->
+    <div class="cp-cta-block reveal">
+      <p>
+        Cuéntenos qué proceso quiere automatizar y <strong>nuestros arquitectos diseñarán una propuesta de viabilidad</strong> para su empresa.
+      </p>
+      <button class="cp-btn" id="cp-open-modal">
+        Solicitar propuesta de viabilidad
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+  </div>
+</section>
+
 <!-- ═══ DIFFERENTIATOR BANNER ═══ -->
 <section id="differentiator">
   <div class="wrap reveal">
@@ -192,6 +282,8 @@
     </div>
   </div>
 </section>
+
+
 
 
 
@@ -1266,6 +1358,51 @@
 
 <!-- Scripts -->
 <script src="main.js"></script>
+  <!-- ═══ MODAL CORPORATIVO ═══ -->
+<!-- Pegar después de <script src="main.js"></script> y antes de </body> -->
+
+<div class="cp-modal-overlay" id="cp-modal-overlay">
+  <div class="cp-modal" role="dialog" aria-modal="true">
+
+    <button class="cp-modal-close" id="cp-modal-close" aria-label="Cerrar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+
+    <div id="cp-modal-content">
+      <div class="cp-modal-eyebrow">Sesión de Arquitectura</div>
+      <h3>Cuéntenos qué proceso<br>quiere <em>automatizar</em></h3>
+      <p class="cp-modal-sub">Nuestros arquitectos diseñarán una propuesta de viabilidad en 48 horas. Sin compromiso.</p>
+
+      <form id="cp-modal-form">
+        <div class="cp-modal-row">
+          <div class="cp-field">
+            <label>Empresa</label>
+            <input type="text" name="empresa" placeholder="Nombre de su empresa" required>
+          </div>
+          <div class="cp-field">
+            <label>Correo corporativo</label>
+            <input type="email" name="email" placeholder="nombre@empresa.com" required>
+          </div>
+        </div>
+        <div class="cp-field">
+          <textarea name="proceso" placeholder="Ej: Conciliamos órdenes entre SAP y nuestro WMS manualmente. Toma 3 días y 2 personas a tiempo completo cada cierre de mes..." required></textarea>
+        </div>
+        <div class="cp-modal-note">Sus datos son confidenciales y solo se usan para preparar su propuesta.</div>
+        <button type="submit" class="cp-modal-submit">
+          Enviar solicitud
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+    </div>
+
+    <div class="cp-modal-success" id="cp-modal-success">
+      <div class="cp-modal-success-ico">✅</div>
+      <h4>Solicitud recibida</h4>
+      <p>Nuestros arquitectos revisarán su caso y le contactarán en las próximas <strong>48 horas</strong> con una propuesta de viabilidad.</p>
+    </div>
+
+  </div>
+</div>
 </body>
 </html>
 
