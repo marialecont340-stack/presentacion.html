@@ -322,18 +322,9 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Cerrar modal
-  const closeModal = () => {
+const closeModal = () => {
     overlay.classList.remove('open');
     document.body.style.overflow = '';
-  };
-
-  closeBtn.addEventListener('click', closeModal);
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });const closeModal = () => {
-    overlay.classList.remove('open');
-    document.body.style.overflow = '';
-
-    // Resetear formulario al cerrar
     setTimeout(() => {
         form.style.display = '';
         success.style.display = 'none';
@@ -341,9 +332,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const btn = form.querySelector('.cp-modal-submit');
         btn.textContent = 'Enviar solicitud';
         btn.disabled = false;
-    }, 300); // espera a que termine la animación de cierre
+    }, 300);
 };
-
+closeBtn.addEventListener('click', closeModal);
+overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
   // Enviar por WhatsApp
   form.addEventListener('submit', function(e) {
     e.preventDefault();
