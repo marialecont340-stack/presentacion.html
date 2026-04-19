@@ -3240,3 +3240,11 @@ nav {
   gap: 8px;
   padding: 0 12px;
 }
+/* Nodos misma anchura en ambos lados */
+.cp-d-node {
+  width: 130px;
+}
+
+.cp-d-col.right {
+  align-items: flex-start;
+}
