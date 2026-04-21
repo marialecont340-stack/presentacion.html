@@ -3479,8 +3479,30 @@ a.nm-item.nm-item--link:hover svg { opacity: .9; transform: translateX(3px); }
   margin-bottom: 48px;
 }
 .section-entry-rule { flex: 1; height: 1.5px; background-size: 200% 100%; animation: rgbRuleShift 4s ease infinite; }
-.section-entry--blue .section-entry-rule  { background: linear-gradient(90deg, transparent, rgba(167,139,250,.5), rgba(61,142,245,.8), rgba(0,200,255,.6), transparent); }
-.section-entry--green .section-entry-rule { background: linear-gradient(90deg, transparent, rgba(0,200,255,.5), rgba(34,201,138,.8), rgba(61,142,245,.5), transparent); }
+.section-entry--blue .section-entry-rule {
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(236,72,153,.5)  8%,
+    rgba(167,139,250,.8) 22%,
+    rgba(61,142,245,1)   40%,
+    rgba(0,200,255,.9)   58%,
+    rgba(34,201,138,.6)  76%,
+    rgba(0,200,255,.3)   90%,
+    transparent 100%
+  );
+}
+.section-entry--green .section-entry-rule {
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(61,142,245,.4)  8%,
+    rgba(0,200,255,.8)   24%,
+    rgba(34,201,138,1)   42%,
+    rgba(0,200,255,.9)   60%,
+    rgba(167,139,250,.7) 78%,
+    rgba(236,72,153,.3)  92%,
+    transparent 100%
+  );
+}
 
 @keyframes rgbRuleShift {
   0%,100% { opacity: .7; filter: brightness(1); }
