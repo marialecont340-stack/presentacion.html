@@ -50,6 +50,15 @@ function closeMenu(){
     document.querySelectorAll('.nm-item--accordion.open').forEach(el => el.classList.remove('open'));
 }
 
+function navAndClose(e, sectionId) {
+    e.preventDefault();
+    closeMenu();
+    setTimeout(() => {
+        const target = document.getElementById(sectionId);
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
+    }, 300);
+}
+
 function toggleNmAccordion(headerEl) {
     const item = headerEl.closest('.nm-item--accordion');
     const wasOpen = item.classList.contains('open');

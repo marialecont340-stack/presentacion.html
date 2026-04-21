@@ -3445,7 +3445,7 @@ a.nm-item.nm-item--link:hover svg { opacity: .9; transform: translateX(3px); }
 /* Cuerpo colapsable */
 .nm-item-body {
   max-height: 0; overflow: hidden;
-  transition: max-height .35s cubic-bezier(.4,0,.2,1);
+  transition: max-height .2s cubic-bezier(0.2,0,0,1);
 }
 .nm-item.open .nm-item-body { max-height: 260px; }
 
