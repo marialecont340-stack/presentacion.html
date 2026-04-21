@@ -3721,6 +3721,7 @@ a.nm-item.nm-item--link:hover svg { opacity: .9; transform: translateX(3px); }
 .nm-item-dot--blue  { background: var(--blue);  box-shadow: 0 0 6px rgba(61,142,245,.6); }
 .nm-item-dot--green { background: var(--green); box-shadow: 0 0 6px rgba(34,201,138,.5); }
 .nm-item-dot--gold  { background: var(--gold);  box-shadow: 0 0 6px rgba(232,184,75,.5); }
+.nm-item-dot--red { background: var(--red); box-shadow: 0 0 6px rgba(255,94,122,.5); }
 
 /* Chevron rotación */
 .nm-chevron { flex-shrink: 0; opacity: .5; transition: transform .3s cubic-bezier(.4,0,.2,1), opacity .2s; }
