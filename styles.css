@@ -251,7 +251,7 @@ h2.sec-title em{font-style:normal;background:linear-gradient(135deg,var(--blue2)
 
 /* Sobreescribe el tamaño global de sec-title solo en esta sección */
 #quienes-somos h2.sec-title {
-  font-size: clamp(52px, 7vw, 90px);
+ font-size: clamp(50px, 7vw, 85px);
 }
 
 .qs-subtitle {
