@@ -173,23 +173,39 @@
 
 <!-- MOBILE MENU -->
 <div class="nav-mobile" id="mobileMenu">
-  <a href="#quienes-somos" onclick="closeMenu()">¿Quiénes somos?</a>
 
-  <div class="nav-mobile-divider">
-    <span class="nav-mobile-divider-label nav-mobile-divider-label--blue">Empresas</span>
+  <a href="#quienes-somos" onclick="closeMenu()" class="nm-single-link">¿Quiénes somos?</a>
+
+  <!-- BLOQUE EMPRESAS -->
+  <div class="nm-block nm-block--empresas">
+    <div class="nm-block-header nm-block-header--blue">
+      <svg viewBox="0 0 16 16" fill="none" width="13" height="13"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Empresas
+    </div>
+    <div class="nm-block-links">
+      <a href="#corporativo-preview" onclick="closeMenu()">
+        <span class="nm-link-dot nm-link-dot--blue"></span>Corporativo &amp; Industria
+      </a>
+    </div>
   </div>
-  <a href="#corporativo-preview" onclick="closeMenu()" class="nav-mobile-empresas">Corporativo &amp; Industria</a>
 
-  <div class="nav-mobile-divider">
-    <span class="nav-mobile-divider-label nav-mobile-divider-label--green">Personas y Negocios</span>
+  <!-- BLOQUE PERSONAS Y NEGOCIOS -->
+  <div class="nm-block nm-block--negocios">
+    <div class="nm-block-header nm-block-header--green">
+      <svg viewBox="0 0 16 16" fill="none" width="13" height="13"><circle cx="8" cy="5" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M2.5 14c0-3 2.5-4.5 5.5-4.5s5.5 1.5 5.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Personas y Negocios
+    </div>
+    <div class="nm-block-links">
+      <a href="#workers" onclick="closeMenu()"><span class="nm-link-dot nm-link-dot--green"></span>Workers IA</a>
+      <a href="#servicios" onclick="closeMenu()"><span class="nm-link-dot nm-link-dot--green"></span>Servicios de crecimiento</a>
+      <a href="#proceso" onclick="closeMenu()"><span class="nm-link-dot nm-link-dot--green"></span>¿Cómo funciona?</a>
+      <a href="#casos" onclick="closeMenu()"><span class="nm-link-dot nm-link-dot--green"></span>Casos de éxito</a>
+    </div>
   </div>
-  <a href="#workers" onclick="closeMenu()">Workers IA</a>
-  <a href="#servicios" onclick="closeMenu()">Servicios de crecimiento</a>
-  <a href="#proceso" onclick="closeMenu()">¿Cómo funciona?</a>
-  <a href="#casos" onclick="closeMenu()">Casos de éxito</a>
 
-  <a href="#blog" onclick="closeMenu()">Nissi Blog</a>
+  <a href="#blog" onclick="closeMenu()" class="nm-single-link">Nissi Blog</a>
   <a href="diagnostico.html" class="nav-mobile-cta">Demo Gratuita →</a>
+
 </div>
 <!-- ═══ HERO ═══ -->
 <!-- <section id="hero">
