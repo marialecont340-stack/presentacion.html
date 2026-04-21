@@ -47,6 +47,14 @@ function closeMenu(){
     document.getElementById('burger').classList.remove('open');
     document.getElementById('mobileMenu').classList.remove('open');
     document.body.style.overflow = '';
+    document.querySelectorAll('.nm-item--accordion.open').forEach(el => el.classList.remove('open'));
+}
+
+function toggleNmAccordion(headerEl) {
+    const item = headerEl.closest('.nm-item--accordion');
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.nm-item--accordion.open').forEach(el => el.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
 }
 
 /* ── ACTIVE NAV LINK ── */
