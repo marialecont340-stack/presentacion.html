@@ -80,8 +80,8 @@ nav{
 /* mobile menu overlay */
 .nav-mobile{
   display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:490;
-  background:rgba(4,7,15,.82);
-  backdrop-filter:blur(22px) saturate(1.2);
+  background:rgba(4,7,15,.55);
+  backdrop-filter:blur(28px) saturate(1.4);
   flex-direction:column;align-items:center;justify-content:flex-start;gap:0;
   padding:88px 20px 40px;overflow-y:auto;
   opacity:0;pointer-events:none;transition:opacity .35s ease;
@@ -3445,7 +3445,7 @@ a.nm-item.nm-item--link:hover svg { opacity: .9; transform: translateX(3px); }
 /* Cuerpo colapsable */
 .nm-item-body {
   max-height: 0; overflow: hidden;
-  transition: max-height .2s cubic-bezier(0.2,0,0,1);
+  transition: max-height .12s cubic-bezier(0.2,0,0,1);
 }
 .nm-item.open .nm-item-body { max-height: 260px; }
 
