@@ -3515,15 +3515,13 @@ a.nm-item.nm-item--link:hover svg { opacity: .9; transform: translateX(3px); }
   padding: 6px 18px; border-radius: 100px;
   position: relative; isolation: isolate; border: none;
 }
-/* Borde RGB giratorio */
+/* Borde RGB */
 .section-entry-label::before {
   content: '';
   position: absolute; inset: -1.5px; border-radius: 100px; z-index: -1;
-  background: conic-gradient(
-    from 0deg,
-    #ec4899, #a78bfa, #3d8ef5, #00c8ff, #22c98a, #00c8ff, #3d8ef5, #a78bfa, #ec4899
-  );
-  animation: rgbCapSpin 3s linear infinite;
+  background: linear-gradient(90deg, #ec4899, #a78bfa, #3d8ef5, #00c8ff, #22c98a, #a78bfa, #ec4899);
+  background-size: 200% 100%;
+  animation: rgbBorderFlow 4s linear infinite;
 }
 /* Máscara interior oscura */
 .section-entry-label::after {
@@ -3531,8 +3529,9 @@ a.nm-item.nm-item--link:hover svg { opacity: .9; transform: translateX(3px); }
   position: absolute; inset: 1.5px; border-radius: 100px; z-index: -1;
   background: rgba(4,7,15,.92);
 }
-@keyframes rgbCapSpin {
-  to { transform: rotate(360deg); }
+@keyframes rgbBorderFlow {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
 }
 
 .section-entry-label--blue  { color: var(--blue2);  background: transparent; }
