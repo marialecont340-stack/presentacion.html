@@ -3491,13 +3491,14 @@ a.nm-item.nm-item--link:hover svg { opacity: .9; transform: translateX(3px); }
 
 /* ── PERSONAS Y NEGOCIOS ENTRY ── */
 .pyn-entry-wrap {
-  padding: 70px 0 0;
+  padding: 70px 0 30px;
   position: relative; z-index: 1;
 }
 .pyn-intro {
-  text-align: center; margin-bottom: 60px;
+  text-align: center; margin-bottom: 0;
 }
 .pyn-intro .sec-title { margin-bottom: 14px; }
+.pyn-entry-wrap + #workers { padding-top: 40px; }
 
 /* ── DIVISION BAND ── */
 #differentiator {
