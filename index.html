@@ -133,22 +133,35 @@
   <div class="nav-links">
     <a href="#quienes-somos">¿Quiénes somos?</a>
 
-    <!-- DROPDOWN SOLUCIONES -->
-    <div class="nav-dropdown" id="navDropdown">
-      <button class="nav-dropdown-toggle" id="navDropdownToggle">
-        Soluciones
+    <!-- DROPDOWN EMPRESAS -->
+    <div class="nav-dropdown" id="navDropdownEmpresas">
+      <button class="nav-dropdown-toggle nav-dd--empresas" id="navDropdownToggleEmpresas">
+        Empresas
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
       </button>
-      <div class="nav-dropdown-menu">
-        <a href="#workers">Workers IA</a>
-        <a href="#servicios">Servicios de crecimiento</a>
-        <div class="nav-dropdown-divider"></div>
-        <a href="#corporativo-preview" class="nav-dropdown-highlight">Corporativo &amp; Industria</a>
+      <div class="nav-dropdown-menu nav-dropdown-menu--empresas">
+        <div class="nav-dropdown-group-label">Para organizaciones</div>
+        <a href="#corporativo-preview" class="nav-dropdown-highlight nav-dd-item--empresas">
+          <span class="nav-dd-dot nav-dd-dot--blue"></span>Corporativo &amp; Industria
+        </a>
       </div>
     </div>
 
-    <a href="#proceso">¿Cómo funciona?</a>
-    <a href="#casos">Casos de éxito</a>
+    <!-- DROPDOWN PERSONAS Y NEGOCIOS -->
+    <div class="nav-dropdown" id="navDropdownNegocios">
+      <button class="nav-dropdown-toggle nav-dd--negocios" id="navDropdownToggleNegocios">
+        Personas y Negocios
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="nav-dropdown-menu nav-dropdown-menu--negocios">
+        <div class="nav-dropdown-group-label">Para tu negocio</div>
+        <a href="#workers" class="nav-dd-item--negocios"><span class="nav-dd-dot nav-dd-dot--green"></span>Workers IA</a>
+        <a href="#servicios" class="nav-dd-item--negocios"><span class="nav-dd-dot nav-dd-dot--green"></span>Servicios de crecimiento</a>
+        <a href="#proceso" class="nav-dd-item--negocios"><span class="nav-dd-dot nav-dd-dot--green"></span>¿Cómo funciona?</a>
+        <a href="#casos" class="nav-dd-item--negocios"><span class="nav-dd-dot nav-dd-dot--green"></span>Casos de éxito</a>
+      </div>
+    </div>
+
     <a href="#blog">Nissi Blog</a>
   </div>
 
@@ -161,11 +174,20 @@
 <!-- MOBILE MENU -->
 <div class="nav-mobile" id="mobileMenu">
   <a href="#quienes-somos" onclick="closeMenu()">¿Quiénes somos?</a>
+
+  <div class="nav-mobile-divider">
+    <span class="nav-mobile-divider-label nav-mobile-divider-label--blue">Empresas</span>
+  </div>
+  <a href="#corporativo-preview" onclick="closeMenu()" class="nav-mobile-empresas">Corporativo &amp; Industria</a>
+
+  <div class="nav-mobile-divider">
+    <span class="nav-mobile-divider-label nav-mobile-divider-label--green">Personas y Negocios</span>
+  </div>
   <a href="#workers" onclick="closeMenu()">Workers IA</a>
   <a href="#servicios" onclick="closeMenu()">Servicios de crecimiento</a>
-  <a href="#corporativo-preview" onclick="closeMenu()" style="color:var(--cyan)">Corporativo &amp; Industria</a>
   <a href="#proceso" onclick="closeMenu()">¿Cómo funciona?</a>
   <a href="#casos" onclick="closeMenu()">Casos de éxito</a>
+
   <a href="#blog" onclick="closeMenu()">Nissi Blog</a>
   <a href="diagnostico.html" class="nav-mobile-cta">Demo Gratuita →</a>
 </div>
@@ -294,30 +316,51 @@
   </div>
 </section>
 
-<!-- ═══ DIFFERENTIATOR BANNER ═══ -->
+<!-- ═══ DIVISION BAND ═══ -->
 <section id="differentiator">
-  <div class="wrap reveal">
-    <div class="sec-eyebrow">El Problema</div>
-   <img src="assets/mockup-cel-agendamiento-automatico-whatsapp-nissitech.webp" alt="Mockup celular agendamiento automatico WhatsApp Nissi Tech" class="diff-right-image">
-    <div class="diff-flex-layout">
-      <div class="diff-combo">
-        <h2 class="sec-title">Cuéntenos qué está <em>frenando</em> su negocio</h2>
-        
-        <div class="diff-solution">
-          <span class="tag">La diferencia que importa: No es una herramienta, es un trabajador.</span>
-          <p class="diff-text">
-            "A veces lo que frena un negocio es el exceso de herramientas que nadie sabe usar. 
-            Nissi Tech no te da un software para que aprendas; te da alguien que ya sabe trabajar por ti, 
-            sin que tengas que pensar en inteligencia artificial."
-          </p>
-        </div>
+  <div class="divband-top-rule"></div>
+  <div class="divband-glow divband-glow--left"></div>
+  <div class="divband-glow divband-glow--right"></div>
 
-        <div class="diff-cta">
-          <a href="diagnostico.html" class="btn-primary">Iniciar Diagnóstico</a>
-        </div>
-      </div>
+  <div class="wrap divband-content reveal">
+
+    <div class="divband-from-row">
+      <span class="divband-segment-tag divband-segment-tag--blue">
+        <svg viewBox="0 0 16 16" fill="none" width="12" height="12"><rect x="2" y="2" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Corporativo e Industria
+      </span>
+      <div class="divband-from-line"></div>
     </div>
+
+    <div class="divband-center">
+      <div class="divband-arrow-wrap">
+        <svg class="divband-arrow" viewBox="0 0 20 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 2v28M3 24l7 8 7-8" stroke="url(#divArrowGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="divArrowGrad" x1="10" y1="2" x2="10" y2="36" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#3d8ef5"/>
+              <stop offset="1" stop-color="#22c98a"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <p class="divband-question">¿No necesitas un proyecto corporativo completo?</p>
+      <h2 class="divband-title">También tenemos soluciones<br>para <em>personas y negocios</em></h2>
+      <p class="divband-sub">Automatización IA sin consultoría extensa ni implementaciones complejas.<br>Elige tu Worker y empieza esta semana.</p>
+      <a href="#workers" class="btn-primary divband-cta">Ver soluciones →</a>
+    </div>
+
+    <div class="divband-to-row">
+      <div class="divband-to-line"></div>
+      <span class="divband-segment-tag divband-segment-tag--green">
+        <svg viewBox="0 0 16 16" fill="none" width="12" height="12"><circle cx="8" cy="5" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M2.5 14c0-3 2.5-4.5 5.5-4.5s5.5 1.5 5.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Personas y Negocios
+      </span>
+    </div>
+
   </div>
+
+  <div class="divband-bottom-rule"></div>
 </section>
 
 
