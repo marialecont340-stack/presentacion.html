@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp cambia las reglas: el número de celular deja de ser obligatorio | Nissi Tech Blog</title>
+  <meta name="description" content="Meta despliega los nombres de usuario (@usuario) en WhatsApp. Un cliente podrá chatear sin revelar su número. Descubre cómo afecta a los CRM y sistemas automatizados, y cómo Nissitech ya adaptó su arquitectura.">
+  <meta name="keywords" content="whatsapp usuario, bsuid, whatsapp business, meta privacidad, crm automatizacion, digital workers, nissitech, numero telefonico whatsapp">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="48x48" href="favicon-48x48.png">
+  <link rel="apple-touch-icon" href="favicon-48x48.png">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Georgia, serif;
+      background: #fff;
+      color: #1e293b;
+    }
+
+    /* ── NAV ── */
+    .blog-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 40px;
+      background: #fff;
+      border-bottom: 1px solid #e8edf2;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #0a1628;
+      text-decoration: none;
+    }
+    .nav-logo span { color: #0ea5e9; }
+    .back-btn {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      color: #0ea5e9;
+      background: none;
+      border: 1px solid rgba(14,165,233,0.3);
+      padding: 7px 16px;
+      border-radius: 100px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .2s;
+    }
+    .back-btn:hover { background: rgba(14,165,233,0.06); }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(160deg, #e8f4fd 0%, #f5faff 60%, #fff 100%);
+      padding: 3rem 40px 2.5rem;
+      border-bottom: 1px solid #e2edf8;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+    .tags-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      font-family: Arial, sans-serif;
+    }
+    .tag { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: #0369a1; }
+    .tag-dot { color: #94a3b8; font-size: 10px; }
+    .hero-title { font-size: 32px; font-weight: 700; color: #0a1628; line-height: 1.25; margin-bottom: 14px; }
+    .hero-sub { font-size: 18px; color: #334155; line-height: 1.6; margin-bottom: 20px; font-style: italic; }
+    .meta-row {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      color: #94a3b8;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .meta-dot { color: #cbd5e1; }
+
+    /* ── BODY ── */
+    .article-body {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 2.5rem 40px 4rem;
+    }
+
+    /* Intro grid */
+    .intro-grid {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 28px;
+      align-items: start;
+      margin-bottom: 2.5rem;
+    }
+    .intro-text p {
+      font-size: 16px;
+      color: #1e293b;
+      line-height: 1.9;
+      margin-bottom: 1rem;
+      text-align: justify;
+    }
+    .img-side {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 0.5px solid #bfdbfe;
+    }
+    .img-side img { width: 100%; height: auto; display: block; }
+
+    /* Secciones */
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0a1628;
+      margin: 2.5rem 0 1rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e2e8f0;
+    }
+    .body-text { font-size: 16px; color: #334155; line-height: 1.9; margin-bottom: 1rem; text-align: justify; }
+
+    /* Lista de riesgos */
+    .risk-list {
+      list-style: none;
+      margin: 1.25rem 0;
+      display: grid;
+      gap: 10px;
+    }
+    .risk-list li {
+      font-family: Arial, sans-serif;
+      font-size: 15px;
+      color: #334155;
+      line-height: 1.6;
+      background: #f8fafc;
+      border: 0.5px solid #e2e8f0;
+      border-left: 3px solid #f59e0b;
+      border-radius: 0 10px 10px 0;
+      padding: 12px 16px;
+    }
+
+    /* Highlight */
+    .highlight {
+      background: #f0f9ff;
+      border-left: 3px solid #0ea5e9;
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 1.5rem 0;
+    }
+    .highlight p { font-size: 15px; color: #1e40af; line-height: 1.8; font-style: italic; }
+
+    /* Dos columnas privacidad / empresas */
+    .split-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 1.75rem 0;
+    }
+    .split-card {
+      background: #f8fafc;
+      border: 0.5px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .split-icon { font-size: 24px; margin-bottom: 8px; }
+    .split-head { font-family: Arial, sans-serif; font-size: 15px; font-weight: 700; color: #0a1628; margin-bottom: 6px; }
+    .split-text { font-family: Arial, sans-serif; font-size: 13px; color: #64748b; line-height: 1.6; }
+
+    /* Pregunta destacada */
+    .question-box {
+      background: linear-gradient(135deg, #e8f4fd, #dbeafe);
+      border: 0.5px solid #bfdbfe;
+      border-radius: 14px;
+      padding: 24px 28px;
+      margin: 2rem 0;
+      text-align: center;
+    }
+    .question-box p {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0a1628;
+      line-height: 1.5;
+      font-family: Georgia, serif;
+    }
+
+    /* ── CTA ── */
+    .cta-box {
+      background: linear-gradient(135deg, #0a1628, #0e2244);
+      border-radius: 16px;
+      padding: 2rem;
+      margin: 2.5rem 0;
+      text-align: center;
+    }
+    .cta-title { font-family: Arial, sans-serif; font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+    .cta-sub { font-family: Arial, sans-serif; font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 20px; }
+    .cta-btn {
+      font-family: Arial, sans-serif;
+      background: #0ea5e9;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px 32px;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background .2s;
+    }
+    .cta-btn:hover { background: #0284c7; }
+
+    /* Footer */
+    .blog-footer {
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      padding: 20px 40px;
+      text-align: center;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .blog-footer a { color: #0ea5e9; text-decoration: none; }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .blog-nav { padding: 12px 20px; }
+      .hero { padding: 2rem 20px; }
+      .article-body { padding: 2rem 20px 3rem; }
+      .intro-grid { grid-template-columns: 1fr; }
+      .img-side { display: block; max-width: 340px; margin: 0 auto; }
+      .split-grid { grid-template-columns: 1fr; }
+      .hero-title { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="blog-nav">
+    <a href="https://nissitech.cloud" class="nav-logo">Nissi<span>Tech</span> Blog</a>
+    <a href="https://nissitech.cloud" class="back-btn">← Volver a NissiTech.cloud</a>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="tags-row">
+      <span class="tag">WhatsApp Business</span>
+      <span class="tag-dot">•</span>
+      <span class="tag">Privacidad</span>
+      <span class="tag-dot">•</span>
+      <span class="tag">Automatización</span>
+    </div>
+    <h1 class="hero-title">WhatsApp cambia las reglas: el número de celular deja de ser obligatorio para chatear</h1>
+    <p class="hero-sub">Meta está desplegando los nombres de usuario (@usuario). Tus clientes podrán escribirte sin revelar su teléfono — y tu sistema podría no reconocerlos.</p>
+    <div class="meta-row">
+      <span>Septiembre de 2026</span>
+      <span class="meta-dot">•</span>
+      <span>Por el equipo de Nissitech</span>
+      <span class="meta-dot">•</span>
+      <span>Nissitech.cloud</span>
+    </div>
+  </div>
+
+  <!-- CUERPO -->
+  <div class="article-body">
+
+    <!-- Intro con imagen lateral -->
+    <div class="intro-grid">
+      <div class="intro-text">
+        <p>WhatsApp está cambiando una de sus reglas más antiguas: el número de celular dejará de ser obligatorio para iniciar un chat. Y este cambio silencioso ya podría estar afectando la atención al cliente de muchas empresas sin que se den cuenta.</p>
+        <p>Meta está desplegando los <strong>nombres de usuario (@usuario)</strong>. A partir de ahora, una persona podrá iniciar una conversación sin revelar su teléfono personal, identificándose mediante un código anónimo llamado <strong>BSUID</strong>.</p>
+        <p>Para los usuarios, es sinónimo de mayor privacidad. Para las empresas con procesos automatizados, es un cambio directo en las reglas del juego.</p>
+      </div>
+      <div class="img-side">
+        <img src="image/whatsapp-username-bsuid-privacidad-clientes-nissitech.webp" alt="Cliente escribiendo por WhatsApp con nombre de usuario @usuario en lugar de número de teléfono - Nissitech">
+      </div>
+    </div>
+
+    <!-- El problema -->
+    <h2 class="section-title">Por qué esto importa para tu negocio</h2>
+    <p class="body-text">Durante años, los CRM, chatbots y sistemas de atención han usado el número telefónico como la <em>llave principal</em> para reconocer clientes: consultar sus pedidos, abrir tickets o recuperar su historial. Es el dato que amarra toda la conversación a una persona.</p>
+    <p class="body-text">Si la arquitectura de un sistema asume que <strong>siempre</strong> recibirá un número, el nuevo identificador anónimo puede provocar fallos difíciles de detectar:</p>
+
+    <ul class="risk-list">
+      <li>Contactos duplicados en el CRM.</li>
+      <li>Historiales de conversación fragmentados.</li>
+      <li>Interacciones que no llegan al flujo automatizado.</li>
+      <li>Mensajes que no escalan al asesor correcto.</li>
+    </ul>
+
+    <div class="highlight">
+      <p>El riesgo no es que WhatsApp deje de recibir mensajes. Es que el sistema reciba al cliente y no sepa quién es.</p>
+    </div>
+
+    <!-- Lo que hizo Nissitech -->
+    <h2 class="section-title">Cómo lo resolvimos en Nissitech</h2>
+    <p class="body-text">Detectamos las primeras interacciones mediante BSUID mientras monitoreábamos nuestros Digital Workers. Por eso adaptamos nuestra arquitectura para procesar ambas rutas de forma transparente: los clientes que comparten su teléfono y los usuarios que prefieren mantenerlo privado.</p>
+    <p class="body-text">Hoy nuestros Workers atienden ambos perfiles sin perder interacciones ni fragmentar la relación con el cliente.</p>
+
+    <!-- Split privacidad vs empresas -->
+    <div class="split-grid">
+      <div class="split-card">
+        <div class="split-icon">🔒</div>
+        <div class="split-head">Para los usuarios</div>
+        <div class="split-text">Más privacidad y control sobre su información personal al momento de escribir a una empresa.</div>
+      </div>
+      <div class="split-card">
+        <div class="split-icon">🛠️</div>
+        <div class="split-head">Para las empresas</div>
+        <div class="split-text">El momento de revisar su infraestructura y confirmar que sus sistemas están listos para la actualización.</div>
+      </div>
+    </div>
+
+    <!-- Pregunta clave -->
+    <h2 class="section-title">La pregunta que cambia</h2>
+    <p class="body-text">La duda ya no es únicamente "¿nuestro WhatsApp recibe mensajes?". Ahora es una más profunda:</p>
+
+    <div class="question-box">
+      <p>Si un cliente decide no compartir su número, ¿tu sistema podrá reconocerlo y atenderlo correctamente?</p>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-box">
+      <div class="cta-title">¿Tu sistema ya está preparado para el cambio de Meta?</div>
+      <div class="cta-sub">Verifiquemos juntos si tu infraestructura reconoce a los clientes sin número</div>
+      <a href="https://nissitech.cloud#contacto" class="cta-btn">Solicitar diagnóstico gratuito →</a>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="blog-footer">
+    <p>© 2026 <a href="https://nissitech.cloud">Nissitech.cloud</a> · Todos los derechos reservados</p>
+  </footer>
+
+</body>
+</html>
