@@ -737,7 +737,7 @@ function normalizarConfig(c) {
 function ajustarModeloIA(c) {
   const ia = c.ia, lista = MODELOS_IA[ia.proveedor], m = texto(ia.modelo);
   if (ia.proveedor === 'anthropic' && !/^claude-/.test(m)) ia.modelo = lista[0][0];
-  else if (ia.proveedor === 'openai' && (!m || /^claude-/.test(m))) ia.modelo = lista[0][0];
+  else if (ia.proveedor === 'openai' && !lista.some(([v]) => v === m) && !/^(gpt-|chatgpt-|o\d|ft:gpt)/i.test(m)) ia.modelo = lista[0][0];   // al cambiar a OpenAI no queda un modelo de otro proveedor
   else if (ia.proveedor === 'compatible' && [...MODELOS_IA.openai, ...MODELOS_IA.anthropic].some(([v]) => v === m)) ia.modelo = '';
   if (isObj(c.p17) && texto(c.p17.modelo)) {
     const pm = texto(c.p17.modelo);
