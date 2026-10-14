@@ -1,0 +1,1867 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="robots" content="noindex, nofollow"><script src="workeros-config.js"></script>
+<title>WorkerOS Nissitech</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: panel de operación. Barra lateral fija con las secciones, área de trabajo a la derecha;
+   en el editor, formulario a la izquierda y vista previa de WhatsApp pegada a la derecha. */
+:root {
+  /* Blanco con tonos azules (pedido de Mari). Un solo tema claro. */
+  --bg: #F3F6FB;
+  --surface: #FFFFFF;
+  --surface-2: #F6F9FE;
+  --ink: #0D1F40;
+  --muted: #5B6B89;
+  --line: #DBE3F0;
+  --accent: #1D5BD8;
+  --accent-strong: #123F9E;
+  --accent-soft: #E6EEFD;
+  --accent-ink: #FFFFFF;
+  --ok: #0C8459;
+  --ok-soft: #DDF3EA;
+  --warn: #9A6400;
+  --warn-soft: #FCF1DA;
+  --bad: #C0322F;
+  --bad-soft: #FCE6E5;
+  --idle: #64708A;
+  --idle-soft: #EDF1F7;
+  --chat-bg: #E8EEF7;
+  --bubble-in: #FFFFFF;
+  --bubble-out: #D7E6FF;
+  --shadow: 0 1px 2px rgba(13,31,64,.05), 0 8px 24px rgba(29,91,216,.08);
+  --f-display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 14px; line-height: 1.5; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -.01em; }
+h1 { font-size: 26px; font-weight: 700; }
+h2 { font-size: 18px; font-weight: 600; }
+h3 { font-size: 15px; font-weight: 600; }
+p { margin: 0; }
+a { color: var(--accent); }
+code, .mono { font-family: var(--f-mono); font-size: 12.5px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+.app { display: grid; grid-template-columns: 228px minmax(0, 1fr); min-height: 100%; }
+.side { background: var(--surface); border-right: 1px solid var(--line); padding-block: 20px; padding-inline: 14px; display: flex; flex-direction: column; gap: 22px; position: sticky; top: 0; height: 100vh; }
+.brand { display: flex; align-items: center; gap: 10px; padding-inline: 6px; }
+.brand-mark { width: 30px; height: 30px; border-radius: 8px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-family: var(--f-mono); font-weight: 500; font-size: 12px; }
+.brand-name { font-family: var(--f-display); font-weight: 700; font-size: 18px; line-height: 1; }
+.brand-sub { font-size: 11px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav a { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 8px; text-decoration: none; color: var(--muted); font-weight: 500; }
+.nav a:hover { background: var(--surface-2); color: var(--ink); }
+.nav a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
+.nav .count { font-family: var(--f-mono); font-size: 11px; }
+.side-foot { margin-top: auto; display: flex; flex-direction: column; gap: 8px; padding-inline: 6px; }
+.mode-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface-2); text-decoration: none; color: var(--ink); width: fit-content; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--idle); flex: none; }
+.dot.ok { background: var(--ok); } .dot.warn { background: var(--warn); } .dot.bad { background: var(--bad); }
+
+.main { padding-block: 28px 64px; padding-inline: clamp(16px, 3vw, 40px); min-width: 0; }
+.view-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 20px; margin-bottom: 20px; }
+.view-head p { color: var(--muted); max-width: 62ch; margin-top: 4px; }
+.eyebrow { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none; color: var(--ink); white-space: nowrap; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.07); }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--muted); }
+.btn.ghost:hover { color: var(--ink); background: var(--surface-2); }
+.btn.danger { color: var(--bad); }
+.btn.sm { padding: 5px 10px; font-size: 13px; }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.notice { display: flex; gap: 10px; padding: 12px 14px; border-radius: var(--r); background: var(--warn-soft); color: var(--ink); font-size: 13px; }
+.notice.info { background: var(--accent-soft); }
+.notice.ok { background: var(--ok-soft); }
+.notice.bad { background: var(--bad-soft); }
+.notice b { font-weight: 600; }
+.notice ul { margin: 6px 0 0; padding-left: 18px; }
+
+/* Resumen */
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 18px; }
+.stat { padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; }
+.stat .n { font-family: var(--f-display); font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat .l { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin-bottom: 14px; }
+.search { flex: 1 1 220px; min-width: 0; display: flex; }
+.search input { width: 100%; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: transparent; padding: 6px 11px; cursor: pointer; color: var(--muted); font-size: 13px; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 11px; font-size: 12.5px; cursor: pointer; color: var(--muted); }
+.chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.lbl { font-size: 12px; color: var(--muted); }
+
+.group { margin-top: 18px; }
+.group-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+.group-head .mono { color: var(--muted); }
+.wlist { display: flex; flex-direction: column; overflow: hidden; }
+.wrow { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.3fr) minmax(0, 1.4fr) auto; gap: 14px; align-items: center; padding: 12px 16px; border-top: 1px solid var(--line); }
+.wrow:first-child { border-top: 0; }
+.wrow:hover { background: var(--surface-2); }
+.wname { display: flex; flex-direction: column; min-width: 0; }
+.wname b { font-weight: 600; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wname span { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mods { display: flex; flex-wrap: wrap; gap: 4px; }
+.mod { font-family: var(--f-mono); font-size: 11px; padding: 1px 6px; border-radius: 4px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); }
+.mod.off { opacity: .45; border-style: dashed; }
+.state { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 3px 9px; border-radius: 999px; width: fit-content; }
+.state.borrador { background: var(--idle-soft); color: var(--idle); }
+.state.creado { background: var(--accent-soft); color: var(--accent); }
+.state.activo { background: var(--ok-soft); color: var(--ok); }
+.state.error { background: var(--bad-soft); color: var(--bad); }
+.tag { font-size: 11px; color: var(--muted); border: 1px dashed var(--line); padding: 0 6px; border-radius: 4px; }
+.wmeta { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.wactions { display: flex; gap: 4px; justify-content: flex-end; flex-wrap: wrap; }
+.empty { padding: 36px 20px; text-align: center; color: var(--muted); display: flex; flex-direction: column; gap: 10px; align-items: center; }
+
+/* Editor */
+.editor { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 22px; align-items: start; }
+.steps { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.steps a { font-size: 12.5px; text-decoration: none; color: var(--muted); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); }
+.steps a:hover { color: var(--ink); }
+.steps a .mono { font-size: 11px; margin-right: 4px; color: var(--accent); }
+.fsec { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; scroll-margin-top: 16px; }
+.fsec + .fsec { margin-top: 14px; }
+.fsec-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.fsec-head p { color: var(--muted); font-size: 13px; margin-top: 2px; max-width: 60ch; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
+.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.field > label, .field > .flabel { font-weight: 500; font-size: 13px; display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
+.field .req { color: var(--bad); }
+.hint { font-size: 12px; color: var(--muted); }
+.hint .mono { font-size: 11.5px; }
+input[type="text"], input[type="password"], input[type="url"], input[type="number"], select, textarea {
+  border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; padding: 8px 10px; width: 100%; min-width: 0;
+}
+textarea { resize: vertical; min-height: 64px; line-height: 1.45; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px var(--accent-soft); }
+.invalid input, .invalid textarea, .invalid select { border-color: var(--bad); }
+.ferr { color: var(--bad); font-size: 12px; }
+.vars { display: flex; gap: 4px; flex-wrap: wrap; }
+.vars button { font-family: var(--f-mono); font-size: 11px; border: 1px solid var(--line); background: var(--surface); padding: 1px 6px; border-radius: 4px; cursor: pointer; color: var(--accent); }
+.days { display: flex; gap: 4px; flex-wrap: wrap; }
+.days button { width: 36px; height: 34px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); cursor: pointer; font-weight: 600; color: var(--muted); }
+.days button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.tpick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.tpick label { border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; background: var(--surface-2); }
+.tpick label:has(input:checked) { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); background: var(--surface); }
+.tpick label.fija, .tpick label.fija:has(input:checked) { cursor: default; box-shadow: none; border-color: var(--line); background: var(--surface); }
+.tp-top .fx { margin-left: auto; font-size: 11px; color: var(--muted); background: var(--idle-soft); padding: 1px 7px; border-radius: 999px; white-space: nowrap; }
+.tp-top { display: flex; align-items: center; gap: 8px; }
+.tp-top input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); flex: none; }
+.tp-top .code { font-family: var(--f-mono); font-size: 12px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); padding: 1px 6px; border-radius: 5px; }
+.tp-top b { font-weight: 600; }
+.tp-top .hint { margin-left: auto; }
+.tpick ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; display: flex; flex-direction: column; gap: 2px; }
+.presets { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+@media (max-width: 760px) { .tpick { grid-template-columns: minmax(0, 1fr); } }
+.blk { border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+.blk.blk-bad { border-color: var(--bad); }
+.blk-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.blk-head .code { font-family: var(--f-mono); font-size: 12px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); padding: 2px 7px; border-radius: 5px; }
+.blk-head h3 { margin: 0; }
+.blk-item { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 8px; align-items: end; padding: 10px; border: 1px dashed var(--line); border-radius: 8px; }
+.blk-item .wide { grid-column: 1 / 3; }
+@media (max-width: 640px) { .blk-item { grid-template-columns: minmax(0, 1fr); } .blk-item .wide { grid-column: auto; } }
+.chain { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; }
+.switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 500; }
+.switch input { appearance: none; width: 38px; height: 22px; border-radius: 999px; background: var(--line); position: relative; cursor: pointer; flex: none; margin: 0; }
+.switch input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--surface); transition: left .15s; }
+.switch input:checked { background: var(--accent); }
+.switch input:checked::after { left: 19px; }
+
+.opts { display: flex; flex-direction: column; gap: 10px; }
+.opt { border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); overflow: hidden; }
+.opt.open { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-soft); }
+.opt.invalid { border-color: var(--bad); }
+.opt-head { display: flex; align-items: center; gap: 4px; padding: 6px 8px 6px 4px; }
+.opt-toggle { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; background: none; border: 0; text-align: left; cursor: pointer; padding: 6px 8px; border-radius: 8px; }
+.opt-toggle:hover { background: var(--surface-2); }
+.opt-title { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.opt-title.sin-titulo { color: var(--muted); font-weight: 400; font-style: italic; }
+.badge { font-size: 11.5px; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+.badge.asesor { background: var(--idle-soft); color: var(--idle); }
+.chev { color: var(--muted); transition: transform .15s; flex: none; }
+.opt.open .chev { transform: rotate(180deg); }
+.opt .opt-body { padding: 14px 16px 16px; border-top: 1px solid var(--line); background: var(--surface-2); }
+.menu-writer { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+.menu-writer textarea { resize: vertical; white-space: pre-wrap; min-height: 260px; }
+.menu-writer textarea { font-family: var(--f-mono); font-size: 13.5px; line-height: 1.7; min-height: 150px; }
+.menu-count { font-size: 12px; color: var(--muted); }
+.more summary { cursor: pointer; color: var(--accent); font-size: 13px; font-weight: 500; }
+.more[open] summary { margin-bottom: 10px; }
+.dl { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); overflow-wrap: anywhere; }
+.bub .doc { display: flex; align-items: center; gap: 10px; background: var(--surface-2); border-radius: 6px; padding: 8px 10px; margin-bottom: 6px; }
+.bub .doc .ic { width: 28px; height: 34px; border-radius: 3px; background: var(--bad); color: #fff; font-size: 9px; font-weight: 700; display: grid; place-items: center; flex: none; }
+.bub .doc b { font-weight: 600; font-size: 13px; }
+.filebox { border: 1px dashed var(--line); border-radius: var(--r); padding: 12px; display: flex; flex-direction: column; gap: 10px; background: var(--surface); }
+.filebox .flabel { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.stepper { display: flex; gap: 4px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 2px; }
+.stepper button { flex: 1 0 auto; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; background: none; border: 0; padding: 0 4px 6px; cursor: pointer; color: var(--muted); font-size: 12.5px; min-width: 92px; text-align: left; }
+.stepper button::before { content: ""; display: block; height: 4px; width: 100%; border-radius: 4px; background: var(--line); }
+.stepper button.done { color: var(--ink); }
+.stepper button.done::before { background: var(--accent); opacity: .45; }
+.stepper button[aria-current="step"] { color: var(--accent); font-weight: 600; }
+.stepper button[aria-current="step"]::before { background: var(--accent); }
+.stepper .n { font-family: var(--f-mono); font-size: 11px; }
+.review { display: flex; flex-direction: column; }
+.review .rrow { display: grid; grid-template-columns: 170px minmax(0, 1fr) auto; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); align-items: start; }
+.review .rrow:first-child { border-top: 0; }
+.review .rk { color: var(--muted); font-size: 13px; }
+.review .rv { min-width: 0; overflow-wrap: anywhere; }
+.review ol { margin: 0; padding-left: 18px; }
+.opt-num { font-family: var(--f-display); font-size: 22px; font-weight: 700; text-align: center; color: var(--accent); padding-top: 4px; }
+.opt-body { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.opt-top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; }
+.opt-tools { display: flex; gap: 2px; }
+.radio-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.radio-row label { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--surface); padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+.radio-row label:has(input:checked) { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.radio-row input { accent-color: var(--accent); margin: 0; }
+
+.pkg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.pkg label { border: 1px solid var(--line); border-radius: var(--r); padding: 12px; display: flex; flex-direction: column; gap: 8px; cursor: pointer; background: var(--surface-2); }
+.pkg label:has(input:checked) { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); background: var(--surface); }
+.pkg label.soon { cursor: not-allowed; opacity: .6; }
+.pkg input { position: absolute; opacity: 0; pointer-events: none; }
+.pkg .pk-top { display: flex; justify-content: space-between; gap: 6px; align-items: baseline; }
+.pkg .pk-top b { font-weight: 600; }
+
+.sendbar { position: sticky; bottom: 0; margin-top: 16px; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; box-shadow: var(--shadow); z-index: 2; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+.sendbar .left { display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 13px; min-width: 0; flex: 1 1 200px; }
+.sendbar .right { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Vista previa WhatsApp */
+.preview { position: sticky; top: 20px; display: flex; flex-direction: column; overflow: hidden; }
+.pv-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-weight: 700; font-family: var(--f-display); flex: none; }
+.pv-head .who { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.pv-head .who b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pv-head .who span { font-size: 11.5px; color: var(--muted); }
+.chat { background: var(--chat-bg); height: 440px; overflow-y: auto; padding: 14px 12px; display: flex; flex-direction: column; gap: 6px; }
+.bub { max-width: 88%; padding: 6px 9px 4px; border-radius: 8px; font-size: 13.5px; line-height: 1.4; box-shadow: 0 1px 1px rgba(0,0,0,.08); overflow-wrap: anywhere; }
+.bub.in { background: var(--bubble-in); align-self: flex-start; border-top-left-radius: 2px; }
+.bub.out { background: var(--bubble-out); align-self: flex-end; border-top-right-radius: 2px; }
+.bub .t { display: block; text-align: right; font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+.sysline { align-self: center; font-size: 11px; color: var(--muted); background: var(--surface); padding: 2px 9px; border-radius: 6px; text-align: center; max-width: 92%; }
+.pv-quick { display: flex; gap: 5px; flex-wrap: wrap; padding: 8px 12px 0; }
+.pv-input { display: flex; gap: 8px; padding: 8px 12px 12px; }
+.pv-input input { flex: 1; }
+.pv-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+
+/* Plantillas */
+.tgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.tcard { padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.tcard .tc-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.tcard .code { font-family: var(--f-mono); font-size: 13px; font-weight: 500; color: var(--accent); }
+.tcard p { color: var(--muted); font-size: 13px; }
+.tcard.soon .code { color: var(--muted); }
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.flow .arrow { color: var(--muted); font-size: 12px; }
+
+/* Conexión */
+.conn { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.gloss { display: flex; flex-direction: column; }
+.gloss details { border-top: 1px solid var(--line); padding: 10px 16px; }
+.gloss details:first-of-type { border-top: 0; }
+.gloss summary { cursor: pointer; font-weight: 600; }
+.gloss details p { color: var(--muted); margin-top: 6px; font-size: 13px; }
+pre.json { background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 12px; overflow: auto; max-height: 420px; font-family: var(--f-mono); font-size: 12px; margin: 0; white-space: pre; }
+
+/* Modal */
+.modal-bg { position: fixed; inset: 0; background: rgba(10,14,20,.45); display: grid; place-items: center; padding: 16px; z-index: 20; }
+.modal { width: min(640px, 100%); max-height: 86vh; overflow: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: var(--shadow); }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+
+.toast { position: fixed; top: calc(16px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); background: var(--accent-strong); color: var(--accent-ink); padding: 9px 16px; border-radius: 8px; font-size: 13px; z-index: 30; box-shadow: var(--shadow); max-width: calc(100% - 32px); }
+
+@media (max-width: 1080px) {
+  .editor { grid-template-columns: minmax(0, 1fr); }
+  .preview { position: static; }
+  .conn { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .side { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 16px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .nav { flex-direction: row; overflow-x: auto; width: 100%; order: 3; }
+  .nav a { flex: none; }
+  .nav .count { display: none; }
+  .side-foot { margin: 0 0 0 auto; flex-direction: row; padding: 0; }
+  .side-foot .hint { display: none; }
+  .sendbar .left { display: none; }
+  .sendbar .right { width: 100%; }
+  .sendbar .right .btn { flex: 1 1 auto; padding-inline: 10px; }
+  .main { padding-block: 18px 48px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wrow { grid-template-columns: minmax(0, 1fr) auto; }
+  .wrow .wmods { grid-column: 1 / -1; }
+  .wrow .wactions { grid-column: 1 / -1; justify-content: flex-start; }
+  .grid2, .pkg { grid-template-columns: minmax(0, 1fr); }
+  .review .rrow { grid-template-columns: minmax(0, 1fr) auto; }
+  .menu-writer { grid-template-columns: minmax(0, 1fr); }
+  .review .rk { grid-column: 1 / -1; }
+  .fsec { padding: 16px; }
+  h1 { font-size: 22px; }
+}
+</style>
+</head><body>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">W/</div>
+      <div>
+        <div class="brand-name">WorkerOS</div>
+        <div class="brand-sub">Nissitech</div>
+      </div>
+    </div>
+    <nav class="nav" id="nav" aria-label="Secciones">
+      <a href="#workers" data-view="workers">Workers <span class="count" id="navCount"></span></a>
+      <a href="#nuevo" data-view="nuevo">Crear worker</a>
+      <a href="#plantillas" data-view="plantillas">Plantillas</a>
+      <a href="#conexion" data-view="conexion">Conexión n8n</a>
+    </nav>
+    <div class="side-foot">
+      <a class="mode-pill" href="#conexion" id="modePill"><span class="dot"></span><span>Modo simulado</span></a>
+      <p class="hint">Prototipo v0.8 · Generador v0.6</p>
+    </div>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ───────── Datos fijos: catálogo de plantillas y paquetes ───────── */
+const PLANTILLAS = [
+  { code: 'BASE', nombre: 'Entrada, BSUID y memoria', desc: 'Recibe el mensaje, saca el número o el BSUID, lee la memoria y decide la ruta. Va en todo worker.', estado: 'lista' },
+  { code: 'P01', nombre: 'Atención y menú', desc: 'Saludo, menú por número o palabra, opción inválida y despedida.', estado: 'lista' },
+  { code: 'P02', nombre: 'Identificación y validación', desc: 'Pide y valida datos del cliente (documento, código).', estado: 'lista' },
+  { code: 'P03', nombre: 'Consulta de bases', desc: 'Busca información del cliente en una base de datos.', estado: 'lista' },
+  { code: 'P04', nombre: 'Información y archivos', desc: 'Envía documentos, PDFs e información fija.', estado: 'lista' },
+  { code: 'P05', nombre: 'Catálogo y servicios', desc: 'Muestra productos o servicios con precios.', estado: 'lista' },
+  { code: 'P06', nombre: 'Cotizaciones', desc: 'Arma una cotización según lo que pide el cliente.', estado: 'despues' },
+  { code: 'P07', nombre: 'Pedidos', desc: 'Toma el pedido y los datos de entrega.', estado: 'lista' },
+  { code: 'P08', nombre: 'Pagos', desc: 'Recibe y valida comprobantes de pago.', estado: 'lista' },
+  { code: 'P09', nombre: 'Delivery y despacho', desc: 'Coordina el envío y avisa el estado.', estado: 'lista' },
+  { code: 'P10', nombre: 'Agendamiento', desc: 'Reserva citas en horarios disponibles.', estado: 'despues' },
+  { code: 'P11', nombre: 'CRM e historial', desc: 'Guarda el historial de cada cliente.', estado: 'despues' },
+  { code: 'P12', nombre: 'Derivación a asesor', desc: 'Avisa al cliente que lo atenderá una persona. Sin Chatwoot por ahora.', estado: 'lista' },
+  { code: 'P13', nombre: 'Seguimiento', desc: 'Escribe al cliente después de una compra o consulta.', estado: 'despues' },
+  { code: 'P14', nombre: 'Campañas', desc: 'Mensajes masivos con plantillas aprobadas por Meta.', estado: 'despues' },
+  { code: 'P15', nombre: 'Eventos', desc: 'Inscripciones y recordatorios de eventos.', estado: 'despues' },
+  { code: 'P16', nombre: 'Reportes', desc: 'Resúmenes de conversaciones y ventas.', estado: 'despues' }
+];
+const PAQUETES = [
+  { id: 'atencion_basica', nombre: 'Atención básica', mods: ['BASE', 'P01', 'P12'], disponible: true, desc: 'Saludo, menú con respuestas y documentos, y aviso de asesor.' },
+  { id: 'floristeria', nombre: 'Floristería', mods: ['BASE', 'P01', 'P05', 'P07', 'P09', 'P08', 'P12'], disponible: true, desc: 'Catálogo, pedido, delivery y pago.' },
+  { id: 'cec', nombre: 'CEC (educación)', mods: ['BASE', 'P01', 'P02', 'P03', 'P04', 'P12'], disponible: true, desc: 'Identificación, consulta y archivos.' }
+];
+/* Bloques (plantillas P02…P09): cada uno es un workflow aparte que el worker abre desde una opción del menú. */
+const BLOQUES = {
+  P02: { nombre: 'Identificación y validación', desc: 'Pide el DNI o RUC, lo busca en una hoja de Google y pide confirmar.', sig: 'P01', opcion: 'Soy socio',
+    funciones: ['Pide DNI, RUC o CE y revisa el formato', 'Lo busca en una hoja de Google', 'Pide confirmar que es él', 'Si no está, ofrece la ficha de inscripción', 'Recuerda al cliente ya validado'] },
+  P03: { nombre: 'Consulta de bases', desc: 'Busca en una hoja de Google lo que pide el cliente, su registro, o muestra toda la lista.', sig: 'P01', opcion: 'Consultar información',
+    funciones: ['Busca lo que escribe el cliente', 'O muestra su propio registro (con P02)', 'O lista todo, ej. próximos eventos', 'Filtra filas, ej. solo activos'] },
+  P04: { nombre: 'Información y archivos', desc: 'Una lista de documentos e información; envía lo que el cliente elige.', sig: 'P01', opcion: 'Documentos',
+    funciones: ['Muestra una lista numerada de documentos', 'Envía el archivo con su texto como caption', 'Puede limitar documentos a clientes al día (con P02)'] },
+  P05: { nombre: 'Catálogo y servicios', desc: 'Muestra categorías y productos desde una hoja de Google.', sig: 'P07', opcion: 'Ver catálogo y hacer un pedido',
+    funciones: ['Lee los productos de una hoja de Google', 'Muestra categorías, precios y fotos', 'Entiende número, código o nombre', 'Envía el catálogo en PDF'] },
+  P07: { nombre: 'Pedidos y carrito', desc: 'Arma el pedido, pide los datos del cliente y muestra el resumen.', sig: 'P09', opcion: 'Hacer un pedido', nota: 'Suele ir después de P05 Catálogo.',
+    funciones: ['Suma uno o varios productos', 'Pide nombre, teléfono y dedicatoria', 'Muestra el resumen para confirmar o corregir', 'Le da un número al pedido'] },
+  P09: { nombre: 'Delivery y despacho', desc: 'Dirección, zona y costo de envío, fecha y turno, o recojo en tienda.', sig: 'P08', opcion: 'Delivery', nota: 'Suele ir después de P07 Pedidos.',
+    funciones: ['Pide la dirección y calcula el envío por zona', 'Fecha de entrega y turno', 'Opción de recoger en tienda', 'Respeta los días con entrega'] },
+  P08: { nombre: 'Pagos y validación', desc: 'Envía los datos de pago, recibe el comprobante y avisa al equipo.', sig: 'P12', opcion: 'Pagar mi pedido', nota: 'Suele ir después de P09 Delivery.',
+    funciones: ['Envía medios de pago y QR', 'Recibe la foto o PDF del comprobante', 'Avisa al equipo para validar el pago'] },
+  P17: { nombre: 'Agente IA', desc: 'Entiende mensajes escritos con palabras libres y responde con IA (Claude, OpenAI u otra), usando la información del negocio.', sig: 'P01', opcion: 'Pregúntame lo que quieras', nota: 'Cada respuesta se cobra en la cuenta de IA del cliente.',
+    funciones: ['Responde cuando el menú no entiende lo que escribió el cliente', 'O como opción del menú, conversa hasta que escriba "menú"', 'Si quiere comprar, abre la opción que corresponde', 'Si pide una persona o reclama, pasa a asesor', 'Si no sabe algo, no lo inventa: ofrece un asesor'] }
+};
+const FIJAS = [
+  ['BASE', 'Entrada y memoria', ['Recibe los mensajes de WhatsApp', 'Reconoce al cliente (número o BSUID)', 'Recuerda la conversación', 'Revisa el horario']],
+  ['P01', 'Atención y menú', ['Saludo y menú numerado', 'Responde texto o documentos', 'Abre las otras plantillas', 'Despedida y opción no válida']],
+  ['P12', 'Derivación a asesor', ['Pasa la conversación a una persona', 'Aviso distinto fuera de horario', 'Se activa con palabras como "asesor"']]
+];
+const ORDEN_BLOQUES = ['P02', 'P03', 'P04', 'P05', 'P07', 'P09', 'P08', 'P17'];
+/* Modelos de IA que ofrece el formulario (P17 con Claude). El primero es el que usa la plantilla si no se elige. */
+const MODELOS_CLAUDE = [['claude-opus-5-5', 'Opus 5.5 · más inteligente'], ['claude-sonnet-5-5', 'Sonnet 5.5 · equilibrado'], ['claude-haiku-5-5', 'Haiku 5.5 · más barato']];
+const PROVEEDORES_IA = [['anthropic', 'Claude (Anthropic)'], ['openai', 'OpenAI (ChatGPT)'], ['compatible', 'Otra compatible con OpenAI (Groq, OpenRouter, DeepSeek…)']];
+const CON_SIGUIENTE = ['P02', 'P05', 'P07', 'P09', 'P08'];
+const TIPOS = ['Floristería', 'Educación', 'Restaurante y comida', 'Salud y belleza', 'Tienda', 'Servicios', 'Otro'];
+const ESTADOS = { borrador: 'Borrador', creado: 'Creado, apagado', activo: 'Activo', error: 'Con error' };
+const ZONAS = ['America/Lima', 'America/Bogota', 'America/Guayaquil', 'America/Mexico_City', 'America/Caracas', 'America/Santiago', 'America/Argentina/Buenos_Aires', 'Europe/Madrid'];
+const DIAS = [[1, 'L', 'lunes'], [2, 'M', 'martes'], [3, 'X', 'miércoles'], [4, 'J', 'jueves'], [5, 'V', 'viernes'], [6, 'S', 'sábado'], [0, 'D', 'domingo']];
+
+/* Respaldo: copia de DEFAULTS del nodo CONFIG WorkerOS (base-v0.2). Si un campo va vacío, el worker usa esto. */
+const DEFAULTS = {
+  plantilla_version: 'base-v0.2', worker_id: 'worker_sin_id',
+  negocio: { nombre: 'nuestro negocio', nombre_asistente: 'el asistente virtual', zona_horaria: 'America/Lima' },
+  whatsapp: { phone_number_id: '1368900409630135', api_version: 'v22.0' },
+  horario: { dias: [1, 2, 3, 4, 5, 6], desde: 9, hasta: 20, texto: 'lunes a sábado, de 9:00 am a 8:00 pm' },
+  interruptores: { pausa: false, mensaje_pausa: 'Hola 👋 En este momento estamos haciendo una actualización. Escríbenos en unos minutos, por favor.' },
+  memoria: { ttl_segundos: 604800 },
+  p01: {
+    saludo: 'Hola {nombre}, gracias por escribir a *{negocio}* 👋',
+    instruccion_menu: 'Responde con el *número* de la opción que buscas:',
+    opciones: [{ numero: '1', titulo: 'Hablar con un asesor', descripcion: 'Te atiende una persona del equipo', palabras: [], accion: 'asesor', respuesta: '' }],
+    pie_respuesta: '\n\nEscribe *menú* para ver las opciones otra vez.',
+    msg_opcion_invalida: 'No reconocí esa opción 🤔',
+    max_intentos_invalidos: 3,
+    palabras_menu: ['menu', 'inicio', 'opciones', 'hola', 'buenas', 'buenos dias', 'buenas tardes', 'buenas noches', '0'],
+    palabras_despedida: ['gracias', 'adios', 'chau', 'chao', 'hasta luego', 'bye'],
+    msg_despedida: '¡Gracias por escribirnos! Cuando necesites algo, aquí estaremos.',
+    msg_archivo_no_soportado: '📎 Recibí tu archivo, pero por ahora solo leo texto. ¿Me lo escribes, por favor?'
+  },
+  p12: {
+    palabras_asesor: ['asesor', 'agente', 'humano', 'persona real', 'hablar con alguien', 'hablar con una persona', 'atencion humana', 'no me entiendes', 'queja', 'reclamo'],
+    nombre_asesor: 'un asesor',
+    msg_derivacion: 'Listo, le aviso a {asesor} 🙌 Te escribirá por este mismo chat.\nMientras tanto, escribe *menú* si quieres ver las opciones.',
+    msg_fuera_horario: 'Listo, le aviso a {asesor} 🙌 Nuestro horario es de {horario}, así que te escribirá apenas esté disponible.\nMientras tanto, escribe *menú* si quieres ver las opciones.'
+  }
+};
+
+/* ───────── Utilidades ───────── */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const clone = (o) => JSON.parse(JSON.stringify(o));
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Math.random().toString(36).slice(2, 10);
+const texto = (v) => typeof v === 'string' ? v.trim() : '';
+const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
+const slug = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 30);
+const fecha = (iso) => { try { return new Date(iso).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return ''; } };
+const waFormat = (s) => esc(s)
+  .replace(/\*([^*\n]+)\*/g, '<b>$1</b>')
+  .replace(/(^|[\s(])_([^_\n]+)_/g, '$1<i>$2</i>')
+  .replace(/~([^~\n]+)~/g, '<s>$1</s>')
+  .replace(/\n/g, '<br>');
+const hora12 = (h) => { const n = Number(h); if (n === 0 || n === 24) return '12:00 am'; if (n === 12) return '12:00 pm'; return n < 12 ? `${n}:00 am` : `${n - 12}:00 pm`; };
+function textoHorario(dias, desde, hasta) {
+  const orden = DIAS.map(d => d[0]).filter(d => dias.includes(d));
+  if (!orden.length) return '';
+  const nom = (n) => DIAS.find(d => d[0] === n)[2];
+  const idx = orden.map(n => DIAS.findIndex(d => d[0] === n));
+  const seguidos = idx.every((v, i) => i === 0 || v === idx[i - 1] + 1);
+  let d;
+  if (orden.length === 1) d = nom(orden[0]);
+  else if (orden.length === 7) d = 'todos los días';
+  else if (seguidos && orden.length > 2) d = `${nom(orden[0])} a ${nom(orden[orden.length - 1])}`;
+  else d = orden.slice(0, -1).map(nom).join(', ') + ' y ' + nom(orden[orden.length - 1]);
+  return `${d}, de ${hora12(desde)} a ${hora12(hasta)}`;
+}
+
+/* Guardado en este navegador (con respaldo en memoria si el navegador no deja guardar) */
+const mem = {};
+const store = {
+  get(k, def) { try { const v = localStorage.getItem('workeros:' + k); return v ? JSON.parse(v) : (k in mem ? mem[k] : def); } catch (e) { return k in mem ? mem[k] : def; } },
+  set(k, v) { mem[k] = v; try { localStorage.setItem('workeros:' + k, JSON.stringify(v)); } catch (e) {} }
+};
+
+/* ───────── Ejemplos iniciales (marcados como ejemplo) ───────── */
+function configVacia() {
+  return {
+    plantilla_version: 'base-v0.4', worker_id: '', _bloques: [],
+    negocio: { nombre: '', nombre_asistente: '', zona_horaria: 'America/Lima' },
+    whatsapp: { phone_number_id: '', api_version: 'v22.0' },
+    horario: { dias: [1, 2, 3, 4, 5, 6], desde: 9, hasta: 20, texto: 'lunes a sábado, de 9:00 am a 8:00 pm' },
+    interruptores: { pausa: false, mensaje_pausa: '' },
+    memoria: { ttl_segundos: 604800 },
+    p01: { saludo: '', instruccion_menu: '', opciones: [
+    ], pie_respuesta: '', msg_opcion_invalida: '', max_intentos_invalidos: 3, palabras_menu: [], palabras_despedida: [], msg_despedida: '', msg_archivo_no_soportado: '' },
+    p12: { palabras_asesor: [], nombre_asesor: '', msg_derivacion: '', msg_fuera_horario: '' }
+  };
+}
+function ejemplos() {
+  const ahora = Date.now();
+  const flor = configVacia();
+  Object.assign(flor, { worker_id: 'demo_floreria' });
+  flor.negocio = { nombre: 'Florería Demo', nombre_asistente: 'Flora', zona_horaria: 'America/Lima' };
+  flor.whatsapp.phone_number_id = '1368900409630135';
+  flor.p01.saludo = 'Hola {nombre}, soy {asistente} de *{negocio}* 🌸\nGracias por escribirnos, con gusto te ayudo.';
+  flor.p01.opciones = [
+    { numero: '1', titulo: 'Ver arreglos', descripcion: 'Ramos y arreglos para toda ocasión', palabras: ['arreglos', 'ramos', 'catalogo'], accion: 'responder', respuesta: '💐 Aquí puedes ver todos nuestros arreglos: https://ejemplo.com/catalogo' },
+    { numero: '2', titulo: 'Horario y ubicación', descripcion: 'Dónde estamos y cuándo atendemos', palabras: ['horario', 'ubicacion', 'direccion', 'donde'], accion: 'responder', respuesta: '📍 Av. Ejemplo 123, Lima\n🕘 Lunes a sábado, de 9:00 am a 8:00 pm' },
+    { numero: '3', titulo: 'Hablar con un asesor', descripcion: 'Te atiende una persona del equipo', palabras: [], accion: 'asesor', respuesta: '' }
+  ];
+  flor.p01.msg_despedida = '¡Gracias por escribirnos! 🌸 Cuando necesites algo, aquí estaremos.';
+  flor.p12.nombre_asesor = 'nuestro equipo';
+
+  const acad = configVacia();
+  acad.negocio = { nombre: 'Academia Demo', nombre_asistente: 'Leo', zona_horaria: 'America/Bogota' };
+  acad.whatsapp.phone_number_id = '1368900409630135';
+  acad.horario = { dias: [1, 2, 3, 4, 5], desde: 8, hasta: 18, texto: 'lunes a viernes, de 8:00 am a 6:00 pm' };
+  acad.p01.saludo = 'Hola {nombre} 👋 Soy {asistente}, el asistente de *{negocio}*.';
+  acad.p01.opciones = [
+    { numero: '1', titulo: 'Cursos y precios', descripcion: '', palabras: ['cursos', 'precios'], accion: 'responder', respuesta: '📚 Nuestros cursos y precios: https://ejemplo.com/cursos' },
+    { numero: '2', titulo: 'Inscripciones', descripcion: 'Fechas y requisitos', palabras: ['inscripcion', 'matricula'], accion: 'responder', respuesta: '📝 Las inscripciones están abiertas hasta el 30 de cada mes.' },
+    { numero: '3', titulo: 'Hablar con un asesor', descripcion: '', palabras: [], accion: 'asesor', respuesta: '' }
+  ];
+
+  const pan = configVacia();
+  pan.negocio = { nombre: 'Panadería Demo', nombre_asistente: '', zona_horaria: 'America/Lima' };
+  pan.whatsapp.phone_number_id = '';
+  pan.p01.opciones = [{ numero: '1', titulo: 'Ver la carta', descripcion: '', palabras: ['carta', 'menu del dia'], accion: 'responder', respuesta: '' }];
+
+  return [
+    { id: uid(), ejemplo: true, estado: 'creado', meta: { tipo_negocio: 'Floristería', paquete: 'atencion_basica', etiquetas: ['piloto'], notas: 'Worker de prueba de Juan Pablo.' }, config: flor,
+      n8n: { workflowId: 'aB3dE5gH7jK9mN1p', enlace: 'https://n8n.ejemplo/workflow/aB3dE5gH7jK9mN1p', activo: false, modo: 'simulado', enviado_en: new Date(ahora - 86400000).toISOString() },
+      creado_en: new Date(ahora - 2 * 86400000).toISOString(), actualizado_en: new Date(ahora - 86400000).toISOString() },
+    { id: uid(), ejemplo: true, estado: 'borrador', meta: { tipo_negocio: 'Educación', paquete: 'atencion_basica', etiquetas: [], notas: '' }, config: acad, n8n: null,
+      creado_en: new Date(ahora - 3600000).toISOString(), actualizado_en: new Date(ahora - 3600000).toISOString() },
+    { id: uid(), ejemplo: true, estado: 'error', meta: { tipo_negocio: 'Restaurante y comida', paquete: 'atencion_basica', etiquetas: [], notas: '' }, config: pan,
+      n8n: { errores: ['whatsapp.phone_number_id debe ser solo números', 'opción 1: falta la respuesta'], modo: 'simulado', enviado_en: new Date(ahora - 7200000).toISOString() },
+      creado_en: new Date(ahora - 7200000).toISOString(), actualizado_en: new Date(ahora - 7200000).toISOString() }
+  ];
+}
+
+/* ───────── Estado ───────── */
+/* Conexión fija: cuando el panel se publica en el servidor, el archivo workeros-config.js trae la dirección y la clave del Generador.
+   Así nadie tiene que configurarla en su navegador y el panel arranca conectado a n8n. */
+const FIJA = (window.WORKEROS_CONFIG && typeof window.WORKEROS_CONFIG.url === 'string' && /^https:\/\//.test(window.WORKEROS_CONFIG.url.trim())) ? window.WORKEROS_CONFIG : null;
+const S = {
+  workers: store.get('workers', null) || (FIJA ? [] : ejemplos()),
+  ajustes: FIJA
+    ? { modo: 'real', url: FIJA.url.trim(), header: (FIJA.header || 'X-WorkerOS-Key').trim(), clave: String(FIJA.clave || ''), n8nBase: String(FIJA.n8n || '').trim().replace(/\/+$/, '') }
+    : Object.assign({ modo: 'simulado', url: '', header: 'X-WorkerOS-Key', clave: '', n8nBase: '' }, store.get('ajustes', {})),
+  filtro: Object.assign({ q: '', agrupar: 'tipo', estado: 'todos', tipo: 'todos' }, store.get('filtro', {})),
+  edit: null,          // { id|null, meta, config, textoHorarioManual }
+  chat: null,
+  errores: {},
+  enviando: false,
+  resultado: null
+};
+const guardarWorkers = () => store.set('workers', S.workers);
+const guardarAjustes = () => { if (!FIJA) store.set('ajustes', S.ajustes); };
+
+/* ───────── Unir config con respaldo (igual que el nodo CONFIG) ───────── */
+function vacio(v) { return v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0); }
+function unir(def, cfg) {
+  if (!isObj(def)) return vacio(cfg) ? def : cfg;
+  const out = {};
+  for (const k of new Set([...Object.keys(def), ...Object.keys(cfg || {})])) {
+    const d = def[k], c = (cfg || {})[k];
+    out[k] = isObj(d) ? unir(d, isObj(c) ? c : {}) : (vacio(c) ? d : c);
+  }
+  return out;
+}
+function efectiva(config) {
+  const c = unir(DEFAULTS, clone(config));
+  const ops = (config.p01?.opciones || []).filter(o => texto(String(o.numero ?? '')) && texto(o.titulo));
+  c.p01.opciones = ops.length ? ops : clone(DEFAULTS.p01.opciones);
+  return c;
+}
+
+/* ───────── Bloques: forma del formulario ⇄ forma que pide el Generador v0.4 ───────── */
+function seccionInicial(code) {
+  switch (code) {
+    case 'P02': return { fuente: { tipo: 'google_sheets', url: '', columna_clave: 'DOCUMENTO' }, msg_encontrado: '', no_encontrado: { ofrecer: true, archivo: { url: '', nombre: 'Ficha de inscripción' } }, siguiente: 'P01' };
+    case 'P03': return { modo_clave: 'texto', fuente: { tipo: 'google_sheets', url: '' }, encabezado: '', plantilla_resultado: '', filtro: { columna: '', valores: [] }, volver_al_menu: true };
+    case 'P04': return { intro: '', items: [{ titulo: '', texto: '', archivo: { url: '', nombre: '' } }] };
+    case 'P05': return { fuente: { tipo: 'google_sheets', url: '' }, catalogo_archivo: { url: '', nombre: 'Catálogo' }, siguiente: 'P07' };
+    case 'P07': return { pedir_cantidad: false, permitir_varios: true, pedir_dedicatoria: true, siguiente: 'P09' };
+    case 'P09': return { zonas_texto: '', recojo: { activo: false, direccion: '' }, turnos_texto: 'Mañana: 9-12\nTarde: 13-16\nNoche: 16-20', dias_entrega: [1, 2, 3, 4, 5, 6], siguiente: 'P08' };
+    case 'P08': return { metodos_texto: '', qr: { url: '' }, siguiente: 'P12' };
+    case 'P17': return { proveedor: 'anthropic', modelo: 'claude-opus-5-5', base_url: '', instrucciones: '', conocimiento: '', usar_como_respaldo: true };
+  }
+  return {};
+}
+const lineasDe = (t) => String(t || '').split('\n').map(l => l.trim()).filter(Boolean);
+/* "San Juan de Miraflores (sjm): 18" → { nombre, costo, alias } ; null si la línea no se entiende */
+function leerZonas(t) {
+  return lineasDe(t).map(l => {
+    const m = l.match(/^(.+?)(?:\s*\(([^)]*)\))?\s*[:=]\s*(?:S\/|\$|US\$)?\s*([\d]+(?:[.,]\d+)?)\s*$/);
+    if (!m) return null;
+    const z = { nombre: m[1].trim(), costo: Number(m[3].replace(',', '.')) };
+    const al = (m[2] || '').split(',').map(x => x.trim()).filter(Boolean); if (al.length) z.alias = al;
+    return z;
+  });
+}
+/* "Mañana: 9-12" → { nombre, desde, hasta } */
+function leerTurnos(t) {
+  return lineasDe(t).map(l => { const m = l.match(/^(.+?)\s*[:=]\s*(\d{1,2})\s*(?:-|–|a)\s*(\d{1,2})\s*$/); return m && Number(m[2]) < Number(m[3]) ? { nombre: m[1].trim(), desde: Number(m[2]), hasta: Number(m[3]) } : null; });
+}
+/* "Yape / Plin: 999 999 999" → { nombre, detalle } */
+function leerMetodos(t) {
+  return lineasDe(t).map(l => { const i = l.indexOf(':'); return i > 0 ? { nombre: l.slice(0, i).trim(), detalle: l.slice(i + 1).trim() } : { nombre: l, detalle: '' }; });
+}
+/* Qué bloques usa el worker: los que abre el menú y los que siguen después de ellos */
+function bloquesUsados(c) {
+  if (Array.isArray(c._bloques)) return ORDEN_BLOQUES.filter(x => c._bloques.includes(x));
+  return derivarBloques(c);
+}
+/* Siguiente efectivo: solo puede apuntar a bloques elegidos */
+function sigDe(c, code) {
+  const v = (c[code.toLowerCase()] || {}).siguiente ?? BLOQUES[code].sig;
+  if (BLOQUES[v] && !bloquesUsados(c).includes(v)) return code === 'P05' ? 'FIN' : 'P01';
+  return v;
+}
+/* Bloques a los que llega el cliente: desde el menú y siguiendo la cadena */
+function alcanzables(c) {
+  const sel = bloquesUsados(c), vistos = new Set();
+  const cola = (c.p01?.opciones || []).filter(o => o.accion === 'modulo' && sel.includes(o.modulo)).map(o => o.modulo);
+  if (sel.includes('P17') && c.p17?.usar_como_respaldo !== false) vistos.add('P17');   // responde cuando el menú no entiende
+  while (cola.length) { const b = cola.shift(); if (vistos.has(b)) continue; vistos.add(b); const n = sigDe(c, b); if (sel.includes(n)) cola.push(n); if (b === 'P03' && c.p03?.modo_clave === 'identificacion' && sel.includes('P02')) cola.push('P02'); }
+  return vistos;
+}
+function normalizarConfig(c) {
+  let mon = texto(c.moneda);
+  for (const code of ORDEN_BLOQUES) { const k = code.toLowerCase(); if (isObj(c[k]) && !('_f' in c[k])) { mon = mon || texto(c[k].moneda); c[k] = aFormulario(code, c[k]); delete c[k].moneda; c[k]._f = 1; } }
+  c.moneda = mon || 'S/';
+  if (!Array.isArray(c._bloques)) c._bloques = isObj(c.bloques) ? ORDEN_BLOQUES.filter(b => c.bloques[b]) : derivarBloques(c);
+  delete c.bloques; asegurarSecciones(c);
+}
+function derivarBloques(c) {
+  const vistos = new Set(), cola = (c.p01?.opciones || []).filter(o => o.accion === 'modulo' && BLOQUES[o.modulo]).map(o => o.modulo);
+  while (cola.length) {
+    const code = cola.shift(); if (vistos.has(code)) continue; vistos.add(code);
+    const sec = c[code.toLowerCase()] || {};
+    const sig = sec.siguiente ?? BLOQUES[code].sig;
+    if (BLOQUES[sig]) cola.push(sig);
+    if (code === 'P03' && sec.modo_clave === 'identificacion') cola.push('P02');
+  }
+  return ORDEN_BLOQUES.filter(x => vistos.has(x));
+}
+/* Después de quitar plantillas u opciones: nada debe apuntar a una plantilla que ya no está */
+function limpiarDependencias(c) {
+  const sel = bloquesUsados(c);
+  (c.p01?.opciones || []).forEach(o => {
+    if (o.accion !== 'modulo') return;
+    if (sel.includes(o.modulo)) return;
+    const al = alcanzables(c);
+    o.modulo = sel.find(b => !al.has(b) && !antecesor(c, b)) || sel.find(b => !antecesor(c, b)) || sel[0] || '';
+    if (!o.modulo) { o.accion = 'responder'; delete o.modulo; }
+  });
+  for (const code of sel) { const sec = c[code.toLowerCase()]; if (isObj(sec) && BLOQUES[sec.siguiente] && !sel.includes(sec.siguiente)) sec.siguiente = sigDe(c, code); }
+}
+/* Los avisos en rojo se recalculan con los datos de ahora (no quedan avisos viejos de opciones o plantillas que ya cambiaron) */
+function refrescarErrores() {
+  const pasos = new Set(Object.keys(S.errores || {}).map(pasoDeError));
+  if (!pasos.size) return;
+  S.errores = Object.fromEntries(Object.entries(validar(S.edit.config, S.edit.cred)).filter(([k]) => pasos.has(pasoDeError(k))));
+}
+/* Qué se va con una plantilla: las opciones del menú que la abren y las plantillas que solo se usaban después de ella */
+function dependientesDe(c, code) {
+  const ops = (c.p01?.opciones || []).map((o, i) => [o, i]).filter(([o]) => o.accion === 'modulo' && o.modulo === code);
+  const antes = alcanzables(c);
+  const c2 = { ...c, _bloques: bloquesUsados(c).filter(b => b !== code), p01: { ...c.p01, opciones: (c.p01?.opciones || []).filter(o => !(o.accion === 'modulo' && o.modulo === code)) } };
+  const despues = alcanzables(c2);
+  const blqs = [...antes].filter(b => b !== code && !despues.has(b));
+  return { ops, blqs };
+}
+function cadena(c, code) {
+  const out = [code], vistos = new Set([code]);
+  let cur = code;
+  for (;;) {
+    const sig = sigDe(c, cur);
+    if (!BLOQUES[sig] || vistos.has(sig)) { if (sig === 'P12') out.push('P12'); break; }
+    out.push(sig); vistos.add(sig); cur = sig;
+  }
+  return out;
+}
+function asegurarSecciones(c) {
+  for (const code of bloquesUsados(c)) { const k = code.toLowerCase(); if (!isObj(c[k])) c[k] = seccionInicial(code); }
+  // un bloque nuevo puede sumar otro a la cadena
+  for (const code of bloquesUsados(c)) { const k = code.toLowerCase(); if (!isObj(c[k])) c[k] = seccionInicial(code); }
+}
+/* Lo que viene guardado o de la respuesta del Generador → forma del formulario */
+function aFormulario(code, s0) {
+  const s = unir(seccionInicial(code), clone(s0 || {}));
+  if (s0 && s0.siguiente === '') s.siguiente = 'FIN';
+  if (code === 'P09') {
+    if (!texto(s0?.zonas_texto) && Array.isArray(s0?.zonas)) s.zonas_texto = s0.zonas.map(z => `${z.nombre}${(z.alias || []).length ? ` (${z.alias.join(', ')})` : ''}: ${z.costo}`).join('\n');
+    if (!texto(s0?.turnos_texto) && Array.isArray(s0?.turnos)) s.turnos_texto = s0.turnos.map(t => `${t.nombre}: ${t.desde}-${t.hasta}`).join('\n');
+    delete s.zonas; delete s.turnos;
+  }
+  if (code === 'P08' && !texto(s0?.metodos_texto) && Array.isArray(s0?.metodos)) { s.metodos_texto = s0.metodos.map(m => m.detalle ? `${m.nombre}: ${m.detalle}` : m.nombre).join('\n'); delete s.metodos; }
+  if (code === 'P07' && Array.isArray(s0?.campos)) { s.pedir_dedicatoria = s0.campos.some(x => x.clave === 'dedicatoria'); delete s.campos; }
+  if (code === 'P04') s.items = (Array.isArray(s0?.items) && s0.items.length ? s0.items : seccionInicial('P04').items).map(it => ({ titulo: it.titulo || '', texto: it.texto || '', archivo: { url: it.archivo?.url || '', nombre: it.archivo?.nombre || '' } }));
+  return s;
+}
+/* Forma del formulario → lo que espera el Generador v0.4 (campos vacíos no se envían: el bloque usa su respaldo) */
+function aContrato(code, s, moneda, sigForm) {
+  const sv = sigForm ?? s.siguiente ?? BLOQUES[code].sig;
+  const sig = sv === 'FIN' ? '' : sv;
+  const hoja = (f) => ({ tipo: 'google_sheets', url: texto(f?.url) });
+  switch (code) {
+    case 'P02': return { fuente: { ...hoja(s.fuente), columna_clave: texto(s.fuente?.columna_clave) || 'DOCUMENTO' },
+      ...(texto(s.msg_encontrado) ? { msg_encontrado: s.msg_encontrado.trim() } : {}),
+      no_encontrado: { ofrecer: true, ...(texto(s.no_encontrado?.archivo?.url) ? { archivo: { url: texto(s.no_encontrado.archivo.url), nombre: texto(s.no_encontrado.archivo.nombre) || 'Ficha de inscripción' } } : {}) },
+      siguiente: sig };
+    case 'P03': return { modo_clave: s.modo_clave || 'texto', busqueda: s.modo_clave === 'todas' ? 'todas' : 'palabras', fuente: hoja(s.fuente),
+      ...(texto(s.encabezado) ? { encabezado: s.encabezado.trim() } : {}), ...(texto(s.plantilla_resultado) ? { plantilla_resultado: s.plantilla_resultado.trim() } : {}),
+      ...(texto(s.filtro?.columna) ? { filtro: { columna: texto(s.filtro.columna), valores: (s.filtro.valores || []).filter(Boolean) } } : {}),
+      volver_al_menu: !!s.volver_al_menu };
+    case 'P04': return { ...(texto(s.intro) ? { intro: s.intro.trim() } : {}),
+      items: (s.items || []).filter(it => texto(it.titulo)).map((it, j) => ({ numero: String(j + 1), titulo: texto(it.titulo), ...(texto(it.texto) ? { texto: it.texto.trim() } : {}),
+        ...(texto(it.archivo?.url) ? { archivo: { url: texto(it.archivo.url), nombre: texto(it.archivo.nombre) || texto(it.titulo) } } : {}) })) };
+    case 'P05': return { moneda, fuente: hoja(s.fuente), columnas: Object.fromEntries(COLS_P05.map(([k, , d]) => [k, texto(s.columnas?.[k]) || d])), ...(texto(s.msg_intro) ? { msg_intro: s.msg_intro.trim() } : {}), ...(texto(s.catalogo_archivo?.url) ? { catalogo_archivo: { url: texto(s.catalogo_archivo.url), nombre: texto(s.catalogo_archivo.nombre) || 'Catálogo' } } : {}), siguiente: sig };
+    case 'P07': return { moneda, pedir_cantidad: !!s.pedir_cantidad, permitir_varios: !!s.permitir_varios,
+      campos: [{ clave: 'nombre', etiqueta: 'Nombre', pregunta: '¿A nombre de quién va el pedido?', tipo: 'texto' }, { clave: 'telefono', etiqueta: 'Teléfono', pregunta: '¿Un teléfono de contacto? 📱', tipo: 'telefono' },
+        ...(s.pedir_dedicatoria ? [{ clave: 'dedicatoria', etiqueta: 'Dedicatoria', pregunta: '¿Quieres agregar una dedicatoria? Escríbela, o responde *no*.', tipo: 'texto', opcional: true }] : [])],
+      siguiente: sig };
+    case 'P09': { const turnos = leerTurnos(s.turnos_texto).filter(Boolean);
+      return { moneda, zonas: leerZonas(s.zonas_texto).filter(Boolean), recojo: { activo: !!s.recojo?.activo, texto: 'Recoger en tienda', direccion: texto(s.recojo?.direccion) },
+        usar_turnos: turnos.length > 0, ...(turnos.length ? { turnos } : {}), dias_entrega: (s.dias_entrega || []).slice().sort(), siguiente: sig }; }
+    case 'P17': { const prov = ['anthropic', 'openai', 'compatible'].includes(s.proveedor) ? s.proveedor : 'anthropic';
+      return { proveedor: prov, ...(texto(s.modelo) ? { modelo: texto(s.modelo) } : {}), ...(prov === 'compatible' ? { base_url: texto(s.base_url).replace(/\/+$/, '') } : {}),
+        ...(texto(s.instrucciones) ? { instrucciones: s.instrucciones.trim() } : {}), ...(texto(s.conocimiento) ? { conocimiento: s.conocimiento.trim() } : {}),
+        usar_como_respaldo: s.usar_como_respaldo !== false }; }
+    case 'P08': return { moneda, metodos: leerMetodos(s.metodos_texto), ...(texto(s.qr?.url) ? { qr: { url: texto(s.qr.url), tipo: 'image' } } : {}), siguiente: sig };
+  }
+  return {};
+}
+
+/* ───────── Validación (la misma regla que el nodo "Validar formulario" del Generador) ───────── */
+function validar(config, cred, { bloques = true } = {}) {
+  const e = {};
+  const add = (campo, msg) => { (e[campo] = e[campo] || []).push(msg); };
+  if (cred && cred.modo === 'nuevas') {
+    if (!texto(cred.nombre)) add('cred.nombre', 'Ponle un nombre a la credencial.');
+    if (texto(cred.token).length < 20) add('cred.token', 'Pega el token de acceso de Meta completo.');
+    if (/^bearer\s/i.test(texto(cred.token))) add('cred.token', 'Pega solo el token, sin la palabra Bearer.');
+    if (texto(cred.app_id) && !/^\d{6,25}$/.test(texto(cred.app_id))) add('cred.app_id', 'El App ID tiene solo números.');
+    if (!!texto(cred.app_id) !== !!texto(cred.app_secret)) add('cred.app_secret', 'Llena el App ID y el App Secret juntos, o deja los dos vacíos.');
+  }
+  if (!texto(config.negocio?.nombre)) add('negocio.nombre', 'Escribe el nombre del negocio.');
+  if (!/^\d{8,20}$/.test(texto(String(config.whatsapp?.phone_number_id ?? '')))) add('whatsapp.phone_number_id', 'Debe tener solo números (entre 8 y 20).');
+  const wid = texto(config.worker_id);
+  if (wid && !/^[a-z0-9_]{3,40}$/.test(wid)) add('worker_id', 'Solo minúsculas, números y guion bajo, de 3 a 40 caracteres.');
+  const ops = config.p01?.opciones || [];
+  if (!ops.length) add('opciones', 'Escribe al menos una opción del menú.');
+  ops.forEach((o, i) => {
+    if (!texto(String(o.numero ?? '')) || !texto(o.titulo)) add('op' + i, `Opción ${i + 1}: falta el título.`);
+    else if (o.accion === 'modulo' && !BLOQUES[o.modulo]) add('op' + i, `Opción ${i + 1}: elige qué plantilla abre.`);
+    else if (o.accion === 'modulo' && !bloquesUsados(config).includes(o.modulo)) add('op' + i, `Opción ${i + 1}: abre ${o.modulo}, pero esa plantilla no está marcada en el paso 3.`);
+    else if ((o.accion || 'responder') === 'responder' && !texto(o.respuesta)) add('op' + i, texto(o.archivo_url) ? `Opción ${i + 1}: escribe el texto que acompaña al documento.` : `Opción ${i + 1}: escribe el texto de respuesta.`);
+    if ((o.accion || 'responder') === 'responder' && texto(o.archivo_url) && texto(o.respuesta).length > 1024) add('op' + i, `Opción ${i + 1}: el texto de un documento puede tener hasta 1024 caracteres.`);
+    if ((o.accion || 'responder') === 'responder' && texto(o.archivo_url) && !/^https:\/\/\S+$/.test(texto(o.archivo_url))) add('op' + i, `Opción ${i + 1}: el link del documento debe empezar con https://`);
+  });
+  const nums = ops.map(o => String(o.numero).trim());
+  if (new Set(nums).size !== nums.length) add('opciones', 'Hay opciones con el mismo número.');
+  if (!(config.horario?.dias || []).length) add('horario.dias', 'Elige al menos un día de atención.');
+  if (Number(config.horario?.desde) >= Number(config.horario?.hasta)) add('horario.horas', 'La hora de cierre debe ser después de la de apertura.');
+  if (bloques) for (const code of bloquesUsados(config)) {
+    const s = config[code.toLowerCase()] || {}, k = 'blk.' + code;
+    const link = (u, que) => { if (texto(u) && !/^https:\/\/\S+$/.test(texto(u))) add(k, `${que} debe empezar con https://`); };
+    if (['P02', 'P03', 'P05'].includes(code)) { if (!texto(s.fuente?.url)) add(k, 'Pega el link de la hoja de Google.'); else link(s.fuente.url, 'El link de la hoja'); }
+    if (code === 'P02') link(s.no_encontrado?.archivo?.url, 'El link de la ficha');
+    if (code === 'P05') link(s.catalogo_archivo?.url, 'El link del catálogo');
+    if (code === 'P04') {
+      const its = (s.items || []).filter(it => texto(it.titulo));
+      if (!its.length) add(k, 'Agrega al menos un documento o información, con su título.');
+      its.forEach(it => { if (!texto(it.texto) && !texto(it.archivo?.url)) add(k, `"${texto(it.titulo)}" necesita un texto o un link.`); link(it.archivo?.url, `El link de "${texto(it.titulo)}"`); });
+    }
+    if (code === 'P17') {
+      const prov = s.proveedor || 'anthropic';
+      if (!['anthropic', 'openai', 'compatible'].includes(prov)) add(k, 'Elige qué IA usa.');
+      if (prov !== 'anthropic' && !texto(s.modelo)) add(k, 'Escribe el nombre del modelo.');
+      if (prov === 'compatible') { if (!texto(s.base_url)) add(k, 'Pega la dirección de la API del proveedor.'); else link(s.base_url, 'La dirección de la API'); }
+      const key = texto(cred?.ia_key);
+      if (/^bearer\s/i.test(key)) add(k, 'Pega la clave de la IA sin la palabra Bearer.');
+      else if (key && (key.length < 20 || /\s/.test(key))) add(k, 'La clave de la IA no parece completa.');
+    }
+    if (code === 'P08') { if (!lineasDe(s.metodos_texto).length) add(k, 'Escribe al menos un medio de pago.'); link(s.qr?.url, 'El link del QR'); }
+    if (code === 'P09') {
+      const zs = leerZonas(s.zonas_texto), malas = lineasDe(s.zonas_texto).filter((l, j) => !zs[j]);
+      if (malas.length) add(k, `No entendí la zona "${malas[0]}". Escríbela como "Miraflores: 10".`);
+      if (!zs.filter(Boolean).length && !s.recojo?.activo) add(k, 'Escribe al menos una zona con su costo, o activa el recojo en tienda.');
+      const ts = leerTurnos(s.turnos_texto), tm = lineasDe(s.turnos_texto).filter((l, j) => !ts[j]);
+      if (tm.length) add(k, `No entendí el turno "${tm[0]}". Escríbelo como "Mañana: 9-12".`);
+      if (!(s.dias_entrega || []).length) add(k, 'Elige al menos un día de entrega.');
+    }
+  }
+  return e;
+}
+const listaErrores = (e) => Object.values(e).flat();
+const PASOS = [['s-negocio', 'Negocio'], ['s-whatsapp', 'WhatsApp y Meta'], ['s-paquete', 'Plantillas'], ['s-menu', 'Menú'], ['s-bloques', 'Configurar plantillas'], ['s-mensajes', 'Mensajes'], ['s-asesor', 'Asesor y pausa'], ['s-revisar', 'Revisar y crear']];
+function pasoDeError(k) {
+  if (k === 'negocio.nombre' || k === 'worker_id') return 0;
+  if (k.startsWith('whatsapp') || k.startsWith('horario') || k.startsWith('cred.')) return 1;
+  if (k === 'alcance') return 3;
+  if (k.startsWith('op')) return 3;
+  if (k.startsWith('blk.')) return 4;
+  return 7;
+}
+/* Link de Drive compartido → link de descarga directa (lo que usará el nodo que envía el documento). */
+function linkDescarga(u) {
+  u = texto(u); if (!u) return '';
+  let m = u.match(/drive\.google\.com\/file\/d\/([\w-]+)/) || u.match(/drive\.google\.com\/(?:open|uc)\?(?:.*&)?id=([\w-]+)/);
+  if (m) return `https://drive.google.com/uc?export=download&id=${m[1]}`;
+  m = u.match(/docs\.google\.com\/(document|spreadsheets|presentation)\/d\/([\w-]+)/);
+  if (m) return `https://docs.google.com/${m[1]}/d/${m[2]}/export?format=${m[1] === 'spreadsheets' ? 'xlsx' : 'pdf'}`;
+  return u;
+}
+/* El menú se escribe como texto: una opción por línea, con o sin número. */
+/* El menú se escribe o se pega como texto, tal como se verá en WhatsApp:
+   - líneas con número ("1. …", "2) …", "*3* …", "4️⃣ …") = opciones
+   - lo que va antes del primer número = encabezado del menú
+   - una línea sin número debajo de una opción = su descripción */
+const RE_OPCION = /^\s*(?:\*?(\d{1,2})\*?\s*[.)\-:–]?|(\d)️?⃣)\s+(.+)$/;
+const limpiar = (t) => t.trim().replace(/^[_*~]+|[_*~]+$/g, '').trim();
+function leerMenu(txt) {
+  const lineas = String(txt || '').split('\n');
+  const hayNumeros = lineas.some(l => RE_OPCION.test(l));
+  if (!hayNumeros) return { intro: null, items: lineas.map(limpiar).filter(Boolean).map(t => ({ titulo: t, descripcion: '' })) };
+  const intro = [], items = [];
+  for (const l of lineas) {
+    const m = l.match(RE_OPCION);
+    if (m) items.push({ titulo: limpiar(m[3]), descripcion: '' });
+    else if (!items.length) intro.push(l);
+    else if (l.trim()) { const it = items[items.length - 1]; it.descripcion = (it.descripcion ? it.descripcion + ' ' : '') + limpiar(l); }
+  }
+  return { intro: intro.join('\n').trim(), items: items.filter(it => it.titulo) };
+}
+const pareceAsesor = (t) => /asesor|persona|humano|agente|ejecutiv/i.test(t);
+/* Paquetes: si el menú está vacío, lo llenan con un ejemplo que se puede cambiar */
+const MENUS_PAQUETE = {
+  floristeria: { texto: 'Responde con el *número* de la opción que buscas:\n\n1. Hacer un pedido\n   Elige tu arreglo y lo llevamos\n2. Horario y ubicación\n3. Hablar con un asesor', modulos: { 0: 'P05' } },
+  cec: { texto: 'Responde con el *número* de la opción que buscas:\n\n1. Soy socio\n   Documentos y consultas para socios\n2. Próximos eventos\n3. Documentos\n4. Hablar con un asesor', modulos: { 0: 'P02', 1: 'P03', 2: 'P04' } }
+};
+function aplicarPaquete(id) {
+  const c = S.edit.config, pq = PAQUETES.find(p => p.id === id); if (!pq) return false;
+  S.edit.meta.paquete = id; c._bloques = pq.mods.filter(m => BLOQUES[m]); asegurarSecciones(c);
+  const m = MENUS_PAQUETE[id]; if (!m || c.p01.opciones.length) return false;
+  S.edit.menuTexto = m.texto; sincronizarMenu(m.texto);
+  for (const [i, code] of Object.entries(m.modulos)) Object.assign(c.p01.opciones[i], { accion: 'modulo', modulo: code });
+  if (id === 'cec') { asegurarSecciones(c); c.p03.modo_clave = 'todas'; c.p03.encabezado = '📅 Próximos eventos:'; }
+  asegurarSecciones(c); S.edit.abiertas = [0];
+  return true;
+}
+function sincronizarMenu(txt) {
+  const { intro, items } = leerMenu(txt), ops = S.edit.config.p01.opciones;
+  if (intro !== null) S.edit.config.p01.instruccion_menu = intro;
+  const clave = (t) => texto(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  const libres = new Set(ops.map((_, j) => j));
+  const porTitulo = items.map(it => { const j = ops.findIndex((o, k) => libres.has(k) && clave(o.titulo) === clave(it.titulo)); if (j >= 0) libres.delete(j); return j; });
+  // si no coincide el título y la cantidad no cambió, es la misma opción con el título corregido
+  const mismaCantidad = items.length === ops.length;
+  S.edit.config.p01.opciones = items.map((it, i) => {
+    let j = porTitulo[i];
+    if (j < 0 && mismaCantidad && libres.has(i)) { j = i; libres.delete(i); }
+    const prev = j >= 0 ? ops[j] : null;
+    if (prev) return { ...prev, titulo: it.titulo, descripcion: it.descripcion, numero: String(i + 1) };
+    return { numero: String(i + 1), titulo: it.titulo, descripcion: it.descripcion, palabras: [], accion: pareceAsesor(it.titulo) ? 'asesor' : 'responder', respuesta: '', archivo_url: '', archivo_nombre: '' };
+  });
+}
+function textoDelMenu(p01) {
+  const ops = (p01.opciones || []).filter(o => texto(o.titulo));
+  const lista = ops.map((o, i) => `${i + 1}. ${o.titulo}` + (texto(o.descripcion) ? `\n   ${o.descripcion}` : '')).join('\n');
+  return [texto(p01.instruccion_menu), lista].filter(Boolean).join('\n\n');
+}
+/* Texto de respaldo con el link (solo para mostrar; desde base-v0.3 P01 envía el documento). */
+function respuestaFinal(o) {
+  const u = texto(o.archivo_url);
+  if (!u) return o.respuesta || '';
+  const r = texto(o.respuesta);
+  return (r ? o.respuesta.trim() + '\n\n' : '') + `📎 ${texto(o.archivo_nombre) || 'Documento'}: ${u}`;
+}
+
+/* Lo que se envía al Generador de n8n */
+function armarEnvio(w, cred) {
+  const c = clone(w.config);
+  c.plantilla_version = 'base-v0.4';
+  c.worker_id = texto(c.worker_id);
+  if (!c.worker_id) delete c.worker_id;   // el Generador lo crea desde el nombre
+  c.whatsapp.phone_number_id = texto(String(c.whatsapp.phone_number_id ?? ''));
+  c.p01.opciones = (c.p01.opciones || []).map((o, i) => {
+    const { archivo_url, archivo_nombre, ...resto } = o;
+    const op = { ...resto, numero: String(i + 1), palabras: (o.palabras || []).filter(Boolean) };
+    if (op.accion === 'modulo') { delete op.respuesta; return op; }
+    delete op.modulo;
+    if (op.accion !== 'asesor') op.respuesta = texto(o.respuesta);
+    if (op.accion !== 'asesor' && texto(archivo_url)) op.archivo = { url: texto(archivo_url), url_descarga: linkDescarga(archivo_url), nombre: texto(archivo_nombre) || 'Documento', caption: texto(o.respuesta) };
+    return op;
+  });
+  // Bloques: solo se envían las secciones de los bloques que el worker usa
+  const usados = bloquesUsados(w.config), moneda = texto(c.moneda) || 'S/';
+  for (const code of ORDEN_BLOQUES) delete c[code.toLowerCase()];
+  delete c.moneda; delete c._bloques;
+  for (const code of usados) c[code.toLowerCase()] = aContrato(code, w.config[code.toLowerCase()] || seccionInicial(code), moneda, sigDe(w.config, code));
+  const out = { config: c, meta: { tipo_negocio: w.meta.tipo_negocio, paquete: w.meta.paquete, etiquetas: w.meta.etiquetas || [], notas: w.meta.notas || '', origen: 'workeros-web', version_interfaz: '0.3', bloques: usados } };
+  // Credenciales de Meta: van aparte de config para que el token NUNCA quede escrito dentro del worker.
+  if (cred && cred.modo === 'nuevas') out.credenciales = { modo: 'nuevas', nombre: texto(cred.nombre), token_meta: texto(cred.token), app_id: texto(cred.app_id), app_secret: texto(cred.app_secret) };
+  else out.credenciales = { modo: 'existentes' };
+  if (usados.includes('P17') && texto(cred?.ia_key)) out.credenciales.ia = { api_key: texto(cred.ia_key) };
+  return out;
+}
+
+/* ───────── Envío a n8n (real o simulado) ───────── */
+async function enviar(payload, { prueba = false } = {}) {
+  const a = S.ajustes;
+  if (a.modo === 'simulado') {
+    await new Promise(r => setTimeout(r, 900));
+    if (prueba) return { status: 400, data: { ok: false, errores: ['negocio.nombre es obligatorio'] }, simulado: true };
+    const e = listaErrores(validar(payload.config, null, { bloques: false }));
+    if (e.length) return { status: 400, data: { ok: false, errores: e }, simulado: true };
+    const id = Array.from({ length: 16 }, () => 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 56)]).join('');
+    const wid = payload.config.worker_id || ((slug(payload.config.negocio.nombre) || 'worker') + '_' + Math.random().toString(36).slice(2, 6));
+    const base = (a.n8nBase || 'https://n8n.ejemplo').replace(/\/$/, '');
+    return { status: 200, simulado: true, data: { ok: true, workflowId: id, nombre: 'WorkerOS · ' + payload.config.negocio.nombre, worker_id: wid, activo: false, enlace: `${base}/workflow/${id}`, siguiente_paso: 'Abre el enlace, revisa el worker y actívalo cuando esté probado.', credenciales: payload.credenciales?.modo === 'nuevas' ? { creadas: true, token: payload.credenciales.nombre + ' · token', trigger: payload.credenciales.app_id ? payload.credenciales.nombre + ' · trigger' : null } : { creadas: false } } };
+  }
+  if (!/^https?:\/\//.test(a.url)) return { status: 0, red: 'Falta la dirección del Generador. Complétala en Conexión n8n.' };
+  const headers = { 'Content-Type': 'application/json' };
+  if (a.header && a.clave) headers[a.header] = a.clave;
+  try {
+    const r = await fetch(a.url, { method: 'POST', headers, body: JSON.stringify(payload) });
+    let data = null; try { data = await r.json(); } catch (e) {}
+    return { status: r.status, data };
+  } catch (err) {
+    return { status: 0, red: 'El navegador no pudo hablar con n8n. Revisa que la dirección sea correcta y que el Generador permita este sitio (CORS).' };
+  }
+}
+function leerRespuesta(r) {
+  if (r.status === 200 && r.data?.ok) return { ok: true, data: r.data };
+  if (r.status === 0) return { ok: false, errores: [r.red] };
+  if (r.status === 401 || r.status === 403) return { ok: false, errores: ['n8n rechazó la clave. Revisa que la clave y el nombre del encabezado sean los mismos de la credencial del Generador.'] };
+  if (r.status === 404) return { ok: false, errores: ['n8n no encontró el Generador en esa dirección. ¿Está activo el workflow "WorkerOS · Generador"? Si estás probando, usa la URL de prueba.'] };
+  if (r.data?.errores) return { ok: false, errores: r.data.errores };
+  return { ok: false, errores: [`n8n respondió con un error (código ${r.status}).`] };
+}
+
+/* ───────── Interfaz general ───────── */
+function toast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; t.setAttribute('role', 'status');
+  $('#toastRoot').replaceChildren(t); setTimeout(() => t.remove(), 2600);
+}
+function copiar(txt, aviso = 'Copiado') {
+  try { navigator.clipboard.writeText(txt).then(() => toast(aviso), () => toast('No se pudo copiar. Selecciona el texto y cópialo a mano.')); }
+  catch (e) { toast('No se pudo copiar. Selecciona el texto y cópialo a mano.'); }
+}
+function modal(html, onMount) {
+  const root = $('#modalRoot');
+  root.innerHTML = `<div class="modal-bg"><div class="modal panel" role="dialog" aria-modal="true">${html}</div></div>`;
+  const close = () => { root.innerHTML = ''; };
+  $('.modal-bg', root).addEventListener('click', (e) => { if (e.target.classList.contains('modal-bg')) close(); });
+  $$('[data-close]', root).forEach(b => b.addEventListener('click', close));
+  onMount && onMount($('.modal', root), close);
+  const f = $('.modal [autofocus], .modal button', root); f && f.focus();
+}
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $('#modalRoot').innerHTML = ''; });
+
+function pintarModo() {
+  const a = S.ajustes, pill = $('#modePill');
+  const real = a.modo === 'real';
+  pill.innerHTML = `<span class="dot ${real ? (a.url ? 'ok' : 'warn') : ''}"></span><span>${real ? (a.url ? 'Conectado a n8n' : 'Falta la URL de n8n') : 'Modo simulado'}</span>`;
+  $('#navCount').textContent = S.workers.length;
+}
+
+function ir(vista) { if (location.hash !== '#' + vista) location.hash = vista; else render(); }
+function vistaActual() { const h = location.hash.replace('#', ''); return ['workers', 'nuevo', 'plantillas', 'conexion'].includes(h) ? h : 'workers'; }
+$('#nav a[data-view="nuevo"]').addEventListener('click', (e) => { e.preventDefault(); abrirEditor(null); if (location.hash === '#nuevo') render(); });
+window.addEventListener('hashchange', () => { if (vistaActual() === 'nuevo' && !S.edit) abrirEditor(null, false); render(); window.scrollTo(0, 0); });
+
+function render() {
+  const v = vistaActual();
+  if (v !== 'nuevo') S.edit = null;
+  $$('#nav a').forEach(a => a.setAttribute('aria-current', a.dataset.view === v ? 'page' : 'false'));
+  pintarModo();
+  const main = $('#main');
+  if (v === 'workers') main.innerHTML = vistaWorkers();
+  if (v === 'nuevo') { if (!S.edit) abrirEditor(null, false); main.innerHTML = vistaEditor(); montarEditor(); }
+  if (v === 'plantillas') main.innerHTML = vistaPlantillas();
+  if (v === 'conexion') { main.innerHTML = vistaConexion(); montarConexion(); }
+  if (v === 'workers') montarWorkers();
+}
+
+/* ───────── Vista: Workers (lista y clasificación) ───────── */
+function modsDe(w) { return ['BASE', 'P01', ...bloquesUsados(w.config || {}), 'P12']; }
+function filaWorker(w) {
+  const c = w.config, n = w.n8n || {};
+  const est = w.estado;
+  const sub = [c.negocio.nombre_asistente && `Asistente: ${c.negocio.nombre_asistente}`, `${(c.p01.opciones || []).length} opciones de menú`].filter(Boolean).join(' · ');
+  return `<div class="wrow">
+    <div class="wname"><b>${esc(c.negocio.nombre || 'Sin nombre')}</b><span>${esc(sub)}</span></div>
+    <div class="wmeta"><span class="state ${est}"><span class="dot ${est === 'activo' ? 'ok' : est === 'error' ? 'bad' : ''}" style="${est === 'creado' ? 'background:var(--accent)' : ''}"></span>${ESTADOS[est]}</span>
+      <span class="mono hint">${esc(n.worker_id || c.worker_id || 'id se crea al enviar')}</span></div>
+    <div class="wmeta wmods"><div class="mods">${modsDe(w).map(m => `<span class="mod">${m}</span>`).join('')}</div>
+      <div class="chips" style="gap:4px">${w.ejemplo ? '<span class="tag">ejemplo</span>' : ''}${n.modo === 'simulado' ? '<span class="tag">simulado</span>' : ''}${(w.meta.etiquetas || []).map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div></div>
+    <div class="wactions">
+      ${n.enlace ? `<a class="btn sm ghost" href="${esc(n.enlace)}" target="_blank" rel="noopener">Abrir en n8n</a>` : ''}
+      <button class="btn sm" data-act="editar" data-id="${w.id}">${est === 'borrador' || est === 'error' ? 'Continuar' : 'Ver'}</button>
+      <button class="btn sm ghost" data-act="mas" data-id="${w.id}" aria-label="Más acciones para ${esc(c.negocio.nombre)}">···</button>
+    </div>
+  </div>`;
+}
+function vistaWorkers() {
+  const f = S.filtro, ws = S.workers;
+  const cuenta = (e) => ws.filter(w => w.estado === e).length;
+  const q = f.q.trim().toLowerCase();
+  const visibles = ws.filter(w =>
+    (f.estado === 'todos' || w.estado === f.estado) &&
+    (f.tipo === 'todos' || w.meta.tipo_negocio === f.tipo) &&
+    (!q || [w.config.negocio.nombre, w.config.negocio.nombre_asistente, w.config.worker_id, w.n8n?.worker_id, ...(w.meta.etiquetas || [])].join(' ').toLowerCase().includes(q)));
+  const clave = { tipo: (w) => w.meta.tipo_negocio || 'Otro', estado: (w) => ESTADOS[w.estado], paquete: (w) => (PAQUETES.find(p => p.id === w.meta.paquete) || PAQUETES[0]).nombre }[f.agrupar];
+  const grupos = {};
+  visibles.sort((a, b) => (b.actualizado_en || '').localeCompare(a.actualizado_en || '')).forEach(w => { (grupos[clave(w)] = grupos[clave(w)] || []).push(w); });
+  const tiposUsados = [...new Set(ws.map(w => w.meta.tipo_negocio))];
+  const hayEjemplos = ws.some(w => w.ejemplo);
+
+  return `
+  <div class="view-head">
+    <div><div class="eyebrow">Panel interno</div><h1>Workers</h1>
+      <p>Cada worker es un bot de WhatsApp armado con plantillas. Aquí ves cuáles existen, en qué estado están y de qué tipo de negocio son.</p></div>
+    <a class="btn primary" href="#nuevo" data-act="nuevo">Crear worker</a>
+  </div>
+  ${hayEjemplos ? `<div class="notice info" style="margin-bottom:16px"><div><b>Los 3 workers de abajo son ejemplos</b> para que veas cómo se ordena la lista. Puedes borrarlos cuando crees los tuyos. <button class="btn sm ghost" data-act="borrar-ejemplos">Quitar ejemplos</button></div></div>` : ''}
+  <div class="stats">
+    <div class="stat panel"><span class="n">${ws.length}</span><span class="l">Workers en total</span></div>
+    <div class="stat panel"><span class="n">${cuenta('activo')}</span><span class="l"><span class="dot ok"></span>Activos</span></div>
+    <div class="stat panel"><span class="n">${cuenta('creado')}</span><span class="l"><span class="dot" style="background:var(--accent)"></span>Creados, apagados</span></div>
+    <div class="stat panel"><span class="n">${cuenta('borrador') + cuenta('error')}</span><span class="l"><span class="dot warn"></span>Por terminar</span></div>
+  </div>
+  <div class="toolbar">
+    <label class="search"><span class="sr" hidden>Buscar</span><input type="text" id="fq" placeholder="Buscar por negocio, asistente o id" value="${esc(f.q)}"></label>
+    <span class="lbl">Agrupar por</span>
+    <div class="seg" role="group" aria-label="Agrupar por">
+      ${[['tipo', 'Tipo de negocio'], ['estado', 'Estado'], ['paquete', 'Paquete']].map(([k, l]) => `<button data-agrupar="${k}" aria-pressed="${f.agrupar === k}">${l}</button>`).join('')}
+    </div>
+  </div>
+  <div class="toolbar">
+    <span class="lbl">Estado</span>
+    <div class="chips">${['todos', ...Object.keys(ESTADOS)].map(e => `<button class="chip" data-festado="${e}" aria-pressed="${f.estado === e}">${e === 'todos' ? 'Todos' : ESTADOS[e]}</button>`).join('')}</div>
+    <span class="lbl">Tipo</span>
+    <div class="chips">${['todos', ...tiposUsados].map(t => `<button class="chip" data-ftipo="${esc(t)}" aria-pressed="${f.tipo === t}">${t === 'todos' ? 'Todos' : esc(t)}</button>`).join('')}</div>
+  </div>
+  ${visibles.length ? Object.entries(grupos).map(([g, lista]) => `
+    <section class="group">
+      <div class="group-head"><h3>${esc(g)}</h3><span class="mono">${lista.length}</span></div>
+      <div class="wlist panel">${lista.map(filaWorker).join('')}</div>
+    </section>`).join('') : `
+    <div class="panel empty">${ws.length ? '<b>Ningún worker coincide con esos filtros.</b><button class="btn sm" data-act="limpiar">Quitar filtros</button>' : '<b>Todavía no hay workers.</b><span>Crea el primero: llenas un formulario y WorkerOS lo arma en n8n con las plantillas.</span><a class="btn primary" href="#nuevo" data-act="nuevo">Crear worker</a>'}</div>`}
+  `;
+}
+function montarWorkers() {
+  const m = $('#main');
+  const fq = $('#fq', m);
+  fq && fq.addEventListener('input', () => { S.filtro.q = fq.value; store.set('filtro', S.filtro); const pos = fq.selectionStart; render(); const n = $('#fq'); n.focus(); n.setSelectionRange(pos, pos); });
+  $$('[data-agrupar]', m).forEach(b => b.addEventListener('click', () => { S.filtro.agrupar = b.dataset.agrupar; store.set('filtro', S.filtro); render(); }));
+  $$('[data-festado]', m).forEach(b => b.addEventListener('click', () => { S.filtro.estado = b.dataset.festado; store.set('filtro', S.filtro); render(); }));
+  $$('[data-ftipo]', m).forEach(b => b.addEventListener('click', () => { S.filtro.tipo = b.dataset.ftipo; store.set('filtro', S.filtro); render(); }));
+  $$('[data-act="nuevo"]', m).forEach(a => a.addEventListener('click', (e) => { e.preventDefault(); abrirEditor(null); }));
+  $$('[data-act="limpiar"]', m).forEach(b => b.addEventListener('click', () => { Object.assign(S.filtro, { q: '', estado: 'todos', tipo: 'todos' }); store.set('filtro', S.filtro); render(); }));
+  $$('[data-act="borrar-ejemplos"]', m).forEach(b => b.addEventListener('click', () => { S.workers = S.workers.filter(w => !w.ejemplo); guardarWorkers(); toast('Ejemplos quitados'); render(); }));
+  $$('[data-act="editar"]', m).forEach(b => b.addEventListener('click', () => abrirEditor(b.dataset.id)));
+  $$('[data-act="mas"]', m).forEach(b => b.addEventListener('click', () => menuWorker(b.dataset.id)));
+}
+function menuWorker(id) {
+  const w = S.workers.find(x => x.id === id); if (!w) return;
+  const n = w.n8n || {};
+  modal(`
+    <div><div class="eyebrow">Worker</div><h2>${esc(w.config.negocio.nombre || 'Sin nombre')}</h2></div>
+    <div class="grid2">
+      <div class="field"><label for="mTipo">Tipo de negocio</label><select id="mTipo">${TIPOS.map(t => `<option ${t === w.meta.tipo_negocio ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+      <div class="field"><label for="mEstado">Estado</label><select id="mEstado">${Object.entries(ESTADOS).map(([k, l]) => `<option value="${k}" ${k === w.estado ? 'selected' : ''}>${l}</option>`).join('')}</select>
+        <span class="hint">Cámbialo a "Activo" cuando lo prendas en n8n.</span></div>
+      <div class="field" style="grid-column:1/-1"><label for="mTags">Etiquetas</label><input type="text" id="mTags" value="${esc((w.meta.etiquetas || []).join(', '))}" placeholder="piloto, cliente nuevo"><span class="hint">Separadas por coma. Sirven para buscar y ordenar.</span></div>
+    </div>
+    ${n.workflowId ? `<div class="notice ok"><div><b>En n8n:</b> workflow <span class="mono">${esc(n.workflowId)}</span>, worker_id <span class="mono">${esc(n.worker_id || '')}</span>${n.modo === 'simulado' ? ' (simulado, no existe de verdad)' : ''}. Enviado el ${fecha(n.enviado_en)}.</div></div>` : ''}
+    ${n.errores ? `<div class="notice bad"><div><b>Último envío rechazado:</b><ul>${n.errores.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div></div>` : ''}
+    <div class="modal-actions" style="justify-content:space-between">
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn sm" data-m="json">Ver lo que se envía</button>
+        <button class="btn sm" data-m="duplicar">Duplicar</button>
+        <button class="btn sm danger" data-m="borrar">Borrar de la lista</button>
+      </div>
+      <div style="display:flex;gap:6px"><button class="btn" data-close>Cerrar</button><button class="btn primary" data-m="guardar">Guardar</button></div>
+    </div>
+    <div id="mConfirm"></div>`, (box, close) => {
+    $('[data-m="guardar"]', box).addEventListener('click', () => {
+      w.meta.tipo_negocio = $('#mTipo', box).value; w.estado = $('#mEstado', box).value;
+      w.meta.etiquetas = $('#mTags', box).value.split(',').map(s => s.trim()).filter(Boolean);
+      w.actualizado_en = new Date().toISOString(); guardarWorkers(); close(); toast('Guardado'); render();
+    });
+    $('[data-m="duplicar"]', box).addEventListener('click', () => {
+      const c = clone(w); c.id = uid(); c.ejemplo = false; c.estado = 'borrador'; c.n8n = null; c.config.worker_id = '';
+      c.config.negocio.nombre = (c.config.negocio.nombre || '') + ' (copia)'; c.creado_en = c.actualizado_en = new Date().toISOString();
+      S.workers.push(c); guardarWorkers(); close(); toast('Copia creada como borrador'); render();
+    });
+    $('[data-m="json"]', box).addEventListener('click', () => { close(); verJSON(w); });
+    $('[data-m="borrar"]', box).addEventListener('click', () => {
+      $('#mConfirm', box).innerHTML = `<div class="notice bad" style="align-items:center;justify-content:space-between;flex-wrap:wrap"><span>Se quita de esta lista. ${n.workflowId && n.modo !== 'simulado' ? 'El workflow sigue existiendo en n8n.' : ''}</span><button class="btn sm danger" data-m="si">Sí, borrar</button></div>`;
+      $('[data-m="si"]', box).addEventListener('click', () => { S.workers = S.workers.filter(x => x.id !== id); guardarWorkers(); close(); toast('Borrado de la lista'); render(); });
+    });
+  });
+}
+function verJSON(w, cred) {
+  const env = armarEnvio(w, cred);
+  if (env.credenciales.token_meta) env.credenciales.token_meta = '•••• oculto (' + env.credenciales.token_meta.length + ' caracteres)';
+  if (env.credenciales.app_secret) env.credenciales.app_secret = '•••• oculto';
+  if (env.credenciales.ia) env.credenciales.ia = { api_key: '•••• oculto (' + env.credenciales.ia.api_key.length + ' caracteres)' };
+  const txt = JSON.stringify(env, null, 2);
+  modal(`<div><div class="eyebrow">Lo que recibe n8n</div><h2>Datos de ${esc(w.config.negocio.nombre || 'este worker')}</h2>
+    <p class="hint" style="margin-top:4px">Este es el paquete de datos (en formato JSON) que el formulario manda al Generador. "config" es lo que reemplaza el nodo CONFIG del worker; "meta" es la clasificación que usa este panel.</p></div>
+    <pre class="json" tabindex="0">${esc(txt)}</pre>
+    <div class="modal-actions"><button class="btn" data-close>Cerrar</button><button class="btn primary" data-copy>Copiar JSON</button></div>`,
+  (box) => $('[data-copy]', box).addEventListener('click', () => copiar(txt, 'JSON copiado')));
+}
+
+/* ───────── Vista: Editor (formulario) ───────── */
+function abrirEditor(id, navegar = true) {
+  const w = id ? S.workers.find(x => x.id === id) : null;
+  S.edit = w ? { id: w.id, meta: clone(w.meta), config: clone(w.config), manual: false } :
+    { id: null, meta: { tipo_negocio: 'Otro', paquete: 'atencion_basica', etiquetas: [], notas: '' }, config: configVacia(), manual: false };
+  S.edit.manual = !!w && S.edit.config.horario.texto !== textoHorario(S.edit.config.horario.dias, S.edit.config.horario.desde, S.edit.config.horario.hasta);
+  const cm = (w && w.meta.credenciales) || {};
+  S.paso = 0;
+  S.edit.config.p01.opciones = S.edit.config.p01.opciones.filter(o => texto(o.titulo));
+  S.edit.menuTexto = textoDelMenu(S.edit.config.p01);
+  normalizarConfig(S.edit.config);
+  S.edit.abiertas = S.edit.config.p01.opciones.length ? [0] : [];
+  S.edit.cred = { modo: cm.modo || 'existentes', nombre: cm.nombre || '', token: '', app_id: '', app_secret: '' };
+  S.errores = {}; S.resultado = null; S.chat = null;
+  if (navegar) ir('nuevo');
+}
+const getPath = (o, p) => p.split('.').reduce((a, k) => a?.[k], o);
+const setPath = (o, p, v) => { const ks = p.split('.'); const last = ks.pop(); ks.reduce((a, k) => (a[k] = a[k] ?? {}), o)[last] = v; };
+
+function campo(path, label, { tipo = 'text', ph = '', hint = '', req = false, rows = 3, vars = null, lista = false, full = false } = {}) {
+  const v = getPath(S.edit.config, path);
+  const val = lista ? (v || []).join(', ') : (v ?? '');
+  const err = S.errores[path];
+  const idf = 'f_' + path.replace(/\./g, '_');
+  const input = tipo === 'textarea'
+    ? `<textarea id="${idf}" data-path="${path}" ${lista ? 'data-lista="1"' : ''} rows="${rows}" placeholder="${esc(ph)}">${esc(val)}</textarea>`
+    : `<input type="${tipo}" id="${idf}" data-path="${path}" ${lista ? 'data-lista="1"' : ''} value="${esc(val)}" placeholder="${esc(ph)}">`;
+  return `<div class="field ${err ? 'invalid' : ''}" ${full ? 'style="grid-column:1/-1"' : ''}>
+    <label for="${idf}">${label}${req ? ' <span class="req" aria-hidden="true">*</span>' : ''}</label>
+    ${vars ? `<div class="vars">${vars.map(x => `<button type="button" data-insert="${x}" data-target="${idf}" title="Insertar ${x}">{${x}}</button>`).join('')}</div>` : ''}
+    ${input}
+    ${err ? `<span class="ferr">${esc(err.join(' '))}</span>` : ''}
+    ${hint ? `<span class="hint">${hint}</span>` : ''}
+  </div>`;
+}
+const respaldo = (txt) => `Si lo dejas vacío se usa: “${esc(String(txt).replace(/\n/g, ' '))}”`;
+
+function vistaEditor() {
+  const E = S.edit, c = E.config;
+  const w = E.id ? S.workers.find(x => x.id === E.id) : null;
+  const creado = w && (w.estado === 'creado' || w.estado === 'activo');
+  const ops = c.p01.opciones;
+  const horas = Array.from({ length: 25 }, (_, h) => h);
+  const errs = listaErrores(S.errores);
+  return `
+  <div class="view-head">
+    <div><div class="eyebrow">${E.id ? 'Editar worker' : 'Nuevo worker'}</div><h1>${esc(c.negocio.nombre || 'Worker sin nombre')}</h1>
+      <p>Ve paso a paso. Los campos vacíos usan un texto genérico, así el bot nunca se queda sin responder. A la derecha ves cómo contestará.</p></div>
+    <a class="btn ghost" href="#workers">Volver a la lista</a>
+  </div>
+  ${creado ? `<div class="notice" style="margin-bottom:14px"><div><b>Este worker ya existe en n8n.</b> Por ahora el Generador solo crea workers nuevos: si cambias algo aquí, se guarda en este panel pero no cambia el worker que ya está en n8n.</div></div>` : ''}
+  <nav class="stepper" aria-label="Pasos del formulario">
+    ${PASOS.map(([id, l], k) => `<button type="button" data-paso="${k}" class="${k < S.paso ? 'done' : ''}" ${k === S.paso ? 'aria-current="step"' : ''}><span><span class="n">${k + 1}</span> ${l}</span></button>`).join('')}
+  </nav>
+  <div class="editor">
+    <div>
+      <form id="wform" novalidate autocomplete="off">
+      <section class="fsec panel" id="s-negocio" ${oculto(0)}>
+        <div class="fsec-head"><div><h2>Negocio</h2><p>Datos que el bot usa dentro de sus mensajes y que sirven para ordenar la lista. No cambian el perfil de WhatsApp (foto, descripción, nombre visible): eso se edita en Meta.</p></div></div>
+        <div class="grid2">
+          ${campo('negocio.nombre', 'Nombre del negocio', { req: true, ph: 'Ej: Florería Miraflores' })}
+          ${campo('negocio.nombre_asistente', 'Nombre del asistente', { ph: 'Ej: Flora', hint: 'Así se presenta el bot. ' + respaldo(DEFAULTS.negocio.nombre_asistente) })}
+          <div class="field"><label for="f_tipo">Tipo de negocio</label><select id="f_tipo" data-meta="tipo_negocio">${TIPOS.map(t => `<option ${t === E.meta.tipo_negocio ? 'selected' : ''}>${t}</option>`).join('')}</select><span class="hint">Sirve para clasificar los workers en la lista.</span></div>
+          <div class="field"><label for="f_zona">Zona horaria</label><select id="f_zona" data-path="negocio.zona_horaria">${ZONAS.map(z => `<option ${z === c.negocio.zona_horaria ? 'selected' : ''}>${z}</option>`).join('')}</select><span class="hint">Para saber si un mensaje llega dentro o fuera del horario.</span></div>
+          ${campo('worker_id', 'Identificador del worker', { ph: slug(c.negocio.nombre) ? slug(c.negocio.nombre) + '_xxxx (automático)' : 'automático', hint: 'Nombre interno, sin espacios. Separa la memoria de un worker de la de otro. Si lo dejas vacío, se crea solo.' })}
+          <div class="field"><label for="f_tags">Etiquetas</label><input type="text" id="f_tags" data-meta="etiquetas" value="${esc((E.meta.etiquetas || []).join(', '))}" placeholder="piloto, cliente nuevo"><span class="hint">Opcional. Separadas por coma.</span></div>
+        </div>
+      </section>
+
+      <section class="fsec panel" id="s-paquete" ${oculto(2)}>
+        <div class="fsec-head"><div><h2>Plantillas</h2><p>Elige qué sabe hacer este worker. Cada plantilla es un bloque con una tarea. En los pasos siguientes solo llenas lo que necesitan las que marques.</p></div></div>
+        <div class="presets"><span class="hint">Atajos:</span>${PAQUETES.map(p => `<button type="button" class="btn sm ${E.meta.paquete === p.id ? '' : 'ghost'}" data-preset="${p.id}">${p.nombre}</button>`).join('')}</div>
+        <div class="tpick">
+          ${FIJAS.map(([code, nom, fs]) => `<label class="fija"><span class="tp-top"><input type="checkbox" checked disabled><span class="code">${code}</span><b>${nom}</b><span class="fx">Siempre</span></span><ul>${fs.map(f => `<li>${f}</li>`).join('')}</ul></label>`).join('')}
+          ${ORDEN_BLOQUES.map(code => { const b = BLOQUES[code], on = bloquesUsados(c).includes(code);
+            return `<label><span class="tp-top"><input type="checkbox" data-blq="${code}" ${on ? 'checked' : ''}><span class="code">${code}</span><b>${b.nombre}</b></span><ul>${b.funciones.map(f => `<li>${f}</li>`).join('')}</ul>${b.nota ? `<span class="hint">${b.nota}</span>` : ''}</label>`; }).join('')}
+        </div>
+        <p class="hint">Más adelante: ${PLANTILLAS.filter(p => p.estado === 'despues').map(p => `${p.code} ${p.nombre}`).join(' · ')}.</p>
+      </section>
+
+      <section class="fsec panel" id="s-whatsapp" ${oculto(1)}>
+        <div class="fsec-head"><div><h2>WhatsApp y Meta</h2><p>El número desde el que responde el bot, cuándo hay personas para atender y las credenciales de Meta.</p></div></div>
+        <div class="grid2">
+          ${campo('whatsapp.phone_number_id', 'Phone number ID', { req: true, ph: 'Ej: 1368900409630135', hint: 'Es el código del número en Meta (no es el teléfono). Está en Meta for Developers → WhatsApp → Configuración de la API.' })}
+          ${campo('horario.texto', 'Horario en palabras', { ph: 'lunes a sábado, de 9:00 am a 8:00 pm', hint: E.manual ? 'Lo escribiste a mano. <button type="button" class="btn sm ghost" data-act="horario-auto">Volver a automático</button>' : 'Se escribe solo a partir de los días y horas. Puedes cambiarlo.' })}
+          <div class="field ${S.errores['horario.dias'] ? 'invalid' : ''}"><span class="flabel">Días de atención</span>
+            <div class="days" role="group" aria-label="Días de atención">${DIAS.map(([n, l, nom]) => `<button type="button" data-dia="${n}" aria-pressed="${c.horario.dias.includes(n)}" title="${nom}">${l}</button>`).join('')}</div>
+            ${S.errores['horario.dias'] ? `<span class="ferr">${S.errores['horario.dias'][0]}</span>` : ''}</div>
+          <div class="field ${S.errores['horario.horas'] ? 'invalid' : ''}"><span class="flabel">Horas</span>
+            <div style="display:flex;gap:8px;align-items:center"><select id="f_desde" data-num="horario.desde" aria-label="Desde">${horas.map(h => `<option value="${h}" ${h === Number(c.horario.desde) ? 'selected' : ''}>${hora12(h)}</option>`).join('')}</select><span class="hint">a</span>
+            <select id="f_hasta" data-num="horario.hasta" aria-label="Hasta">${horas.map(h => `<option value="${h}" ${h === Number(c.horario.hasta) ? 'selected' : ''}>${hora12(h)}</option>`).join('')}</select></div>
+            ${S.errores['horario.horas'] ? `<span class="ferr">${S.errores['horario.horas'][0]}</span>` : ''}</div>
+        </div>
+        ${vistaCredenciales()}
+      </section>
+
+      <section class="fsec panel" id="s-menu" ${oculto(3)}>
+        <div class="fsec-head"><div><h2>Menú</h2><p>Primero escribe o pega el menú tal como lo verá el cliente. La web detecta las opciones numeradas y arma un desplegable para cada una, donde pones su texto y su documento.</p></div></div>
+        <div class="menu-writer">
+          <div class="field ${S.errores.opciones ? 'invalid' : ''}"><label for="f_menu">Escribe o pega el menú</label>
+            <textarea id="f_menu" rows="12" placeholder="Responde con el *número* de la opción que buscas:&#10;&#10;1. Ver catálogo&#10;   Ramos y arreglos para toda ocasión&#10;2. Horario y ubicación&#10;3. Hablar con un asesor">${esc(S.edit.menuTexto)}</textarea>
+            ${S.errores.opciones ? `<span class="ferr">${esc(S.errores.opciones[0])}</span>` : ''}</div>
+          <div class="notice info"><div><b>Así lo lee la web:</b><ul>
+            <li>Cada línea que empieza con número es una <b>opción</b> y crea su desplegable abajo.</li>
+            <li>Lo que escribes antes del primer número es el <b>encabezado</b> del menú.</li>
+            <li>Una línea sin número debajo de una opción es su <b>descripción</b> (sale en cursiva).</li>
+            <li>Si una opción dice "asesor", queda como derivación a asesor. En su desplegable puedes cambiar lo que hace, por ejemplo que abra un bloque (catálogo, pedido, pago…).</li>
+            <li>El saludo no va aquí: se escribe en el paso 6 y sale antes del menú.</li></ul></div></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap"><h3>Respuestas de cada opción</h3><span class="menu-count" id="menuCount">${ops.length} ${ops.length === 1 ? 'opción' : 'opciones'}</span></div>
+        <div class="opts" id="optsList">${vistaOpciones()}</div>
+        ${vistaSueltos()}
+      </section>
+
+      <section class="fsec panel" id="s-bloques" ${oculto(4)}>
+        <div class="fsec-head"><div><h2>Configurar plantillas</h2><p>Los datos que necesita cada plantilla que marcaste en el paso 3.</p></div></div>
+        ${vistaBloques()}
+      </section>
+
+      <section class="fsec panel" id="s-mensajes" ${oculto(5)}>
+        <div class="fsec-head"><div><h2>Mensajes</h2><p>Lo que dice el bot en cada momento. Las palabras entre llaves se reemplazan solas: <span class="mono">{nombre}</span> es el nombre del cliente en WhatsApp, <span class="mono">{negocio}</span> y <span class="mono">{asistente}</span> salen de la parte 1. Para negrita escribe *así*.</p></div></div>
+        ${campo('p01.saludo', 'Saludo', { tipo: 'textarea', vars: ['nombre', 'asistente', 'negocio'], ph: DEFAULTS.p01.saludo, hint: respaldo(DEFAULTS.p01.saludo) })}
+        <div class="grid2">
+          ${campo('p01.msg_opcion_invalida', 'Cuando no entiende la respuesta', { tipo: 'textarea', rows: 2, ph: DEFAULTS.p01.msg_opcion_invalida, hint: 'Después se repite el menú.' })}
+          <div class="field"><label for="f_max">Intentos antes de pasar a asesor</label><select id="f_max" data-num="p01.max_intentos_invalidos">${[2, 3, 4, 5].map(n => `<option value="${n}" ${n === Number(c.p01.max_intentos_invalidos) ? 'selected' : ''}>${n} respuestas que no entiende</option>`).join('')}</select><span class="hint">Si el cliente se equivoca esas veces seguidas, se le avisa que lo atenderá una persona.</span></div>
+          ${campo('p01.msg_despedida', 'Despedida', { tipo: 'textarea', rows: 2, vars: ['nombre', 'negocio'], ph: DEFAULTS.p01.msg_despedida, hint: 'Cuando el cliente escribe "gracias", "chau"…' })}
+          ${campo('p01.pie_respuesta', 'Nota al final de cada respuesta', { tipo: 'textarea', rows: 2, ph: DEFAULTS.p01.pie_respuesta.trim(), hint: 'Le recuerda cómo volver al menú.' })}
+          ${campo('p01.palabras_menu', 'Palabras que muestran el menú', { lista: true, ph: DEFAULTS.p01.palabras_menu.join(', '), hint: 'Separadas por coma. Vacío = las de ejemplo.' })}
+          ${campo('p01.palabras_despedida', 'Palabras de despedida', { lista: true, ph: DEFAULTS.p01.palabras_despedida.join(', '), hint: 'Separadas por coma. Vacío = las de ejemplo.' })}
+          ${campo('p01.msg_archivo_no_soportado', 'Cuando mandan una foto o archivo', { tipo: 'textarea', rows: 2, ph: DEFAULTS.p01.msg_archivo_no_soportado, hint: 'Por ahora el bot solo lee texto.', full: true })}
+        </div>
+      </section>
+
+      <section class="fsec panel" id="s-asesor" ${oculto(6)}>
+        <div class="fsec-head"><div><h2>Asesor y pausa</h2><p>Por ahora el aviso de asesor solo informa al cliente; todavía no abre una conversación con una persona (eso llega con Chatwoot).</p></div></div>
+        <div class="grid2">
+          ${campo('p12.nombre_asesor', 'Cómo llamar al asesor', { ph: DEFAULTS.p12.nombre_asesor, hint: 'Se usa en <span class="mono">{asesor}</span>. Ej: "nuestro equipo", "Carla".' })}
+          ${campo('p12.palabras_asesor', 'Palabras que piden asesor', { lista: true, ph: 'asesor, humano, reclamo…', hint: 'Vacío = asesor, agente, humano, queja, reclamo y otras.' })}
+          ${campo('p12.msg_derivacion', 'Aviso dentro del horario', { tipo: 'textarea', vars: ['asesor', 'horario'], ph: DEFAULTS.p12.msg_derivacion, hint: respaldo(DEFAULTS.p12.msg_derivacion) })}
+          ${campo('p12.msg_fuera_horario', 'Aviso fuera del horario', { tipo: 'textarea', vars: ['asesor', 'horario'], ph: DEFAULTS.p12.msg_fuera_horario, hint: 'Se usa cuando escriben fuera del horario de la parte 3.' })}
+        </div>
+        <label class="switch"><input type="checkbox" id="f_pausa" data-bool="interruptores.pausa" ${c.interruptores.pausa ? 'checked' : ''}>Modo pausa</label>
+        <span class="hint" style="margin-top:-8px">Si está prendido, el bot responde solo el mensaje de pausa a todo. Útil mientras se hacen cambios.</span>
+        ${c.interruptores.pausa ? campo('interruptores.mensaje_pausa', 'Mensaje de pausa', { tipo: 'textarea', rows: 2, ph: DEFAULTS.interruptores.mensaje_pausa }) : ''}
+        <div class="field"><label for="f_ttl">Cuánto recuerda a cada cliente</label><select id="f_ttl" data-num="memoria.ttl_segundos">${[[86400, '1 día'], [259200, '3 días'], [604800, '7 días'], [1209600, '14 días'], [2592000, '30 días']].map(([s, l]) => `<option value="${s}" ${s === Number(c.memoria.ttl_segundos) ? 'selected' : ''}>${l}</option>`).join('')}</select><span class="hint">Pasado ese tiempo sin escribir, el cliente vuelve a recibir el saludo.</span></div>
+      </section>
+      <section class="fsec panel" id="s-revisar" ${oculto(7)}>
+        <div class="fsec-head"><div><h2>Revisar y crear</h2><p>Así se va a crear el worker. Si algo no está bien, toca "Cambiar" y vuelves a ese paso.</p></div></div>
+        ${vistaRevision()}
+      </section>
+      </form>
+
+      <div class="sendbar panel" id="sendbar">
+        <div class="left">${S.enviando ? '<span class="dot warn"></span>Enviando a n8n…' : `Paso ${S.paso + 1} de ${PASOS.length} · ${PASOS[S.paso][1]}`}</div>
+        <div class="right">
+          ${S.paso > 0 ? '<button type="button" class="btn" data-act="ant">Anterior</button>' : ''}
+          <button type="button" class="btn ghost" data-act="guardar">Guardar borrador</button>
+          ${S.paso < PASOS.length - 1 ? '<button type="button" class="btn primary" data-act="sig">Siguiente</button>'
+            : `<button type="button" class="btn primary" data-act="crear" ${S.enviando ? 'disabled' : ''}>${creado ? 'Crear otra vez en n8n' : 'Crear en n8n'}</button>`}
+        </div>
+      </div>
+      <div id="resultado">${pintarResultado()}</div>
+    </div>
+    ${vistaPreview()}
+  </div>`;
+}
+const oculto = (k) => S.paso === k ? '' : 'hidden';
+function selectSiguiente(code, s) {
+  const opts = [['P01', 'Volver al menú'], ['P12', 'Pasar a un asesor'], ...(code === 'P05' ? [['FIN', 'Nada más (solo mostrar el catálogo)']] : []), ...ORDEN_BLOQUES.filter(b => b !== code && b !== 'P17' && bloquesUsados(S.edit.config).includes(b)).map(b => [b, `${b} · ${BLOQUES[b].nombre}`])];
+  const v = sigDe(S.edit.config, code);
+  return `<div class="field"><label for="f_${code}_sig">Al terminar, pasa a</label><select id="f_${code}_sig" data-path="${code.toLowerCase()}.siguiente">${opts.map(([k, l]) => `<option value="${k}" ${k === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></div>`;
+}
+const COLS_P05 = [['nombre', 'Nombre del producto', 'NOMBRE'], ['precio', 'Precio', 'PRECIO'], ['codigo', 'Código', 'CODIGO'], ['categoria', 'Categoría', 'CATEGORIA'], ['descripcion', 'Descripción', 'DESCRIPCION'], ['imagen', 'Link de la foto', 'IMAGEN']];
+const hintHoja = 'Compártela como "Cualquier persona con el enlace · Lector" y pega el link normal de la hoja.';
+function camposBloque(code, s) {
+  const k = code.toLowerCase();
+  switch (code) {
+    case 'P02': return `<div class="grid2">
+      ${campo('p02.fuente.url', 'Link de la hoja de Google', { req: true, ph: 'https://docs.google.com/spreadsheets/d/…', hint: hintHoja })}
+      ${campo('p02.fuente.columna_clave', 'Columna con el documento', { ph: 'DOCUMENTO', hint: 'El nombre de la columna donde está el DNI o RUC.' })}
+      ${campo('p02.msg_encontrado', 'Mensaje al encontrarlo', { tipo: 'textarea', full: true, ph: 'Encontré este registro:\n*{NOMBRE}*\nDocumento: {DOCUMENTO}\n\n¿Eres tú? Responde *sí* o *no*.', hint: 'Las palabras en MAYÚSCULA entre llaves, como {NOMBRE}, se llenan con esa columna de la hoja. Vacío = el mensaje de ejemplo.' })}
+      ${campo('p02.no_encontrado.archivo.url', 'Ficha de inscripción (link, opcional)', { ph: 'https://drive.google.com/file/d/…/view', hint: 'Si no lo encuentra, le ofrece esta ficha y lo pasa a un asesor.' })}
+      ${campo('p02.no_encontrado.archivo.nombre', 'Nombre de la ficha', { ph: 'Ficha de inscripción' })}
+      ${selectSiguiente(code, s)}</div>`;
+    case 'P03': return `<div class="grid2">
+      <div class="field"><label for="f_p03_modo">Qué busca</label><select id="f_p03_modo" data-path="p03.modo_clave">${[['texto', 'Lo que el cliente escribe'], ['identificacion', 'Su propio registro (usa P02)'], ['todas', 'Muestra toda la lista']].map(([v, l]) => `<option value="${v}" ${s.modo_clave === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+        <span class="hint">"Toda la lista" sirve para cosas como próximos eventos.</span></div>
+      ${campo('p03.fuente.url', 'Link de la hoja de Google', { req: true, ph: 'https://docs.google.com/spreadsheets/d/…', hint: hintHoja })}
+      ${campo('p03.encabezado', 'Título de los resultados', { ph: 'Esto encontré:' })}
+      ${campo('p03.plantilla_resultado', 'Cómo se ve cada resultado', { tipo: 'textarea', ph: '*{NOMBRE}*\n📅 {FECHA}\n📍 {LUGAR}', hint: 'Usa los nombres de las columnas en MAYÚSCULA entre llaves.' })}
+      ${campo('p03.filtro.columna', 'Mostrar solo filas donde la columna…', { ph: 'Ej: ACTIVO', hint: 'Opcional.' })}
+      ${campo('p03.filtro.valores', '…tiene este valor', { lista: true, ph: 'Ej: SI', hint: 'Separados por coma.' })}
+      </div>
+      <label class="switch"><input type="checkbox" data-bool="p03.volver_al_menu" ${s.volver_al_menu ? 'checked' : ''}>Al terminar, vuelve al menú</label>`;
+    case 'P04': return `${campo('p04.intro', 'Texto antes de la lista', { ph: 'Estos son los documentos e informaciones disponibles 📂' })}
+      <span class="flabel">Documentos e información</span>
+      ${(s.items || []).map((it, j) => `<div class="blk-item">
+        <div class="field"><label for="it${j}t">${j + 1}. Título</label><input type="text" id="it${j}t" data-item="${j}" data-ik="titulo" value="${esc(it.titulo)}" placeholder="Ej: Brochure"></div>
+        <div class="field"><label for="it${j}u">Link del archivo (opcional)</label><input type="url" id="it${j}u" data-item="${j}" data-ik="url" value="${esc(it.archivo?.url)}" placeholder="https://drive.google.com/file/d/…/view"></div>
+        <button type="button" class="btn sm ghost" data-item-del="${j}" aria-label="Quitar ${j + 1}">Quitar</button>
+        <div class="field wide"><label for="it${j}x">Texto (va como caption si hay archivo)</label><textarea id="it${j}x" data-item="${j}" data-ik="texto" rows="2" placeholder="Ej: 📘 Aquí tienes nuestro brochure">${esc(it.texto)}</textarea></div>
+        <div class="field"><label for="it${j}n">Nombre del archivo</label><input type="text" id="it${j}n" data-item="${j}" data-ik="nombre" value="${esc(it.archivo?.nombre)}" placeholder="Ej: Brochure 2026"></div>
+      </div>`).join('')}
+      <button type="button" class="btn sm" data-act="item-add" style="align-self:flex-start">Agregar documento</button>`;
+    case 'P05': return `<div class="grid2">
+      ${campo('p05.fuente.url', 'Link de la hoja de productos', { req: true, ph: 'https://docs.google.com/spreadsheets/d/…', hint: 'Abajo, en "Columnas de la hoja", dices cómo se llama cada columna en la hoja del cliente. ' + hintHoja })}
+      ${campo('p05.catalogo_archivo.url', 'Catálogo en PDF (link, opcional)', { ph: 'https://drive.google.com/file/d/…/view', hint: 'Se envía al abrir el catálogo.' })}
+      ${campo('p05.catalogo_archivo.nombre', 'Nombre del catálogo', { ph: 'Catálogo' })}
+      ${campo('p05.msg_intro', 'Texto que acompaña al catálogo', { tipo: 'textarea', rows: 2, ph: 'Este es nuestro catálogo 🛍️', hint: 'Sale al abrir el catálogo, junto al PDF. Vacío = el texto de ejemplo.' })}
+      ${selectSiguiente(code, s)}</div>
+      <details class="more" ${COLS_P05.some(([k]) => texto(s.columnas?.[k])) ? 'open' : ''}><summary>Columnas de la hoja</summary>
+        <p class="hint" style="margin:6px 0 10px">Escribe el título de la columna tal como está en la hoja del cliente. Vacío = el nombre de ejemplo. Solo el nombre del producto y el precio son necesarios; las demás pueden no existir.</p>
+        <div class="grid2">${COLS_P05.map(([k, l, d]) => campo('p05.columnas.' + k, l, { ph: d })).join('')}</div></details>`;
+    case 'P07': return `<div style="display:flex;flex-direction:column;gap:10px">
+      <label class="switch"><input type="checkbox" data-bool="p07.permitir_varios" ${s.permitir_varios ? 'checked' : ''}>Puede agregar varios productos al pedido</label>
+      <label class="switch"><input type="checkbox" data-bool="p07.pedir_cantidad" ${s.pedir_cantidad ? 'checked' : ''}>Pregunta la cantidad de cada producto</label>
+      <label class="switch"><input type="checkbox" data-bool="p07.pedir_dedicatoria" ${s.pedir_dedicatoria ? 'checked' : ''}>Pide una dedicatoria (opcional para el cliente)</label>
+      <span class="hint">Siempre pide nombre y teléfono, y al final muestra el resumen para confirmar.</span></div>
+      <div class="grid2">${selectSiguiente(code, s)}</div>`;
+    case 'P09': return `<div class="grid2">
+      ${campo('p09.zonas_texto', 'Zonas y costo de envío', { tipo: 'textarea', rows: 5, ph: 'Miraflores: 10\nSan Isidro: 10\nSan Juan de Miraflores (sjm): 18', hint: 'Una por línea: <span class="mono">Zona: costo</span>. Entre paréntesis, otros nombres con los que el cliente la escribe.' })}
+      ${campo('p09.turnos_texto', 'Turnos de entrega', { tipo: 'textarea', rows: 5, ph: 'Mañana: 9-12\nTarde: 13-16', hint: 'Una por línea: <span class="mono">Nombre: desde-hasta</span> (horas de 0 a 24). Vacío = no pregunta turno.' })}
+      <div class="field"><span class="flabel">Días con entrega</span><div class="days" role="group" aria-label="Días con entrega">${DIAS.map(([n, l, nom]) => `<button type="button" data-dia-ent="${n}" aria-pressed="${(s.dias_entrega || []).includes(n)}" title="${nom}">${l}</button>`).join('')}</div></div>
+      ${selectSiguiente(code, s)}</div>
+      <label class="switch"><input type="checkbox" data-bool="p09.recojo.activo" ${s.recojo?.activo ? 'checked' : ''}>También puede recoger en tienda</label>
+      ${s.recojo?.activo ? campo('p09.recojo.direccion', 'Dirección de la tienda', { ph: 'Av. Ejemplo 123' }) : ''}`;
+    case 'P08': return `<div class="grid2">
+      ${campo('p08.metodos_texto', 'Medios de pago', { tipo: 'textarea', rows: 4, req: true, ph: 'Yape / Plin: 999 999 999 (Mi negocio)\nTransferencia BCP: Cuenta 000-0000000-0-00', hint: 'Uno por línea: <span class="mono">Nombre: datos</span>.' })}
+      ${campo('p08.qr.url', 'Imagen del QR (link, opcional)', { ph: 'https://drive.google.com/file/d/…/view' })}
+      ${selectSiguiente(code, s)}</div>
+      <span class="hint">El bloque no lee el comprobante: lo guarda y avisa a una persona del equipo para que valide el pago.</span>`;
+    case 'P17': { const prov = s.proveedor || 'anthropic', E = S.edit;
+      return `<div class="grid2">
+      <div class="field"><label for="f_p17_prov">Qué IA usa</label><select id="f_p17_prov" data-path="p17.proveedor">${PROVEEDORES_IA.map(([v, l]) => `<option value="${v}" ${prov === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+        <span class="hint">Es la empresa de la que sale la clave (API key).</span></div>
+      ${prov === 'anthropic'
+        ? `<div class="field"><label for="f_p17_mod">Modelo</label><select id="f_p17_mod" data-path="p17.modelo">${MODELOS_CLAUDE.map(([v, l]) => `<option value="${v}" ${(s.modelo || MODELOS_CLAUDE[0][0]) === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+          <span class="hint">El modelo es el "cerebro". Uno más barato cuesta menos por respuesta.</span></div>`
+        : campo('p17.modelo', 'Modelo', { req: true, ph: prov === 'openai' ? 'Ej: el nombre del modelo en tu cuenta de OpenAI' : 'Ej: llama-3.3-70b-versatile', hint: 'Cópialo tal cual de la página de modelos del proveedor.' })}
+      ${prov === 'compatible' ? campo('p17.base_url', 'Dirección de la API', { req: true, ph: 'https://api.groq.com/openai', hint: 'La "base URL" que da el proveedor, sin /v1/chat/completions al final.' }) : ''}
+      <div class="field"><label for="cr_ia_key">Clave de la IA (API key)</label><input type="password" id="cr_ia_key" data-cred="ia_key" value="${esc(E.cred.ia_key || '')}" placeholder="${prov === 'anthropic' ? 'sk-ant-…' : 'sk-…'}" autocomplete="off" spellcheck="false">
+        <span class="hint">No se guarda en este panel ni dentro del worker: el Generador la guarda como credencial en n8n. Vacía = usa la clave de Nissitech del Generador.</span></div>
+      ${campo('p17.instrucciones', 'Cómo debe hablar', { tipo: 'textarea', rows: 3, full: true, ph: 'Eres amable y breve. Tuteas al cliente. Si preguntan algo que no está en la información, ofrece pasar con una persona.', hint: 'Tono, reglas y lo que NO debe hacer. Vacío = amable y servicial.' })}
+      ${campo('p17.conocimiento', 'Lo que sabe del negocio', { tipo: 'textarea', rows: 7, full: true, ph: 'Vendemos laptops, monitores y accesorios.\nGarantía de 12 meses en todos los productos.\nDelivery en Lima de 24 a 48 horas, desde S/ 10.\nAtendemos en Av. Ejemplo 123, Miraflores.', hint: 'Precios, políticas, preguntas frecuentes, dirección… La IA solo responde con lo que está aquí; lo demás no lo inventa.' })}
+      </div>
+      <label class="switch"><input type="checkbox" data-bool="p17.usar_como_respaldo" ${s.usar_como_respaldo !== false ? 'checked' : ''}>Responder cuando el menú no entiende lo que escribe el cliente</label>
+      <span class="hint">También puedes agregar en el menú una opción que abra esta plantilla, por ejemplo "${esc(BLOQUES.P17.opcion)}". ${BLOQUES.P17.nota}</span>`; }
+  }
+  return '';
+}
+/* Para plantillas que van en cadena (pedido, delivery, pago): la plantilla elegida que normalmente va antes */
+function antecesor(c, code) {
+  const cad = ['P05', 'P07', 'P09', 'P08'], i = cad.indexOf(code); if (i < 1) return null;
+  const sel = bloquesUsados(c);
+  for (let j = i - 1; j >= 0; j--) if (sel.includes(cad[j])) return cad[j];
+  return null;
+}
+function vistaSueltos() {
+  const c = S.edit.config, al = alcanzables(c), sueltos = bloquesUsados(c).filter(b => !al.has(b));
+  if (!sueltos.length) return '';
+  return `<div class="notice"><div><b>Aviso:</b> ninguna opción abre todavía ${sueltos.map(b => `${b} ${BLOQUES[b].nombre}`).join(', ')}. Puedes seguir igual, pero el cliente no llegará a esa plantilla hasta que una opción la abra (o otra plantilla pase a ella).
+    <div class="presets" style="margin-top:8px">${sueltos.map(b => { const prev = antecesor(c, b);
+      const enCadena = ['P07', 'P09', 'P08'].includes(b);
+      return (prev ? `<button type="button" class="btn sm" data-link="${prev}>${b}">Que ${prev} pase a ${b} al terminar</button>` : enCadena ? '' : `<button type="button" class="btn sm" data-add-blk="${b}">Agregar opción "${esc(BLOQUES[b].opcion)}"</button>`)
+        + `<button type="button" class="btn sm ghost" data-del-blk="${b}">Quitar ${b}</button>`; }).join('')}</div></div></div>`;
+}
+function vistaBloques() {
+  const c = S.edit.config, usados = bloquesUsados(c);
+  if (!usados.length) return `<div class="notice info"><div><b>No marcaste plantillas extra.</b> El worker tendrá saludo, menú y asesor. Si quieres catálogo, pedidos, delivery, pagos o documentos, márcalas en el paso 3.</div></div>`;
+  const entradas = c.p01.opciones.map((o, i) => [o, i]).filter(([o]) => o.accion === 'modulo' && BLOQUES[o.modulo]);
+  const tagB = (b) => `<span class="mod">${b}</span>`;
+  const usaMoneda = usados.some(b => ['P05', 'P07', 'P09', 'P08'].includes(b));
+  return `<div class="field" style="gap:8px"><span class="flabel">Recorrido del cliente</span>
+      ${entradas.map(([o, i]) => `<div class="chain"><span>Opción ${i + 1} · ${esc(o.titulo)}</span><span class="arrow">→</span>${cadena(c, o.modulo).map(tagB).join('<span class="arrow">→</span>')}</div>`).join('')}
+      <span class="hint">El cliente puede salir de cualquier bloque escribiendo <b>menú</b>, o pedir un <b>asesor</b>.</span></div>
+    ${usaMoneda ? `<div class="grid2">${campo('moneda', 'Moneda', { ph: 'S/', hint: 'Se usa en precios, envío y total. Ej: S/, $, COP.' })}</div>` : ''}
+    ${usados.map(code => { const s = c[code.toLowerCase()] || seccionInicial(code), err = S.errores['blk.' + code];
+      return `<div class="blk ${err ? 'blk-bad' : ''}" id="blk_${code}"><div class="blk-head"><span class="code">${code}</span><h3>${BLOQUES[code].nombre}</h3></div>
+        <p class="hint" style="margin:-6px 0 0">${BLOQUES[code].desc}</p>
+        ${camposBloque(code, s)}
+        ${err ? `<span class="ferr">${esc(err.join(' '))}</span>` : ''}</div>`; }).join('')}
+    <div class="notice"><div><b>En n8n:</b> cada plantilla se importa una vez como workflow aparte (no hace falta activarla) y su id va en el nodo AJUSTES del Generador, en <span class="mono">PLANTILLAS</span>. El Generador copia sus nodos y arma un solo workflow para este cliente.</div></div>`;
+}
+function vistaOpciones() {
+  const ops = S.edit.config.p01.opciones;
+  return ops.length ? ops.map((o, i) => vistaOpcion(o, i)).join('') : '<div class="panel empty-ops" style="padding:18px;color:var(--muted);text-align:center">Escribe la primera opción arriba y aquí aparecerá su desplegable.</div>';
+}
+function badgeOpcion(o) {
+  if (o.accion === 'asesor') return '<span class="badge asesor">Pasa a asesor</span>';
+  if (o.accion === 'modulo') return `<span class="badge">Abre ${esc(o.modulo || 'bloque')}</span>`;
+  const doc = !!texto(o.archivo_url), txt = !!texto(o.respuesta);
+  if (doc && txt) return '<span class="badge">Documento + texto</span>';
+  if (doc) return '<span class="badge">Documento</span>';
+  if (txt) return '<span class="badge">Texto</span>';
+  return '<span class="badge asesor">Sin respuesta</span>';
+}
+function vistaOpcion(o, i) {
+  const abierta = S.edit.abiertas.includes(i) || !!S.errores['op' + i];
+  const asesor = o.accion === 'asesor', modulo = o.accion === 'modulo';
+  const dl = linkDescarga(o.archivo_url);
+  return `<div class="opt ${abierta ? 'open' : ''} ${S.errores['op' + i] ? 'invalid' : ''}">
+    <div class="opt-head">
+      <button type="button" class="opt-toggle" data-toggle="${i}" aria-expanded="${abierta}">
+        <span class="opt-num" aria-hidden="true">${i + 1}</span>
+        <span class="opt-title">${esc(o.titulo)}</span>
+        ${badgeOpcion(o)}
+        <svg class="chev" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    ${abierta ? `<div class="opt-body"><div style="display:flex;flex-direction:column;gap:12px">
+      <div class="radio-row" role="radiogroup" aria-label="Qué hace la opción ${i + 1}">
+        <label><input type="radio" name="acc${i}" value="responder" data-op="${i}" data-k="accion" ${asesor || modulo ? '' : 'checked'}>Responde con texto o documento</label>
+        <label ${bloquesUsados(S.edit.config).length || modulo ? '' : 'title="Primero marca plantillas en el paso 3"'}><input type="radio" name="acc${i}" value="modulo" data-op="${i}" data-k="accion" ${modulo ? 'checked' : ''} ${bloquesUsados(S.edit.config).length || modulo ? '' : 'disabled'}>Abre una plantilla</label>
+        <label><input type="radio" name="acc${i}" value="asesor" data-op="${i}" data-k="accion" ${asesor ? 'checked' : ''}>Pasa a un asesor</label>
+      </div>
+      ${asesor ? '<p class="hint">El cliente recibe el aviso de asesor que configuras en el paso 7.</p>' : modulo ? `
+      <div class="field"><label for="op${i}m">Qué plantilla abre</label><select id="op${i}m" data-op="${i}" data-k="modulo">${ORDEN_BLOQUES.filter(b => bloquesUsados(S.edit.config).includes(b) || b === o.modulo).map(b => `<option value="${b}" ${o.modulo === b ? 'selected' : ''}>${b} · ${BLOQUES[b].nombre}</option>`).join('')}</select>
+        <span class="hint">${esc(BLOQUES[o.modulo]?.desc || '')} La configuras en el paso 5.</span></div>` : `
+      <div class="filebox">
+        <span class="flabel"><b style="font-weight:600">Documento (opcional)</b></span>
+        <div class="grid2">
+          <div class="field"><label for="op${i}u">Link compartido de Drive</label><input type="url" id="op${i}u" data-op="${i}" data-k="archivo_url" value="${esc(o.archivo_url || '')}" placeholder="https://drive.google.com/file/d/…/view"></div>
+          <div class="field"><label for="op${i}n">Nombre del archivo</label><input type="text" id="op${i}n" data-op="${i}" data-k="archivo_nombre" value="${esc(o.archivo_nombre || '')}" placeholder="Ej: Catálogo 2026"></div>
+        </div>
+        <span class="hint">En Drive, el archivo debe estar compartido como "Cualquier persona con el enlace" y pesar menos de 100 MB.</span><span class="dl" id="op${i}dl">${dl && dl !== texto(o.archivo_url) ? `Link de descarga que usará el worker: ${esc(dl)}` : ''}</span>
+      </div>
+      <div class="field"><label for="op${i}r" id="op${i}rl">${texto(o.archivo_url) ? 'Texto que acompaña al documento (caption)' : 'Texto de respuesta'}</label><div class="vars">${['nombre', 'negocio', 'asistente'].map(x => `<button type="button" data-insert="${x}" data-target="op${i}r">{${x}}</button>`).join('')}</div><textarea id="op${i}r" data-op="${i}" data-k="respuesta" rows="3" placeholder="${texto(o.archivo_url) ? 'Ej: 💐 Aquí tienes nuestro catálogo actualizado' : 'Lo que el bot contesta al elegir esta opción'}">${esc(o.respuesta)}</textarea>
+        <span class="hint">${texto(o.archivo_url) ? 'Va pegado al documento, como su descripción. Máximo 1024 caracteres.' : 'Si agregas un documento arriba, este texto irá como su descripción.'}</span></div>`}
+      <details class="more"><summary>Más opciones</summary><div style="display:flex;flex-direction:column;gap:12px">
+        <div class="field"><label for="op${i}p">Palabras que también la activan</label><input type="text" id="op${i}p" data-op="${i}" data-k="palabras" value="${esc((o.palabras || []).join(', '))}" placeholder="Ej: catalogo, precios"><span class="hint">Si el cliente escribe una de estas palabras en vez del número. Separadas por coma.</span></div>
+      </div></details>
+      ${S.errores['op' + i] ? `<span class="ferr">${esc(S.errores['op' + i].join(' '))}</span>` : ''}
+    </div></div>` : ''}
+  </div>`;
+}
+function vistaRevision() {
+  const E = S.edit, c = E.config, ops = c.p01.opciones;
+  const pq = PAQUETES.find(p => p.id === E.meta.paquete) || PAQUETES[0];
+  const fila = (k, v, paso) => `<div class="rrow"><span class="rk">${k}</span><div class="rv">${v}</div><button type="button" class="btn sm ghost" data-paso="${paso}">Cambiar</button></div>`;
+  const falta = '<span class="ferr">Falta</span>';
+  const errs = listaErrores(validar(c, E.cred));
+  const alc = alcanzables(c), sueltos = bloquesUsados(c).filter(b => !alc.has(b));
+  return `${sueltos.length ? `<div class="notice"><div><b>Aviso:</b> ninguna opción del menú abre ${sueltos.join(', ')}. Se copiará al worker, pero el cliente no llegará a ella.</div></div>` : ''}${errs.length ? `<div class="notice bad"><div><b>Antes de crear, corrige esto:</b><ul>${errs.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div></div>` : `<div class="notice ${S.ajustes.modo === 'real' ? 'ok' : 'info'}"><div>${S.ajustes.modo === 'real' ? '<b>Todo listo.</b> Al tocar "Crear en n8n" se envía a tu Generador.' : '<b>Modo simulado.</b> Al tocar "Crear en n8n" no se crea nada de verdad. Cámbialo en Conexión n8n.'}</div></div>`}
+  <div class="review">
+    ${fila('Negocio', `${esc(c.negocio.nombre) || falta}${c.negocio.nombre_asistente ? ` · asistente <b>${esc(c.negocio.nombre_asistente)}</b>` : ''}<br><span class="hint">${esc(E.meta.tipo_negocio)} · ${esc(c.negocio.zona_horaria)}</span>`, 0)}
+    ${fila('Plantillas', `<span class="mods" style="display:inline-flex;margin-left:6px;gap:4px;flex-wrap:wrap">${['BASE', 'P01', ...bloquesUsados(c), 'P12'].map(m => `<span class="mod">${m}</span>`).join('')}</span>`, 2)}
+    ${fila('WhatsApp', `${c.whatsapp.phone_number_id ? `<span class="mono">${esc(c.whatsapp.phone_number_id)}</span>` : falta}<br><span class="hint">${E.cred.modo === 'nuevas' ? `Credenciales nuevas: ${esc(E.cred.nombre)}${E.cred.token ? '' : ' (falta el token)'}` : 'Credenciales de Nissitech'}</span>`, 1)}
+    ${fila('Horario', esc(c.horario.texto) || falta, 1)}
+    ${fila('Menú', `<ol>${ops.map(o => `<li>${esc(texto(o.titulo) || 'Sin título')} <span class="hint">· ${o.accion === 'asesor' ? 'pasa a asesor' : o.accion === 'modulo' ? 'abre ' + esc(o.modulo) : texto(o.archivo_url) ? (texto(o.respuesta) ? 'documento + texto' : 'documento') : 'texto'}</span></li>`).join('')}</ol>`, 3)}
+    ${fila('Configuración', bloquesUsados(c).length ? `<span class="mods" style="display:inline-flex;gap:4px;flex-wrap:wrap">${bloquesUsados(c).map(b => `<span class="mod">${b}</span>`).join('')}</span><br><span class="hint">${bloquesUsados(c).map(b => BLOQUES[b].nombre).join(' · ')}</span>` : '<span class="hint">Ninguno</span>', 4)}
+    ${fila('Mensajes', `<span class="hint">Saludo:</span> ${esc((c.p01.saludo || DEFAULTS.p01.saludo).replace(/\n/g, ' '))}`, 5)}
+    ${fila('Asesor y pausa', `${esc(c.p12.nombre_asesor || DEFAULTS.p12.nombre_asesor)} · modo pausa ${c.interruptores.pausa ? '<b>prendido</b>' : 'apagado'}`, 6)}
+  </div>
+  <button type="button" class="btn ghost" data-act="ver-json" style="align-self:flex-start">Ver lo que se envía a n8n</button>`;
+}
+function pintarResultado() {
+  const r = S.resultado; if (!r) return '';
+  if (r.ok) {
+    const d = r.data;
+    return `<div class="notice ok" style="margin-top:14px"><div><b>Worker creado${r.simulado ? ' (simulado)' : ''}.</b> ${esc(d.nombre || '')} con id <span class="mono">${esc(d.workflowId)}</span> y worker_id <span class="mono">${esc(d.worker_id)}</span>. ${esc(d.siguiente_paso || '')}${d.credenciales?.creadas ? ` Credenciales creadas en n8n: <span class="mono">${esc([d.credenciales.token, d.credenciales.trigger].filter(Boolean).join(', '))}</span>.` : ''}
+      ${(d.plantillas || []).length ? `<div style="margin-top:6px">Plantillas copiadas: <span class="mono">${esc([].concat(d.plantillas).map(x => typeof x === 'string' ? x : (x.codigo || x.code || JSON.stringify(x))).join(', '))}</span></div>` : ''}
+      ${(d.avisos || []).length ? `<div style="margin-top:8px"><b>Avisos del Generador:</b><ul>${d.avisos.map(a => `<li>${esc(a)}</li>`).join('')}</ul></div>` : ''}
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${d.enlace ? `<a class="btn sm" href="${esc(d.enlace)}" target="_blank" rel="noopener">Abrir en n8n</a>` : ''}<a class="btn sm ghost" href="#workers">Ver en la lista</a></div></div></div>`;
+  }
+  return `<div class="notice bad" style="margin-top:14px"><div><b>No se creó el worker.</b><ul>${r.errores.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div></div>`;
+}
+
+
+/* Credenciales de Meta: el formulario las pide y el Generador las crea en n8n. Nunca se guardan en este panel. */
+function credCampo(k, label, { tipo = 'text', ph = '', hint = '', full = false } = {}) {
+  const err = S.errores['cred.' + k];
+  return `<div class="field ${err ? 'invalid' : ''}" ${full ? 'style="grid-column:1/-1"' : ''}><label for="cr_${k}">${label}</label>
+    <input type="${tipo}" id="cr_${k}" data-cred="${k}" value="${esc(S.edit.cred[k] || '')}" placeholder="${esc(ph)}" autocomplete="off" spellcheck="false">
+    ${err ? `<span class="ferr">${esc(err.join(' '))}</span>` : ''}${hint ? `<span class="hint">${hint}</span>` : ''}</div>`;
+}
+function vistaCredenciales() {
+  const cr = S.edit.cred, nuevas = cr.modo === 'nuevas';
+  const sugerido = 'WhatsApp · ' + (S.edit.config.negocio.nombre || 'cliente');
+  return `<div class="field" style="gap:10px;border-top:1px solid var(--line);padding-top:14px">
+    <span class="flabel">Credenciales de WhatsApp en n8n</span>
+    <div class="radio-row" role="radiogroup" aria-label="Credenciales">
+      <label><input type="radio" name="credmodo" value="existentes" data-cred="modo" ${nuevas ? '' : 'checked'}>Usar las de Nissitech</label>
+      <label><input type="radio" name="credmodo" value="nuevas" data-cred="modo" ${nuevas ? 'checked' : ''}>Crear credenciales para este cliente</label>
+    </div>
+    <span class="hint">${nuevas ? 'El Generador crea las credenciales en n8n con estos datos y se las pone al worker nuevo.' : 'El worker usa las credenciales que están en el nodo AJUSTES del Generador. Sirve para pruebas con el número del proyecto.'}</span>
+    ${nuevas ? `<div class="grid2">
+      ${credCampo('nombre', 'Nombre de la credencial', { ph: sugerido, hint: 'Así aparecerá en n8n → Credentials.' })}
+      ${credCampo('token', 'Token de acceso de Meta', { tipo: 'password', ph: 'EAAG…', hint: 'El token permanente del usuario del sistema. Solo el token, sin "Bearer".' })}
+      ${credCampo('app_id', 'App ID (opcional)', { ph: 'Ej: 1234567890123456', hint: 'Solo si el cliente tiene su propia app de Meta. Lo usa el WhatsApp Trigger para recibir mensajes.' })}
+      ${credCampo('app_secret', 'App Secret (opcional)', { tipo: 'password', ph: 'Va junto con el App ID', hint: 'Meta for Developers → tu app → Configuración → Básica.' })}
+    </div>
+    <div class="notice info"><div><b>El token no se guarda en este panel.</b> Viaja una sola vez al Generador, n8n lo guarda cifrado como credencial y aquí solo queda el nombre. Si guardas el borrador, tendrás que pegarlo otra vez antes de crear.</div></div>` : ''}
+  </div>`;
+}
+
+/* Vista previa: simulador con la misma lógica que P01 y P12 */
+function vistaPreview() {
+  const c = efectiva(S.edit.config);
+  if (!S.chat) iniciarChat();
+  const ini = (S.edit.config.negocio.nombre_asistente || S.edit.config.negocio.nombre || 'W').trim().charAt(0).toUpperCase();
+  return `<aside class="preview panel" aria-label="Vista previa en WhatsApp">
+    <div class="pv-head"><div class="avatar" aria-hidden="true">${esc(ini)}</div>
+      <div class="who"><b>${esc(S.edit.config.negocio.nombre || 'Tu negocio')}</b><span>Vista previa · así responderá el bot</span></div>
+      <button type="button" class="btn sm ghost" data-act="chat-reset">Reiniciar</button></div>
+    <div class="chat" id="chat" aria-live="polite">${pintarChat()}</div>
+    <div class="pv-quick">${['Hola', '1', '2', 'asesor', 'xyz', 'gracias'].map(t => `<button type="button" class="chip" data-say="${t}">${t}</button>`).join('')}</div>
+    <form class="pv-input" id="pvForm"><input type="text" id="pvText" placeholder="Escribe como si fueras el cliente" aria-label="Mensaje de prueba"><button class="btn primary sm" type="submit">Enviar</button></form>
+    <div class="pv-foot"><label class="switch" style="font-weight:400"><input type="checkbox" id="pvHorario" ${S.chat.dentro ? 'checked' : ''}>Dentro del horario</label><span>Cliente: ${esc(S.chat.nombre)}</span></div>
+  </aside>`;
+}
+function iniciarChat() {
+  S.chat = { msgs: [], mem: { estado: '', intentos: 0 }, dentro: true, nombre: 'Ana' };
+  hablar('Hola');
+}
+function pintarChat() {
+  return S.chat.msgs.map(m => m.sys ? `<div class="sysline">${esc(m.texto)}</div>` : `<div class="bub ${m.yo ? 'out' : 'in'}">${m.doc ? `<div class="doc"><span class="ic">PDF</span><b>${esc(m.doc)}</b></div>` : ''}${waFormat(m.texto)}<span class="t">${m.hora}</span></div>`).join('');
+}
+function hablar(txt) {
+  const cfg = efectiva(S.edit.config), p01 = cfg.p01, ch = S.chat, mem = ch.mem;
+  const h = new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+  ch.msgs.push({ yo: true, texto: txt, hora: h });
+  const norm = (s) => String(s ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9ñ ]/g, ' ').replace(/\s+/g, ' ').trim();
+  const t = norm(txt);
+  const contiene = (p) => { const w = norm(p); return w !== '' && (` ${t} `).includes(` ${w} `); };
+  const rellenar = (s) => String(s ?? '').replace(/\s*\{nombre\}/g, ch.nombre ? ' ' + ch.nombre : '').replaceAll('{negocio}', cfg.negocio.nombre).replaceAll('{asistente}', cfg.negocio.nombre_asistente);
+  const menu = p01.instruccion_menu + '\n\n' + p01.opciones.map(o => `*${o.numero}* ${o.titulo}` + (o.descripcion ? `\n      _${o.descripcion}_` : '')).join('\n\n');
+  const bienvenida = rellenar(p01.saludo) + '\n\n' + menu;
+  const derivar = (motivo) => {
+    const pl = ch.dentro ? cfg.p12.msg_derivacion : cfg.p12.msg_fuera_horario;
+    ch.msgs.push({ sys: true, texto: 'P12 · ' + motivo });
+    mem.estado = mem.estado || 'en_menu'; mem.intentos = 0;
+    return pl.replaceAll('{asesor}', cfg.p12.nombre_asesor).replaceAll('{horario}', cfg.horario.texto);
+  };
+  let r, doc = null;
+  if (cfg.interruptores.pausa) r = cfg.interruptores.mensaje_pausa;
+  else {
+    const opciones = p01.opciones.map((o, i) => ({ ...o, numero: String(i + 1) }));
+    const opcion = opciones.find(o => t === norm(o.numero) || (o.palabras || []).some(contiene));
+    if ((cfg.p12.palabras_asesor || []).some(contiene)) r = derivar('pidió hablar con una persona');
+    else if (mem.estado === '') { r = bienvenida; mem.estado = 'en_menu'; mem.intentos = 0; }
+    else if (opcion && opcion.accion === 'modulo') { mem.intentos = 0; ch.msgs.push({ sys: true, texto: `${opcion.modulo} · ${BLOQUES[opcion.modulo]?.nombre || 'bloque'}: desde aquí responde el bloque en n8n` }); r = null; }
+    else if (opcion) { mem.intentos = 0; if (opcion.accion !== 'asesor' && texto(opcion.archivo_url)) doc = texto(opcion.archivo_nombre) || 'Documento'; r = opcion.accion === 'asesor' ? derivar(`eligió la opción ${opcion.numero}`) : rellenar(doc ? opcion.respuesta : respuestaFinal(opcion)).trim() + p01.pie_respuesta; }
+    else if ((p01.palabras_menu || []).some(contiene)) { r = bienvenida; mem.intentos = 0; }
+    else if ((p01.palabras_despedida || []).some(contiene)) { r = rellenar(p01.msg_despedida); mem.estado = ''; mem.intentos = 0; }
+    else if (bloquesUsados(S.edit.config).includes('P17') && S.edit.config.p17?.usar_como_respaldo !== false) { mem.intentos = 0; ch.msgs.push({ sys: true, texto: 'P17 · Agente IA: aquí la IA responde con la información del negocio y luego vuelve al menú' }); r = null; }
+    else {
+      mem.intentos++;
+      if (p01.max_intentos_invalidos && mem.intentos >= p01.max_intentos_invalidos) r = derivar(`no entendió ${mem.intentos} veces`);
+      else r = rellenar(p01.msg_opcion_invalida) + '\n\n' + menu;
+    }
+  }
+  if (r !== null) ch.msgs.push({ yo: false, texto: doc ? r.replace(/^\s+/, '') : r, hora: h, doc });
+}
+function refrescarPreview() {
+  const box = $('.preview'); if (!box) return;
+  const tmp = document.createElement('div'); tmp.innerHTML = vistaPreview();
+  box.replaceWith(tmp.firstElementChild); montarPreview();
+}
+function montarPreview() {
+  const chat = $('#chat'); chat.scrollTop = chat.scrollHeight;
+  $$('[data-say]').forEach(b => b.addEventListener('click', () => { hablar(b.dataset.say); refrescarPreview(); }));
+  $('#pvForm').addEventListener('submit', (e) => { e.preventDefault(); const v = $('#pvText').value.trim(); if (!v) return; hablar(v); refrescarPreview(); $('#pvText').focus(); });
+  $('#pvHorario').addEventListener('change', (e) => { S.chat.dentro = e.target.checked; S.chat.msgs.push({ sys: true, texto: e.target.checked ? 'Ahora dentro del horario' : 'Ahora fuera del horario' }); refrescarPreview(); });
+  $('[data-act="chat-reset"]').addEventListener('click', () => { S.chat = null; refrescarPreview(); });
+}
+
+function leerFormulario() {
+  const E = S.edit, c = E.config;
+  $$('#wform [data-path]').forEach(el => {
+    const v = el.dataset.lista ? el.value.split(',').map(s => s.trim()).filter(Boolean) : el.value;
+    setPath(c, el.dataset.path, v);
+  });
+  $$('#wform [data-num]').forEach(el => setPath(c, el.dataset.num, Number(el.value)));
+  $$('#wform [data-bool]').forEach(el => setPath(c, el.dataset.bool, el.checked));
+  $$('#wform [data-op]').forEach(el => {
+    const o = c.p01.opciones[Number(el.dataset.op)]; if (!o) return;
+    if (el.type === 'radio') { if (el.checked) o.accion = el.value; return; }
+    o[el.dataset.k] = el.dataset.k === 'palabras' ? el.value.split(',').map(s => s.trim()).filter(Boolean) : el.value;
+  });
+  $$('#wform [data-item]').forEach(el => {
+    const it = c.p04?.items?.[Number(el.dataset.item)]; if (!it) return;
+    if (el.dataset.ik === 'url' || el.dataset.ik === 'nombre') { it.archivo = it.archivo || {}; it.archivo[el.dataset.ik] = el.value; } else it[el.dataset.ik] = el.value;
+  });
+  limpiarDependencias(c);
+  asegurarSecciones(c);
+  if (isObj(c.p17)) { const m = texto(c.p17.modelo), esClaude = /^claude-/.test(m);
+    if ((c.p17.proveedor || 'anthropic') === 'anthropic') { if (!MODELOS_CLAUDE.some(([v]) => v === m)) c.p17.modelo = MODELOS_CLAUDE[0][0]; }
+    else if (esClaude) c.p17.modelo = ''; }
+  $$('#wform [data-cred]').forEach(el => { if (el.type === 'radio') { if (el.checked) E.cred.modo = el.value; } else E.cred[el.dataset.cred] = el.value; });
+  if (E.cred.modo === 'nuevas' && !texto(E.cred.nombre)) E.cred.nombre = 'WhatsApp · ' + (c.negocio.nombre || 'cliente');
+  E.meta.credenciales = { modo: E.cred.modo, nombre: E.cred.modo === 'nuevas' ? texto(E.cred.nombre) : '' };
+  E.meta.tipo_negocio = $('#f_tipo').value;
+  E.meta.etiquetas = $('#f_tags').value.split(',').map(s => s.trim()).filter(Boolean);
+  const pq = $('#wform input[name="paquete"]:checked'); if (pq) E.meta.paquete = pq.value;
+  c.p01.opciones.forEach((o, i) => { o.numero = String(i + 1); });
+  if (!E.manual) c.horario.texto = textoHorario(c.horario.dias, c.horario.desde, c.horario.hasta);
+}
+function refrescarOpciones() {
+  const box = $('#optsList'); if (!box) return;
+  box.innerHTML = vistaOpciones();
+  const n = S.edit.config.p01.opciones.length, mc = $('#menuCount'); if (mc) mc.textContent = `${n} ${n === 1 ? 'opción' : 'opciones'}`;
+  montarOpciones(box);
+}
+function montarOpciones(root) {
+  $$('[data-toggle]', root).forEach(b => b.addEventListener('click', () => { leerFormulario(); const i = Number(b.dataset.toggle), a = S.edit.abiertas; S.edit.abiertas = a.includes(i) ? a.filter(x => x !== i) : [...a, i]; if (!S.edit.abiertas.includes(i)) delete S.errores['op' + i]; refrescarOpciones(); }));
+  $$('[data-insert]', root).forEach(b => b.addEventListener('click', () => insertarVar(b)));
+}
+function insertarVar(b) {
+  const el = document.getElementById(b.dataset.target); if (!el) return;
+  const ins = `{${b.dataset.insert}}`, s = el.selectionStart ?? el.value.length, e2 = el.selectionEnd ?? s;
+  el.value = el.value.slice(0, s) + ins + el.value.slice(e2); el.focus(); el.setSelectionRange(s + ins.length, s + ins.length);
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+}
+function rerenderEditor() {
+  const y = window.scrollY, act = document.activeElement?.id;
+  $('#main').innerHTML = vistaEditor(); montarEditor();
+  window.scrollTo(0, y);
+  if (act && document.getElementById(act)) document.getElementById(act).focus();
+}
+function guardarEnLista(estado) {
+  const E = S.edit; const ahora = new Date().toISOString();
+  let w = E.id ? S.workers.find(x => x.id === E.id) : null;
+  if (!w) { w = { id: uid(), ejemplo: false, estado: 'borrador', n8n: null, creado_en: ahora }; S.workers.push(w); E.id = w.id; }
+  w.meta = clone(E.meta); w.config = clone(E.config); w.actualizado_en = ahora;
+  if (estado) w.estado = estado;
+  guardarWorkers(); pintarModo();
+  return w;
+}
+function montarEditor() {
+  const m = $('#main'), form = $('#wform');
+  let tPreview, tMenu;
+  form.addEventListener('input', (e) => {
+    if (e.target.dataset.path === 'horario.texto') S.edit.manual = true;
+    if (e.target.id === 'f_menu') {
+      leerFormulario(); S.edit.menuTexto = e.target.value;
+      clearTimeout(tMenu); tMenu = setTimeout(() => { sincronizarMenu(S.edit.menuTexto); limpiarDependencias(S.edit.config); refrescarErrores(); if (!S.edit.abiertas.length && S.edit.config.p01.opciones.length) S.edit.abiertas = [0]; refrescarOpciones(); S.chat = null; refrescarPreview(); }, 250);
+      return;
+    }
+    if (e.target.dataset.k === 'archivo_url' || e.target.dataset.k === 'respuesta') { const o = S.edit.config.p01.opciones[Number(e.target.dataset.op)]; if (o) { o[e.target.dataset.k] = e.target.value; const bd = e.target.closest('.opt')?.querySelector('.badge'); if (bd) bd.outerHTML = badgeOpcion(o);
+      if (e.target.dataset.k === 'archivo_url') { const i = e.target.dataset.op, u = e.target.value.trim(), dl = linkDescarga(u), lb = document.getElementById(`op${i}rl`), dlb = document.getElementById(`op${i}dl`);
+        if (lb) lb.textContent = u ? 'Texto que acompaña al documento (caption)' : 'Texto de respuesta';
+        if (dlb) dlb.textContent = dl && dl !== u ? `Link de descarga que usará el worker: ${dl}` : ''; } } }
+    leerFormulario();
+    const h1 = $('.view-head h1'); if (h1) h1.textContent = S.edit.config.negocio.nombre || 'Worker sin nombre';
+    if (!S.edit.manual && e.target.dataset.path !== 'horario.texto') { const ht = $('#f_horario_texto'); if (ht) ht.value = S.edit.config.horario.texto; }
+    clearTimeout(tPreview); tPreview = setTimeout(() => { S.chat = null; refrescarPreview(); }, 350);
+  });
+  form.addEventListener('change', (e) => {
+    const t = e.target;
+    if (t.dataset.blq) {
+      leerFormulario(); const c = S.edit.config, sel = bloquesUsados(c), code = t.dataset.blq;
+      if (t.checked) c._bloques = [...sel, code];
+      else if (!quitarPlantilla(code)) { t.checked = true; return; }
+      asegurarSecciones(c); limpiarDependencias(c); refrescarErrores(); S.chat = null; rerenderEditor(); return;
+    }
+    if (t.name === 'paquete') { leerFormulario(); if (aplicarPaquete(t.value)) { S.chat = null; toast('Llené el menú con un ejemplo. Puedes cambiarlo en el paso 4.'); } rerenderEditor(); return; }
+    if (t.type === 'radio' || t.dataset.bool || t.dataset.num || t.tagName === 'SELECT') { leerFormulario(); refrescarErrores(); S.chat = null; rerenderEditor(); }
+  });
+  $$('[data-dia]', m).forEach(b => b.addEventListener('click', () => {
+    leerFormulario(); const d = Number(b.dataset.dia), ds = S.edit.config.horario.dias;
+    S.edit.config.horario.dias = ds.includes(d) ? ds.filter(x => x !== d) : [...ds, d];
+    if (!S.edit.manual) S.edit.config.horario.texto = textoHorario(S.edit.config.horario.dias, S.edit.config.horario.desde, S.edit.config.horario.hasta);
+    S.chat = null; rerenderEditor();
+  }));
+  $$('[data-preset]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); const lleno = aplicarPaquete(b.dataset.preset); S.chat = null; toast(lleno ? 'Marqué sus plantillas y llené el menú con un ejemplo.' : 'Marqué las plantillas de ese paquete.'); rerenderEditor(); }));
+  $$('[data-link]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); const [de, a2] = b.dataset.link.split('>'); asegurarSecciones(S.edit.config); S.edit.config[de.toLowerCase()].siguiente = a2; S.chat = null; toast(`Listo: al terminar ${de}, el cliente pasa a ${a2}.`); rerenderEditor(); }));
+  $$('[data-del-blk]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); if (quitarPlantilla(b.dataset.delBlk)) { asegurarSecciones(S.edit.config); refrescarErrores(); S.chat = null; rerenderEditor(); } }));
+  $$('[data-add-blk]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); const code = b.dataset.addBlk, ops = S.edit.config.p01.opciones;
+    ops.push({ numero: String(ops.length + 1), titulo: BLOQUES[code].opcion, descripcion: '', palabras: [], accion: 'modulo', modulo: code, respuesta: '', archivo_url: '', archivo_nombre: '' });
+    S.edit.menuTexto = textoDelMenu(S.edit.config.p01); S.edit.abiertas = [ops.length - 1]; delete S.errores.alcance; S.chat = null; rerenderEditor(); }));
+  $$('[data-dia-ent]', m).forEach(b => b.addEventListener('click', () => {
+    leerFormulario(); const d = Number(b.dataset.diaEnt), s9 = S.edit.config.p09, ds = s9.dias_entrega || [];
+    s9.dias_entrega = ds.includes(d) ? ds.filter(x => x !== d) : [...ds, d]; rerenderEditor();
+  }));
+  $$('[data-act="item-add"]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); const its = S.edit.config.p04.items; its.push({ titulo: '', texto: '', archivo: { url: '', nombre: '' } }); rerenderEditor(); const n = document.getElementById(`it${its.length - 1}t`); n && n.focus(); }));
+  $$('[data-item-del]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); S.edit.config.p04.items.splice(Number(b.dataset.itemDel), 1); rerenderEditor(); }));
+  $$('[data-insert]', m).filter(b => !b.closest('#optsList')).forEach(b => b.addEventListener('click', () => insertarVar(b)));
+  montarOpciones($('#optsList', m) || m.querySelector('#optsList') || document.createElement('div'));
+  $$('[data-act="add-op"]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); const ops = S.edit.config.p01.opciones; ops.push({ numero: String(ops.length + 1), titulo: '', descripcion: '', palabras: [], accion: 'responder', respuesta: '', archivo_url: '', archivo_nombre: '' }); S.edit.abiertas = [ops.length - 1]; rerenderEditor(); const n = document.getElementById(`op${ops.length - 1}t`); n && n.focus(); }));
+  $$('[data-paso]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); irPaso(Number(b.dataset.paso)); }));
+  $$('[data-act="sig"]', m).forEach(b => b.addEventListener('click', siguiente));
+  $$('[data-act="ant"]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); irPaso(S.paso - 1); }));
+  $$('[data-del]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); const i = Number(b.dataset.del); S.edit.config.p01.opciones.splice(i, 1); S.edit.abiertas = S.edit.abiertas.filter(x => x !== i).map(x => x > i ? x - 1 : x); refrescarErrores(); S.chat = null; rerenderEditor(); }));
+  $$('[data-mv]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); const i = Number(b.dataset.mv), j = i + Number(b.dataset.dir), ops = S.edit.config.p01.opciones; [ops[i], ops[j]] = [ops[j], ops[i]]; S.edit.abiertas = S.edit.abiertas.map(x => x === i ? j : x === j ? i : x); refrescarErrores(); S.chat = null; rerenderEditor(); }));
+  const ha = $('[data-act="horario-auto"]', m); ha && ha.addEventListener('click', () => { leerFormulario(); S.edit.manual = false; S.edit.config.horario.texto = textoHorario(S.edit.config.horario.dias, S.edit.config.horario.desde, S.edit.config.horario.hasta); rerenderEditor(); });
+  $$('[data-act="ver-json"]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); verJSON({ meta: S.edit.meta, config: S.edit.config }, S.edit.cred); }));
+  $$('[data-act="guardar"]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); const w = S.workers.find(x => x.id === S.edit.id); guardarEnLista(w && w.estado !== 'error' ? null : 'borrador'); toast('Borrador guardado en este navegador'); rerenderEditor(); }));
+  $$('[data-act="crear"]', m).forEach(b => b.addEventListener('click', crear));
+  montarPreview();
+}
+/* Quita una plantilla y lo que depende de ella (opciones del menú que la abren y plantillas que solo iban después). false si la persona cancela. */
+function quitarPlantilla(code) {
+  const c = S.edit.config, { ops, blqs } = dependientesDe(c, code);
+  if (ops.length || blqs.length) {
+    const partes = [];
+    if (ops.length) partes.push(`la opción del menú ${ops.map(([o, i]) => `${i + 1} "${texto(o.titulo)}"`).join(' y ')}`);
+    if (blqs.length) partes.push(`${blqs.map(b => `${b} ${BLOQUES[b].nombre}`).join(' y ')}, que solo se usaba${blqs.length > 1 ? 'n' : ''} después de ${code}`);
+    if (!confirm(`Al quitar ${code} ${BLOQUES[code].nombre} también se quita ${partes.join(', y ')}. ¿Seguir?`)) return false;
+  }
+  const fuera = new Set([code, ...blqs]);
+  c._bloques = bloquesUsados(c).filter(b => !fuera.has(b));
+  if (ops.length) {
+    const idx = new Set(ops.map(([, i]) => i));
+    c.p01.opciones = c.p01.opciones.filter((_, i) => !idx.has(i)).map((o, i) => ({ ...o, numero: String(i + 1) }));
+    S.edit.menuTexto = textoDelMenu(c.p01); S.edit.abiertas = [];
+  }
+  limpiarDependencias(c);
+  toast(`Quité ${[...fuera].join(', ')}${ops.length ? ' y su opción del menú' : ''}.`);
+  return true;
+}
+function irPaso(k) {
+  S.paso = Math.max(0, Math.min(PASOS.length - 1, k));
+  rerenderEditor(); window.scrollTo(0, 0);
+}
+function siguiente() {
+  leerFormulario();
+  const todos = validar(S.edit.config, S.edit.cred);
+  const mios = Object.fromEntries(Object.entries(todos).filter(([k]) => pasoDeError(k) === S.paso));
+  if (Object.keys(mios).length) {
+    S.errores = mios; rerenderEditor();
+    const first = $('.invalid, .blk-bad'); first && first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    toast('Completa los campos marcados en rojo'); return;
+  }
+  S.errores = {}; irPaso(S.paso + 1);
+}
+async function crear() {
+  leerFormulario();
+  S.errores = validar(S.edit.config, S.edit.cred);
+  if (listaErrores(S.errores).length) {
+    S.resultado = null; S.paso = Math.min(...Object.keys(S.errores).map(pasoDeError)); rerenderEditor(); window.scrollTo(0, 0);
+    const first = $('.invalid, .blk-bad'); first && first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    toast('Revisa los campos marcados en rojo'); return;
+  }
+  const w = guardarEnLista(null);
+  S.enviando = true; S.resultado = null; rerenderEditor();
+  const r = await enviar(armarEnvio(w, S.edit.cred));
+  const res = leerRespuesta(r);
+  S.enviando = false;
+  const ahora = new Date().toISOString();
+  const modo = r.simulado ? 'simulado' : 'real';
+  if (res.ok) {
+    const d = res.data;
+    w.n8n = { workflowId: d.workflowId, enlace: d.enlace, worker_id: d.worker_id, activo: !!d.activo, nombre: d.nombre, modo, enviado_en: ahora, credenciales: d.credenciales || null };
+    S.edit.cred.token = ''; S.edit.cred.app_secret = ''; S.edit.cred.ia_key = '';
+    w.estado = d.activo ? 'activo' : 'creado';
+    const sel = bloquesUsados(w.config);
+    if (d.config && isObj(d.config)) { w.config = d.config; w.config._bloques = sel; normalizarConfig(w.config); }
+    else if (d.worker_id) w.config.worker_id = d.worker_id;
+    S.edit.config = clone(w.config);
+    S.resultado = { ok: true, data: d, simulado: r.simulado };
+  } else {
+    w.n8n = { errores: res.errores, modo, enviado_en: ahora }; w.estado = 'error';
+    S.resultado = { ok: false, errores: res.errores };
+  }
+  w.actualizado_en = ahora; guardarWorkers();
+  rerenderEditor();
+  $('#resultado')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/* ───────── Vista: Plantillas ───────── */
+function vistaPlantillas() {
+  const grupo = (est, titulo, nota) => {
+    const ts = PLANTILLAS.filter(p => p.estado === est);
+    if (!ts.length) return '';
+    return `<section class="group"><div class="group-head"><h3>${titulo}</h3><span class="mono">${ts.length}</span></div>
+      ${nota ? `<p class="hint" style="margin:-4px 0 10px">${nota}</p>` : ''}
+      <div class="tgrid">${ts.map(p => `<div class="tcard panel ${est === 'lista' ? '' : 'soon'}"><div class="tc-top"><span class="code">${p.code}</span>${est === 'lista' ? '<span class="state activo">Lista</span>' : est === 'prioridad' ? '<span class="state creado">Prioridad</span>' : '<span class="state borrador">Después</span>'}</div><h3>${p.nombre}</h3><p>${p.desc}</p></div>`).join('')}</div></section>`;
+  };
+  return `
+  <div class="view-head"><div><div class="eyebrow">Biblioteca</div><h1>Plantillas y paquetes</h1>
+    <p>Una plantilla es un bloque de n8n con una sola función. Un paquete junta varias para un tipo de negocio. El formulario solo puede pedir lo que las plantillas listas saben hacer.</p></div></div>
+  <section class="group"><div class="group-head"><h3>Paquetes</h3></div>
+    <div class="tgrid">${PAQUETES.map(p => `<div class="tcard panel ${p.disponible ? '' : 'soon'}"><div class="tc-top"><h3>${p.nombre}</h3>${p.disponible ? '<span class="state activo">Disponible</span>' : '<span class="state borrador">Próximamente</span>'}</div><p>${p.desc}</p><div class="flow">${p.mods.map((m, i) => `${i ? '<span class="arrow">→</span>' : ''}<span class="mod ${p.disponible ? '' : 'off'}">${m}</span>`).join('')}</div></div>`).join('')}</div>
+  </section>
+  ${grupo('lista', 'Listas para usar', 'Cada plantilla vive en n8n como workflow aparte, solo como pieza. El Generador v0.6 copia las que elijas y crea un worker independiente con todo adentro: si después cambias o borras una plantilla, los workers ya creados no se tocan.')}
+  ${grupo('prioridad', 'Prioridad', 'Las siguientes en construirse. Cuando una esté probada, el formulario suma una sección para configurarla.')}
+  ${grupo('despues', 'Más adelante', '')}`;
+}
+
+/* ───────── Vista: Conexión n8n ───────── */
+function vistaConexion() {
+  const a = S.ajustes;
+  if (FIJA) return `
+  <div class="view-head"><div><div class="eyebrow">Ajustes</div><h1>Conexión con n8n</h1>
+    <p>Este panel ya viene conectado al Generador de Nissitech. No hay nada que configurar aquí.</p></div></div>
+  <div class="conn"><form class="panel fsec" id="connForm" novalidate autocomplete="off">
+    <div class="notice ok"><div><b>Conectado a n8n.</b> Los workers se crean de verdad en <span class="mono">${esc(a.n8nBase || new URL(a.url).origin)}</span>.</div></div>
+    <div class="field"><span class="flabel">Dirección del Generador</span><span class="mono" style="word-break:break-all">${esc(a.url)}</span>
+      <span class="hint">Se cambia en el archivo <span class="mono">workeros-config.js</span>, en el servidor.</span></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" data-act="probar">Probar conexión</button></div>
+    <div id="connRes"></div>
+  </form></div>`;
+  return `
+  <div class="view-head"><div><div class="eyebrow">Ajustes</div><h1>Conexión con n8n</h1>
+    <p>Aquí se dice a dónde manda el formulario los datos. Mientras el Generador no esté publicado, usa el modo simulado: todo funciona igual pero no se crea nada de verdad.</p></div></div>
+  <div class="conn">
+    <form class="panel fsec" id="connForm" novalidate autocomplete="off">
+      <div class="field"><span class="flabel">Modo</span>
+        <div class="seg" role="group" aria-label="Modo"><button type="button" data-modo="simulado" aria-pressed="${a.modo === 'simulado'}">Simulado</button><button type="button" data-modo="real" aria-pressed="${a.modo === 'real'}">n8n real</button></div>
+        <span class="hint">${a.modo === 'simulado' ? 'Las respuestas son inventadas, para probar el panel.' : 'El formulario envía los datos al Generador de tu n8n.'}</span></div>
+      <div class="field"><label for="cUrl">Dirección del Generador (webhook)</label>
+        <input type="url" id="cUrl" value="${esc(a.url)}" placeholder="https://n8n.nissitech.cloud/webhook/workeros/crear-worker">
+        <span class="hint">Está en n8n, en el primer nodo del workflow "WorkerOS · Generador" (Production URL). Para pruebas sirve la Test URL, que cambia <span class="mono">/webhook/</span> por <span class="mono">/webhook-test/</span>.</span></div>
+      <div class="grid2">
+        <div class="field"><label for="cHeader">Nombre del encabezado</label><input type="text" id="cHeader" value="${esc(a.header)}" placeholder="X-WorkerOS-Key"><span class="hint">Debe ser igual al "Name" de la credencial Header Auth del Generador.</span></div>
+        <div class="field"><label for="cClave">Clave</label><input type="password" id="cClave" value="${esc(a.clave)}" placeholder="La clave secreta"><span class="hint">El "Value" de esa credencial. Se guarda solo en este navegador.</span></div>
+      </div>
+      <div class="field"><label for="cBase">Dirección de tu n8n (opcional)</label><input type="url" id="cBase" value="${esc(a.n8nBase)}" placeholder="https://n8n.nissitech.cloud"><span class="hint">Solo para armar los enlaces "Abrir en n8n" en modo simulado.</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="submit" class="btn primary">Guardar</button><button type="button" class="btn" data-act="probar">Probar conexión</button></div>
+      <div id="connRes"></div>
+    </form>
+    <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+      <div class="panel gloss">
+        <div style="padding:14px 16px 6px"><h2>Palabras que aparecen aquí</h2></div>
+        <details open><summary>API</summary><p>Una puerta para que un programa le pida cosas a otro. La API de n8n permite crear workflows sin entrar a n8n con el mouse. El Generador la usa por dentro.</p></details>
+        <details><summary>Webhook</summary><p>Una dirección web que n8n "escucha". Cuando el formulario manda datos a esa dirección, el workflow arranca. Es como el buzón del Generador.</p></details>
+        <details><summary>Clave y encabezado</summary><p>La clave es una contraseña que viaja con cada envío, en un campo llamado encabezado (header). Si no coincide con la del Generador, n8n rechaza el envío. Así nadie de afuera puede crear workers.</p></details>
+        <details><summary>JSON</summary><p>Un formato de texto para ordenar datos con nombres y valores, como <span class="mono">"nombre": "Florería Demo"</span>. Es lo que viaja del formulario a n8n.</p></details>
+        <details><summary>CORS</summary><p>Una regla de seguridad del navegador: una página solo puede hablar con otro sitio si ese sitio lo permite. En el webhook del Generador hay que poner en Options → Allowed Origins (CORS) la dirección de este panel.</p></details>
+        <details><summary>Workflow y worker</summary><p>Un workflow es un flujo de nodos en n8n. Un worker es un workflow que atiende un WhatsApp, armado con plantillas.</p></details>
+      </div>
+      <div class="panel fsec">
+        <h2>Cómo viaja un worker</h2>
+        <div class="flow" style="gap:6px"><span class="mod">Formulario</span><span class="arrow">→</span><span class="mod">Generador (webhook)</span><span class="arrow">→</span><span class="mod">API de n8n</span><span class="arrow">→</span><span class="mod">Worker nuevo</span></div>
+        <p class="hint">El Generador revisa los datos, los pone en el nodo CONFIG de la plantilla base, crea el worker apagado y responde con su id y enlace. Este panel guarda esa respuesta en la lista.</p>
+      </div>
+    </div>
+  </div>`;
+}
+function montarConexion() {
+  const f = $('#connForm');
+  const leer = () => FIJA ? S.ajustes : Object.assign(S.ajustes, { url: $('#cUrl').value.trim(), header: $('#cHeader').value.trim() || 'X-WorkerOS-Key', clave: $('#cClave').value, n8nBase: $('#cBase').value.trim() });
+  if (!FIJA) $$('[data-modo]', f).forEach(b => b.addEventListener('click', () => { leer(); S.ajustes.modo = b.dataset.modo; guardarAjustes(); render(); }));
+  if (!FIJA) f.addEventListener('submit', (e) => { e.preventDefault(); leer(); guardarAjustes(); pintarModo(); toast('Conexión guardada'); });
+  $('[data-act="probar"]', f).addEventListener('click', async () => {
+    leer(); guardarAjustes(); pintarModo();
+    const box = $('#connRes'); box.innerHTML = '<p class="hint">Probando…</p>';
+    // Se envía un formulario vacío: si la clave y la dirección están bien, el Generador responde "faltan datos" (400) y no crea nada.
+    const r = await enviar({}, { prueba: true });
+    let html;
+    if (r.status === 400 && r.data && r.data.ok === false) html = `<div class="notice ok"><div><b>${r.simulado ? 'Modo simulado: todo listo para probar.' : 'Conexión correcta.'}</b> ${r.simulado ? 'Cambia a "n8n real" cuando el Generador esté publicado.' : 'n8n recibió el envío y la clave es válida. No se creó ningún worker.'}</div></div>`;
+    else { const l = leerRespuesta(r); html = `<div class="notice bad"><div><b>No funcionó.</b> ${esc(l.ok ? 'n8n respondió algo inesperado.' : l.errores[0])}</div></div>`; }
+    box.innerHTML = html;
+  });
+}
+
+/* ───────── Inicio ───────── */
+if (!store.get('workers', null)) guardarWorkers();
+render();
+})();
+</script>
+</body></html>

@@ -1,0 +1,2 @@
+# La conexión real con n8n (tiene la clave) NUNCA va al repositorio: solo se sube a Hostinger
+workeros/workeros-config.js
