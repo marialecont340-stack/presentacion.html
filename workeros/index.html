@@ -214,6 +214,37 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 .menu-count { font-size: 12px; color: var(--muted); }
 .more summary { cursor: pointer; color: var(--accent); font-size: 13px; font-weight: 500; }
 .more[open] summary { margin-bottom: 10px; }
+.tuto { border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); padding: 12px 14px; }
+.tuto > summary { font-size: 14px; }
+.tuto-intro { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+.tuto-part { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
+.tuto-part:first-of-type { border-top: 0; margin-top: 0; padding-top: 0; }
+.tuto-part h4 { margin: 0 0 4px; font-size: 14px; font-family: var(--f-display); color: var(--ink); }
+.tuto-part h4 .tag { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); margin-left: 6px; vertical-align: 1px; }
+.tuto-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start; }
+.tuto-grid > div:last-child { max-width: 440px; }
+.tuto ol { margin: 6px 0 0; padding-left: 20px; font-size: 13px; line-height: 1.55; display: flex; flex-direction: column; gap: 5px; }
+.tuto ol b { font-weight: 600; }
+.tuto .warnline { font-size: 12.5px; color: var(--warn); background: var(--warn-soft); border-radius: 6px; padding: 6px 9px; margin-top: 8px; }
+.shot { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; font-size: 11px; color: var(--ink); box-shadow: var(--shadow); }
+.shot .bar { display: flex; align-items: center; gap: 5px; padding: 6px 8px; background: var(--surface-2); border-bottom: 1px solid var(--line); }
+.shot .bar i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); display: block; }
+.shot .bar span { margin-left: 6px; font-family: var(--f-mono); font-size: 10px; color: var(--muted); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.shot .body { display: grid; grid-template-columns: 34% 1fr; min-height: 118px; }
+.shot .sx { background: var(--surface-2); border-right: 1px solid var(--line); padding: 8px 6px; display: flex; flex-direction: column; gap: 4px; }
+.shot .sx span { padding: 3px 6px; border-radius: 4px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.shot .sx span.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.shot .mx { padding: 9px 10px; display: flex; flex-direction: column; gap: 6px; }
+.shot .mx .t { font-weight: 600; font-size: 12px; }
+.shot .row { display: flex; flex-direction: column; gap: 2px; padding: 5px 6px; border-radius: 5px; border: 1px solid var(--line); }
+.shot .row small { color: var(--muted); font-size: 10px; }
+.shot .row code { font-family: var(--f-mono); font-size: 10.5px; }
+.shot .row.hl { border: 2px solid var(--accent); background: var(--accent-soft); }
+.shot .btnx { align-self: flex-start; background: var(--accent); color: #fff; border-radius: 4px; padding: 3px 8px; font-weight: 600; }
+.shot .btnx.hl { outline: 2px solid #F5B400; outline-offset: 2px; }
+.shot-cap { font-size: 11.5px; color: var(--muted); margin-top: 5px; }
+.ia-off { opacity: .55; pointer-events: none; }
+
 .dl { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); overflow-wrap: anywhere; }
 .bub .doc { display: flex; align-items: center; gap: 10px; background: var(--surface-2); border-radius: 6px; padding: 8px 10px; margin-bottom: 6px; }
 .bub .doc .ic { width: 28px; height: 34px; border-radius: 3px; background: var(--bad); color: #fff; font-size: 9px; font-weight: 700; display: grid; place-items: center; flex: none; }
@@ -347,7 +378,7 @@ pre.json { background: var(--surface-2); border: 1px solid var(--line); border-r
     </nav>
     <div class="side-foot">
       <a class="mode-pill" href="#conexion" id="modePill"><span class="dot"></span><span>Modo simulado</span></a>
-      <p class="hint">Prototipo v0.9 · Generador v0.6</p>
+      <p class="hint">Prototipo v1.0 · Generador v0.7</p>
     </div>
   </aside>
   <main class="main" id="main"></main>
@@ -411,6 +442,12 @@ const FIJAS = [
 const ORDEN_BLOQUES = ['P02', 'P03', 'P04', 'P05', 'P07', 'P09', 'P08', 'P17'];
 /* Modelos de IA que ofrece el formulario (P17 con Claude). El primero es el que usa la plantilla si no se elige. */
 const MODELOS_CLAUDE = [['claude-opus-5-5', 'Opus 5.5 · más inteligente'], ['claude-sonnet-5-5', 'Sonnet 5.5 · equilibrado'], ['claude-haiku-5-5', 'Haiku 5.5 · más barato']];
+/* Modelos para la IA de todo el worker (sección "ia" del Generador v0.7). El primero es el recomendado. */
+const MODELOS_IA = {
+  openai: [['gpt-4o-mini', 'GPT-4o mini · rápido y barato (recomendado)'], ['gpt-4o', 'GPT-4o · más inteligente, cuesta más']],
+  anthropic: [['claude-haiku-5-5', 'Haiku 5.5 · rápido y barato (recomendado)'], ['claude-sonnet-5-5', 'Sonnet 5.5 · equilibrado'], ['claude-opus-5-5', 'Opus 5.5 · más inteligente, cuesta más']]
+};
+const IA_INICIAL = () => ({ activa: true, proveedor: 'openai', modelo: 'gpt-4o-mini', base_url: '', instrucciones: '', conocimiento: '' });
 const PROVEEDORES_IA = [['anthropic', 'Claude (Anthropic)'], ['openai', 'OpenAI (ChatGPT)'], ['compatible', 'Otra compatible con OpenAI (Groq, OpenRouter, DeepSeek…)']];
 const CON_SIGUIENTE = ['P02', 'P05', 'P07', 'P09', 'P08'];
 const TIPOS = ['Floristería', 'Educación', 'Restaurante y comida', 'Salud y belleza', 'Tienda', 'Servicios', 'Otro'];
@@ -492,6 +529,7 @@ function configVacia() {
     horario: { dias: [1, 2, 3, 4, 5, 6], desde: 9, hasta: 20, texto: 'lunes a sábado, de 9:00 am a 8:00 pm' },
     interruptores: { pausa: false, mensaje_pausa: '' },
     memoria: { ttl_segundos: 604800 },
+    ia: IA_INICIAL(),
     p01: { saludo: '', instruccion_menu: '', opciones: [
     ], pie_respuesta: '', msg_opcion_invalida: '', max_intentos_invalidos: 3, palabras_menu: [], palabras_despedida: [], msg_despedida: '', msg_archivo_no_soportado: '' },
     p12: { palabras_asesor: [], nombre_asesor: '', msg_derivacion: '', msg_fuera_horario: '' }
@@ -594,7 +632,7 @@ function seccionInicial(code) {
     case 'P07': return { pedir_cantidad: false, permitir_varios: true, pedir_dedicatoria: true, siguiente: 'P09' };
     case 'P09': return { zonas_texto: '', recojo: { activo: false, direccion: '' }, turnos_texto: 'Mañana: 9-12\nTarde: 13-16\nNoche: 16-20', dias_entrega: [1, 2, 3, 4, 5, 6], siguiente: 'P08' };
     case 'P08': return { metodos_texto: '', qr: { url: '' }, siguiente: 'P12' };
-    case 'P17': return { proveedor: 'anthropic', modelo: 'claude-opus-5-5', base_url: '', instrucciones: '', conocimiento: '', usar_como_respaldo: true };
+    case 'P17': return { modelo: '', instrucciones: '', conocimiento: '', usar_como_respaldo: true };
   }
   return {};
 }
@@ -637,11 +675,41 @@ function alcanzables(c) {
   return vistos;
 }
 function normalizarConfig(c) {
+  // IA de todo el worker (Generador v0.7). Un borrador viejo con Agente IA toma de ahí el proveedor y el modelo.
+  if (!isObj(c.ia)) {
+    const p = isObj(c.p17) ? c.p17 : {}, prov = ['anthropic', 'openai', 'compatible'].includes(p.proveedor) ? p.proveedor : '';
+    c.ia = prov ? { ...IA_INICIAL(), proveedor: prov, modelo: texto(p.modelo), base_url: texto(p.base_url) } : IA_INICIAL();
+  }
+  c.ia = { ...IA_INICIAL(), ...c.ia, activa: c.ia.activa !== false };
+  if (Array.isArray(c.ia.conocimiento)) c.ia.conocimiento = c.ia.conocimiento.join('\n');
+  ajustarModeloIA(c);
   let mon = texto(c.moneda);
   for (const code of ORDEN_BLOQUES) { const k = code.toLowerCase(); if (isObj(c[k]) && !('_f' in c[k])) { mon = mon || texto(c[k].moneda); c[k] = aFormulario(code, c[k]); delete c[k].moneda; c[k]._f = 1; } }
   c.moneda = mon || 'S/';
   if (!Array.isArray(c._bloques)) c._bloques = isObj(c.bloques) ? ORDEN_BLOQUES.filter(b => c.bloques[b]) : derivarBloques(c);
   delete c.bloques; asegurarSecciones(c);
+  if (isObj(c.p17)) { delete c.p17.proveedor; delete c.p17.base_url; if (texto(c.p17.modelo) === texto(c.ia.modelo)) c.p17.modelo = ''; ajustarModeloIA(c); }
+}
+/* Si cambia el proveedor, el modelo tiene que ser de ese proveedor */
+function ajustarModeloIA(c) {
+  const ia = c.ia, lista = MODELOS_IA[ia.proveedor], m = texto(ia.modelo);
+  if (ia.proveedor === 'anthropic' && !/^claude-/.test(m)) ia.modelo = lista[0][0];
+  else if (ia.proveedor === 'openai' && (!m || /^claude-/.test(m))) ia.modelo = lista[0][0];
+  else if (ia.proveedor === 'compatible' && [...MODELOS_IA.openai, ...MODELOS_IA.anthropic].some(([v]) => v === m)) ia.modelo = '';
+  if (isObj(c.p17) && texto(c.p17.modelo)) {
+    const pm = texto(c.p17.modelo);
+    if (lista && !lista.some(([v]) => v === pm)) c.p17.modelo = '';
+    if (!lista && [...MODELOS_IA.openai, ...MODELOS_IA.anthropic].some(([v]) => v === pm)) c.p17.modelo = '';
+  }
+}
+/* Sección "ia" que espera el Generador v0.7 */
+function iaContrato(c) {
+  const ia = c.ia || IA_INICIAL();
+  if (ia.activa === false) return { activa: false };
+  const prov = ['anthropic', 'openai', 'compatible'].includes(ia.proveedor) ? ia.proveedor : 'openai';
+  return { proveedor: prov, ...(texto(ia.modelo) ? { modelo: texto(ia.modelo) } : {}),
+    ...(prov === 'compatible' ? { base_url: texto(ia.base_url).replace(/\/+$/, '') } : {}),
+    ...(texto(ia.instrucciones) ? { instrucciones: ia.instrucciones.trim() } : {}), ...(texto(ia.conocimiento) ? { conocimiento: ia.conocimiento.trim() } : {}) };
 }
 function derivarBloques(c) {
   const vistos = new Set(), cola = (c.p01?.opciones || []).filter(o => o.accion === 'modulo' && BLOQUES[o.modulo]).map(o => o.modulo);
@@ -711,7 +779,7 @@ function aFormulario(code, s0) {
   return s;
 }
 /* Forma del formulario → lo que espera el Generador v0.4 (campos vacíos no se envían: el bloque usa su respaldo) */
-function aContrato(code, s, moneda, sigForm) {
+function aContrato(code, s, moneda, sigForm, ia = IA_INICIAL()) {
   const sv = sigForm ?? s.siguiente ?? BLOQUES[code].sig;
   const sig = sv === 'FIN' ? '' : sv;
   const hoja = (f) => ({ tipo: 'google_sheets', url: texto(f?.url) });
@@ -735,8 +803,8 @@ function aContrato(code, s, moneda, sigForm) {
     case 'P09': { const turnos = leerTurnos(s.turnos_texto).filter(Boolean);
       return { moneda, zonas: leerZonas(s.zonas_texto).filter(Boolean), recojo: { activo: !!s.recojo?.activo, texto: 'Recoger en tienda', direccion: texto(s.recojo?.direccion) },
         usar_turnos: turnos.length > 0, ...(turnos.length ? { turnos } : {}), dias_entrega: (s.dias_entrega || []).slice().sort(), siguiente: sig }; }
-    case 'P17': { const prov = ['anthropic', 'openai', 'compatible'].includes(s.proveedor) ? s.proveedor : 'anthropic';
-      return { proveedor: prov, ...(texto(s.modelo) ? { modelo: texto(s.modelo) } : {}), ...(prov === 'compatible' ? { base_url: texto(s.base_url).replace(/\/+$/, '') } : {}),
+    case 'P17': { const prov = ['anthropic', 'openai', 'compatible'].includes(ia.proveedor) ? ia.proveedor : 'openai';
+      return { proveedor: prov, ...(texto(s.modelo) ? { modelo: texto(s.modelo) } : {}),
         ...(texto(s.instrucciones) ? { instrucciones: s.instrucciones.trim() } : {}), ...(texto(s.conocimiento) ? { conocimiento: s.conocimiento.trim() } : {}),
         usar_como_respaldo: s.usar_como_respaldo !== false }; }
     case 'P08': return { moneda, metodos: leerMetodos(s.metodos_texto), ...(texto(s.qr?.url) ? { qr: { url: texto(s.qr.url), tipo: 'image' } } : {}), siguiente: sig };
@@ -773,6 +841,18 @@ function validar(config, cred, { bloques = true } = {}) {
   if (new Set(nums).size !== nums.length) add('opciones', 'Hay opciones con el mismo número.');
   if (!(config.horario?.dias || []).length) add('horario.dias', 'Elige al menos un día de atención.');
   if (Number(config.horario?.desde) >= Number(config.horario?.hasta)) add('horario.horas', 'La hora de cierre debe ser después de la de apertura.');
+  const ia = config.ia || IA_INICIAL();
+  if (ia.activa !== false) {
+    if (!['anthropic', 'openai', 'compatible'].includes(ia.proveedor)) add('ia', 'Elige qué IA usa.');
+    if (ia.proveedor === 'compatible') {
+      if (!texto(ia.base_url)) add('ia', 'Pega la dirección de la API del proveedor.');
+      else if (!/^https:\/\/\S+$/.test(texto(ia.base_url))) add('ia', 'La dirección de la API debe empezar con https://');
+      if (!texto(ia.modelo)) add('ia', 'Escribe el nombre del modelo.');
+    }
+    const key = texto(cred?.ia_key);
+    if (/^bearer\s/i.test(key)) add('ia', 'Pega la clave sin la palabra Bearer.');
+    else if (key && (key.length < 20 || /\s/.test(key))) add('ia', 'La clave de la IA no parece completa: cópiala otra vez.');
+  }
   if (bloques) for (const code of bloquesUsados(config)) {
     const s = config[code.toLowerCase()] || {}, k = 'blk.' + code;
     const link = (u, que) => { if (texto(u) && !/^https:\/\/\S+$/.test(texto(u))) add(k, `${que} debe empezar con https://`); };
@@ -784,15 +864,7 @@ function validar(config, cred, { bloques = true } = {}) {
       if (!its.length) add(k, 'Agrega al menos un documento o información, con su título.');
       its.forEach(it => { if (!texto(it.texto) && !texto(it.archivo?.url)) add(k, `"${texto(it.titulo)}" necesita un texto o un link.`); link(it.archivo?.url, `El link de "${texto(it.titulo)}"`); });
     }
-    if (code === 'P17') {
-      const prov = s.proveedor || 'anthropic';
-      if (!['anthropic', 'openai', 'compatible'].includes(prov)) add(k, 'Elige qué IA usa.');
-      if (prov !== 'anthropic' && !texto(s.modelo)) add(k, 'Escribe el nombre del modelo.');
-      if (prov === 'compatible') { if (!texto(s.base_url)) add(k, 'Pega la dirección de la API del proveedor.'); else link(s.base_url, 'La dirección de la API'); }
-      const key = texto(cred?.ia_key);
-      if (/^bearer\s/i.test(key)) add(k, 'Pega la clave de la IA sin la palabra Bearer.');
-      else if (key && (key.length < 20 || /\s/.test(key))) add(k, 'La clave de la IA no parece completa.');
-    }
+    if (code === 'P17' && config.ia?.activa === false) add(k, 'El Agente IA necesita la IA prendida en el paso 6.');
     if (code === 'P08') { if (!lineasDe(s.metodos_texto).length) add(k, 'Escribe al menos un medio de pago.'); link(s.qr?.url, 'El link del QR'); }
     if (code === 'P09') {
       const zs = leerZonas(s.zonas_texto), malas = lineasDe(s.zonas_texto).filter((l, j) => !zs[j]);
@@ -806,14 +878,15 @@ function validar(config, cred, { bloques = true } = {}) {
   return e;
 }
 const listaErrores = (e) => Object.values(e).flat();
-const PASOS = [['s-negocio', 'Negocio'], ['s-whatsapp', 'WhatsApp y Meta'], ['s-paquete', 'Plantillas'], ['s-menu', 'Menú'], ['s-bloques', 'Configurar plantillas'], ['s-mensajes', 'Mensajes'], ['s-asesor', 'Asesor y pausa'], ['s-revisar', 'Revisar y crear']];
+const PASOS = [['s-negocio', 'Negocio'], ['s-whatsapp', 'WhatsApp y Meta'], ['s-paquete', 'Plantillas'], ['s-menu', 'Menú'], ['s-bloques', 'Configurar plantillas'], ['s-ia', 'Inteligencia artificial'], ['s-mensajes', 'Mensajes'], ['s-asesor', 'Asesor y pausa'], ['s-revisar', 'Revisar y crear']];
 function pasoDeError(k) {
   if (k === 'negocio.nombre' || k === 'worker_id') return 0;
   if (k.startsWith('whatsapp') || k.startsWith('horario') || k.startsWith('cred.')) return 1;
   if (k === 'alcance') return 3;
   if (k.startsWith('op')) return 3;
   if (k.startsWith('blk.')) return 4;
-  return 7;
+  if (k === 'ia') return 5;
+  return 8;
 }
 /* Link de Drive compartido → link de descarga directa (lo que usará el nodo que envía el documento). */
 function linkDescarga(u) {
@@ -892,7 +965,7 @@ function respuestaFinal(o) {
 /* Lo que se envía al Generador de n8n */
 function armarEnvio(w, cred) {
   const c = clone(w.config);
-  c.plantilla_version = 'base-v0.4';
+  c.plantilla_version = 'unificado-v0.7';
   c.worker_id = texto(c.worker_id);
   if (!c.worker_id) delete c.worker_id;   // el Generador lo crea desde el nombre
   c.whatsapp.phone_number_id = texto(String(c.whatsapp.phone_number_id ?? ''));
@@ -909,12 +982,14 @@ function armarEnvio(w, cred) {
   const usados = bloquesUsados(w.config), moneda = texto(c.moneda) || 'S/';
   for (const code of ORDEN_BLOQUES) delete c[code.toLowerCase()];
   delete c.moneda; delete c._bloques;
-  for (const code of usados) c[code.toLowerCase()] = aContrato(code, w.config[code.toLowerCase()] || seccionInicial(code), moneda, sigDe(w.config, code));
-  const out = { config: c, meta: { tipo_negocio: w.meta.tipo_negocio, paquete: w.meta.paquete, etiquetas: w.meta.etiquetas || [], notas: w.meta.notas || '', origen: 'workeros-web', version_interfaz: '0.3', bloques: usados } };
+  for (const code of usados) c[code.toLowerCase()] = aContrato(code, w.config[code.toLowerCase()] || seccionInicial(code), moneda, sigDe(w.config, code), w.config.ia || IA_INICIAL());
+  c.ia = iaContrato(w.config);
+  const out = { config: c, meta: { tipo_negocio: w.meta.tipo_negocio, paquete: w.meta.paquete, etiquetas: w.meta.etiquetas || [], notas: w.meta.notas || '', origen: 'workeros-web', version_interfaz: '1.0', bloques: usados } };
   // Credenciales de Meta: van aparte de config para que el token NUNCA quede escrito dentro del worker.
   if (cred && cred.modo === 'nuevas') out.credenciales = { modo: 'nuevas', nombre: texto(cred.nombre), token_meta: texto(cred.token), app_id: texto(cred.app_id), app_secret: texto(cred.app_secret) };
   else out.credenciales = { modo: 'existentes' };
-  if (usados.includes('P17') && texto(cred?.ia_key)) out.credenciales.ia = { api_key: texto(cred.ia_key) };
+  // API key de la IA: también va aparte; el Generador la guarda como credencial de n8n.
+  if (texto(cred?.ia_key) && (w.config.ia?.activa !== false || usados.includes('P17'))) out.credenciales.ia = { api_key: texto(cred.ia_key) };
   return out;
 }
 
@@ -1221,7 +1296,7 @@ function vistaEditor() {
       <section class="fsec panel" id="s-whatsapp" ${oculto(1)}>
         <div class="fsec-head"><div><h2>WhatsApp y Meta</h2><p>El número desde el que responde el bot, cuándo hay personas para atender y las credenciales de Meta.</p></div></div>
         <div class="grid2">
-          ${campo('whatsapp.phone_number_id', 'Phone number ID', { req: true, ph: 'Ej: 1368900409630135', hint: 'Es el código del número en Meta (no es el teléfono). Está en Meta for Developers → WhatsApp → Configuración de la API.' })}
+          ${campo('whatsapp.phone_number_id', 'Phone number ID', { req: true, ph: 'Ej: 1368900409630135', hint: 'Es el código del número en Meta (no es el teléfono). Abajo, en "¿Dónde encuentro estos datos?", te muestro dónde está.' })}
           ${campo('horario.texto', 'Horario en palabras', { ph: 'lunes a sábado, de 9:00 am a 8:00 pm', hint: E.manual ? 'Lo escribiste a mano. <button type="button" class="btn sm ghost" data-act="horario-auto">Volver a automático</button>' : 'Se escribe solo a partir de los días y horas. Puedes cambiarlo.' })}
           <div class="field ${S.errores['horario.dias'] ? 'invalid' : ''}"><span class="flabel">Días de atención</span>
             <div class="days" role="group" aria-label="Días de atención">${DIAS.map(([n, l, nom]) => `<button type="button" data-dia="${n}" aria-pressed="${c.horario.dias.includes(n)}" title="${nom}">${l}</button>`).join('')}</div>
@@ -1245,7 +1320,7 @@ function vistaEditor() {
             <li>Lo que escribes antes del primer número es el <b>encabezado</b> del menú.</li>
             <li>Una línea sin número debajo de una opción es su <b>descripción</b> (sale en cursiva).</li>
             <li>Si una opción dice "asesor", queda como derivación a asesor. En su desplegable puedes cambiar lo que hace, por ejemplo que abra un bloque (catálogo, pedido, pago…).</li>
-            <li>El saludo no va aquí: se escribe en el paso 6 y sale antes del menú.</li></ul></div></div>
+            <li>El saludo no va aquí: se escribe en el paso 7 y sale antes del menú.</li></ul></div></div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap"><h3>Respuestas de cada opción</h3><span class="menu-count" id="menuCount">${ops.length} ${ops.length === 1 ? 'opción' : 'opciones'}</span></div>
         <div class="opts" id="optsList">${vistaOpciones()}</div>
@@ -1257,7 +1332,11 @@ function vistaEditor() {
         ${vistaBloques()}
       </section>
 
-      <section class="fsec panel" id="s-mensajes" ${oculto(5)}>
+      <section class="fsec panel" id="s-ia" ${oculto(5)}>
+        ${vistaIA()}
+      </section>
+
+      <section class="fsec panel" id="s-mensajes" ${oculto(6)}>
         <div class="fsec-head"><div><h2>Mensajes</h2><p>Lo que dice el bot en cada momento. Las palabras entre llaves se reemplazan solas: <span class="mono">{nombre}</span> es el nombre del cliente en WhatsApp, <span class="mono">{negocio}</span> y <span class="mono">{asistente}</span> salen de la parte 1. Para negrita escribe *así*.</p></div></div>
         ${campo('p01.saludo', 'Saludo', { tipo: 'textarea', vars: ['nombre', 'asistente', 'negocio'], ph: DEFAULTS.p01.saludo, hint: respaldo(DEFAULTS.p01.saludo) })}
         <div class="grid2">
@@ -1271,7 +1350,7 @@ function vistaEditor() {
         </div>
       </section>
 
-      <section class="fsec panel" id="s-asesor" ${oculto(6)}>
+      <section class="fsec panel" id="s-asesor" ${oculto(7)}>
         <div class="fsec-head"><div><h2>Asesor y pausa</h2><p>Por ahora el aviso de asesor solo informa al cliente; todavía no abre una conversación con una persona (eso llega con Chatwoot).</p></div></div>
         <div class="grid2">
           ${campo('p12.nombre_asesor', 'Cómo llamar al asesor', { ph: DEFAULTS.p12.nombre_asesor, hint: 'Se usa en <span class="mono">{asesor}</span>. Ej: "nuestro equipo", "Carla".' })}
@@ -1284,7 +1363,7 @@ function vistaEditor() {
         ${c.interruptores.pausa ? campo('interruptores.mensaje_pausa', 'Mensaje de pausa', { tipo: 'textarea', rows: 2, ph: DEFAULTS.interruptores.mensaje_pausa }) : ''}
         <div class="field"><label for="f_ttl">Cuánto recuerda a cada cliente</label><select id="f_ttl" data-num="memoria.ttl_segundos">${[[86400, '1 día'], [259200, '3 días'], [604800, '7 días'], [1209600, '14 días'], [2592000, '30 días']].map(([s, l]) => `<option value="${s}" ${s === Number(c.memoria.ttl_segundos) ? 'selected' : ''}>${l}</option>`).join('')}</select><span class="hint">Pasado ese tiempo sin escribir, el cliente vuelve a recibir el saludo.</span></div>
       </section>
-      <section class="fsec panel" id="s-revisar" ${oculto(7)}>
+      <section class="fsec panel" id="s-revisar" ${oculto(8)}>
         <div class="fsec-head"><div><h2>Revisar y crear</h2><p>Así se va a crear el worker. Si algo no está bien, toca "Cambiar" y vuelves a ese paso.</p></div></div>
         ${vistaRevision()}
       </section>
@@ -1369,19 +1448,15 @@ function camposBloque(code, s) {
       ${campo('p08.qr.url', 'Imagen del QR (link, opcional)', { ph: 'https://drive.google.com/file/d/…/view' })}
       ${selectSiguiente(code, s)}</div>
       <span class="hint">El bloque no lee el comprobante: lo guarda y avisa a una persona del equipo para que valide el pago.</span>`;
-    case 'P17': { const prov = s.proveedor || 'anthropic', E = S.edit;
-      return `<div class="grid2">
-      <div class="field"><label for="f_p17_prov">Qué IA usa</label><select id="f_p17_prov" data-path="p17.proveedor">${PROVEEDORES_IA.map(([v, l]) => `<option value="${v}" ${prov === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
-        <span class="hint">Es la empresa de la que sale la clave (API key).</span></div>
-      ${prov === 'anthropic'
-        ? `<div class="field"><label for="f_p17_mod">Modelo</label><select id="f_p17_mod" data-path="p17.modelo">${MODELOS_CLAUDE.map(([v, l]) => `<option value="${v}" ${(s.modelo || MODELOS_CLAUDE[0][0]) === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
-          <span class="hint">El modelo es el "cerebro". Uno más barato cuesta menos por respuesta.</span></div>`
-        : campo('p17.modelo', 'Modelo', { req: true, ph: prov === 'openai' ? 'Ej: el nombre del modelo en tu cuenta de OpenAI' : 'Ej: llama-3.3-70b-versatile', hint: 'Cópialo tal cual de la página de modelos del proveedor.' })}
-      ${prov === 'compatible' ? campo('p17.base_url', 'Dirección de la API', { req: true, ph: 'https://api.groq.com/openai', hint: 'La "base URL" que da el proveedor, sin /v1/chat/completions al final.' }) : ''}
-      <div class="field"><label for="cr_ia_key">Clave de la IA (API key)</label><input type="password" id="cr_ia_key" data-cred="ia_key" value="${esc(E.cred.ia_key || '')}" placeholder="${prov === 'anthropic' ? 'sk-ant-…' : 'sk-…'}" autocomplete="off" spellcheck="false">
-        <span class="hint">No se guarda en este panel ni dentro del worker: el Generador la guarda como credencial en n8n. Vacía = usa la clave de Nissitech del Generador.</span></div>
-      ${campo('p17.instrucciones', 'Cómo debe hablar', { tipo: 'textarea', rows: 3, full: true, ph: 'Eres amable y breve. Tuteas al cliente. Si preguntan algo que no está en la información, ofrece pasar con una persona.', hint: 'Tono, reglas y lo que NO debe hacer. Vacío = amable y servicial.' })}
-      ${campo('p17.conocimiento', 'Lo que sabe del negocio', { tipo: 'textarea', rows: 7, full: true, ph: 'Vendemos laptops, monitores y accesorios.\nGarantía de 12 meses en todos los productos.\nDelivery en Lima de 24 a 48 horas, desde S/ 10.\nAtendemos en Av. Ejemplo 123, Miraflores.', hint: 'Precios, políticas, preguntas frecuentes, dirección… La IA solo responde con lo que está aquí; lo demás no lo inventa.' })}
+    case 'P17': { const ia = S.edit.config.ia || IA_INICIAL(), lista = MODELOS_IA[ia.proveedor], provN = (PROVEEDORES_IA.find(([v]) => v === ia.proveedor) || ['', ia.proveedor])[1];
+      return `<div class="notice info"><div>Usa la IA del <b>paso 6</b>: ${esc(provN)} · <span class="mono">${esc(ia.modelo || '—')}</span>, con la misma clave. Lo que dejes vacío aquí se toma de ese paso.</div></div>
+      <div class="grid2">
+      ${lista
+        ? `<div class="field"><label for="f_p17_mod">Modelo para conversar</label><select id="f_p17_mod" data-path="p17.modelo"><option value="">Igual que el paso 6</option>${lista.map(([v, l]) => `<option value="${v}" ${s.modelo === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+          <span class="hint">Para conversar libremente puede convenir un modelo más inteligente que el del resto del worker.</span></div>`
+        : campo('p17.modelo', 'Modelo para conversar', { ph: ia.modelo || 'Igual que el paso 6', hint: 'Vacío = el mismo del paso 6.' })}
+      ${campo('p17.instrucciones', 'Cómo debe hablar', { tipo: 'textarea', rows: 3, full: true, ph: texto(ia.instrucciones) || 'Eres amable y breve. Tuteas al cliente. Si preguntan algo que no está en la información, ofrece pasar con una persona.', hint: 'Tono, reglas y lo que NO debe hacer. Vacío = lo del paso 6.' })}
+      ${campo('p17.conocimiento', 'Lo que sabe del negocio', { tipo: 'textarea', rows: 6, full: true, ph: texto(ia.conocimiento) || 'Vendemos laptops, monitores y accesorios.\nGarantía de 12 meses en todos los productos.\nDelivery en Lima de 24 a 48 horas, desde S/ 10.', hint: 'Vacío = lo del paso 6. La IA solo responde con lo que está escrito; lo demás no lo inventa.' })}
       </div>
       <label class="switch"><input type="checkbox" data-bool="p17.usar_como_respaldo" ${s.usar_como_respaldo !== false ? 'checked' : ''}>Responder cuando el menú no entiende lo que escribe el cliente</label>
       <span class="hint">También puedes agregar en el menú una opción que abra esta plantilla, por ejemplo "${esc(BLOQUES.P17.opcion)}". ${BLOQUES.P17.nota}</span>`; }
@@ -1453,7 +1528,7 @@ function vistaOpcion(o, i) {
         <label ${bloquesUsados(S.edit.config).length || modulo ? '' : 'title="Primero marca plantillas en el paso 3"'}><input type="radio" name="acc${i}" value="modulo" data-op="${i}" data-k="accion" ${modulo ? 'checked' : ''} ${bloquesUsados(S.edit.config).length || modulo ? '' : 'disabled'}>Abre una plantilla</label>
         <label><input type="radio" name="acc${i}" value="asesor" data-op="${i}" data-k="accion" ${asesor ? 'checked' : ''}>Pasa a un asesor</label>
       </div>
-      ${asesor ? '<p class="hint">El cliente recibe el aviso de asesor que configuras en el paso 7.</p>' : modulo ? `
+      ${asesor ? '<p class="hint">El cliente recibe el aviso de asesor que configuras en el paso 8.</p>' : modulo ? `
       <div class="field"><label for="op${i}m">Qué plantilla abre</label><select id="op${i}m" data-op="${i}" data-k="modulo">${ORDEN_BLOQUES.filter(b => bloquesUsados(S.edit.config).includes(b) || b === o.modulo).map(b => `<option value="${b}" ${o.modulo === b ? 'selected' : ''}>${b} · ${BLOQUES[b].nombre}</option>`).join('')}</select>
         <span class="hint">${esc(BLOQUES[o.modulo]?.desc || '')} La configuras en el paso 5.</span></div>` : `
       <div class="filebox">
@@ -1488,8 +1563,9 @@ function vistaRevision() {
     ${fila('Horario', esc(c.horario.texto) || falta, 1)}
     ${fila('Menú', `<ol>${ops.map(o => `<li>${esc(texto(o.titulo) || 'Sin título')} <span class="hint">· ${o.accion === 'asesor' ? 'pasa a asesor' : o.accion === 'modulo' ? 'abre ' + esc(o.modulo) : texto(o.archivo_url) ? (texto(o.respuesta) ? 'documento + texto' : 'documento') : 'texto'}</span></li>`).join('')}</ol>`, 3)}
     ${fila('Configuración', bloquesUsados(c).length ? `<span class="mods" style="display:inline-flex;gap:4px;flex-wrap:wrap">${bloquesUsados(c).map(b => `<span class="mod">${b}</span>`).join('')}</span><br><span class="hint">${bloquesUsados(c).map(b => BLOQUES[b].nombre).join(' · ')}</span>` : '<span class="hint">Ninguno</span>', 4)}
-    ${fila('Mensajes', `<span class="hint">Saludo:</span> ${esc((c.p01.saludo || DEFAULTS.p01.saludo).replace(/\n/g, ' '))}`, 5)}
-    ${fila('Asesor y pausa', `${esc(c.p12.nombre_asesor || DEFAULTS.p12.nombre_asesor)} · modo pausa ${c.interruptores.pausa ? '<b>prendido</b>' : 'apagado'}`, 6)}
+    ${fila('Inteligencia artificial', c.ia?.activa === false ? 'Apagada · <span class="hint">solo reglas</span>' : `${esc((PROVEEDORES_IA.find(([v]) => v === c.ia.proveedor) || ['', c.ia.proveedor])[1])} · <span class="mono">${esc(c.ia.modelo || '—')}</span><br><span class="hint">${texto(E.cred.ia_key) ? 'Con clave (API key)' : 'Sin clave: funciona solo con reglas, salvo que el Generador tenga una clave de Nissitech'}</span>`, 5)}
+    ${fila('Mensajes', `<span class="hint">Saludo:</span> ${esc((c.p01.saludo || DEFAULTS.p01.saludo).replace(/\n/g, ' '))}`, 6)}
+    ${fila('Asesor y pausa', `${esc(c.p12.nombre_asesor || DEFAULTS.p12.nombre_asesor)} · modo pausa ${c.interruptores.pausa ? '<b>prendido</b>' : 'apagado'}`, 7)}
   </div>
   <button type="button" class="btn ghost" data-act="ver-json" style="align-self:flex-start">Ver lo que se envía a n8n</button>`;
 }
@@ -1505,6 +1581,90 @@ function pintarResultado() {
   return `<div class="notice bad" style="margin-top:14px"><div><b>No se creó el worker.</b><ul>${r.errores.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div></div>`;
 }
 
+
+/* Paso 6: IA de todo el worker (Generador v0.7). La clave viaja aparte y nunca se guarda en este panel. */
+function vistaIA() {
+  const c = S.edit.config, ia = c.ia || IA_INICIAL(), on = ia.activa !== false, lista = MODELOS_IA[ia.proveedor];
+  const err = S.errores.ia, p17 = bloquesUsados(c).includes('P17');
+  const modelos = lista ? (lista.some(([v]) => v === ia.modelo) || !texto(ia.modelo) ? lista : [...lista, [ia.modelo, ia.modelo]]) : null;
+  return `<div class="fsec-head"><div><h2>Inteligencia artificial</h2><p>La IA ayuda a <b>todas las plantillas</b> a entender lo que el cliente escribe con sus propias palabras. Por ejemplo, "quiero mandarle flores a mi mamá" abre el catálogo, o "¿cuánto debo en total?" suma sus deudas. Solo entra cuando las reglas (números y palabras clave) no entienden: una consulta por mensaje.</p></div></div>
+    <label class="switch"><input type="checkbox" id="f_ia_on" data-bool="ia.activa" ${on ? 'checked' : ''}>Usar IA en este worker</label>
+    <span class="hint" style="margin-top:-8px">${on ? 'Sin clave (API key), el worker funciona igual, solo con números y palabras clave.' : 'Apagada: el worker responde solo con números y palabras clave.'}${p17 && !on ? ' <b>El Agente IA (P17) necesita la IA prendida.</b>' : ''}</span>
+    <div class="${on ? '' : 'ia-off'}" style="display:flex;flex-direction:column;gap:14px" ${on ? '' : 'aria-hidden="true"'}>
+      <div class="grid2">
+        <div class="field"><label for="f_ia_prov">Qué IA usa</label><select id="f_ia_prov" data-path="ia.proveedor" ${on ? '' : 'disabled'}>${PROVEEDORES_IA.map(([v, l]) => `<option value="${v}" ${ia.proveedor === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+          <span class="hint">Es la empresa de la que sale la clave. OpenAI es la de ChatGPT.</span></div>
+        ${modelos
+          ? `<div class="field"><label for="f_ia_mod">Modelo</label><select id="f_ia_mod" data-path="ia.modelo" ${on ? '' : 'disabled'}>${modelos.map(([v, l]) => `<option value="${esc(v)}" ${ia.modelo === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>
+            <span class="hint">El modelo es el "cerebro" de la IA. Para entender mensajes cortos basta el recomendado, que cuesta menos.</span></div>`
+          : campo('ia.modelo', 'Modelo', { req: true, ph: 'Ej: llama-3.3-70b-versatile', hint: 'Cópialo tal cual de la página de modelos del proveedor.' })}
+        ${ia.proveedor === 'compatible' ? campo('ia.base_url', 'Dirección de la API', { req: true, ph: 'https://api.groq.com/openai', hint: 'La "base URL" que da el proveedor, sin /v1/chat/completions al final.' }) : ''}
+        <div class="field"><label for="cr_ia_key">Clave de la IA (API key)${p17 ? ' <span class="req" aria-hidden="true">*</span>' : ''}</label><input type="password" id="cr_ia_key" data-cred="ia_key" value="${esc(S.edit.cred.ia_key || '')}" placeholder="${ia.proveedor === 'anthropic' ? 'sk-ant-…' : 'sk-…'}" autocomplete="off" spellcheck="false" ${on ? '' : 'disabled'}>
+          <span class="hint">Una <b>API key</b> es una contraseña larga que da la empresa de IA para que el worker use su IA. Cada respuesta se cobra en la cuenta de esa clave.${p17 ? ' El Agente IA la necesita (vacía = usa la clave de Nissitech del Generador, si tiene).' : ''}</span></div>
+      </div>
+      ${campo('ia.instrucciones', 'Cómo debe hablar', { tipo: 'textarea', rows: 2, full: true, ph: 'Tono cálido y cercano. Tutea al cliente.', hint: 'Opcional. Tono y reglas para todas las respuestas de la IA.' })}
+      ${campo('ia.conocimiento', 'Lo que sabe del negocio', { tipo: 'textarea', rows: 5, full: true, ph: 'Florería en Lima desde 2015. Delivery de lunes a sábado.\nCambios por calidad dentro de las 24 horas.', hint: 'Opcional. Horarios, políticas, preguntas frecuentes… La IA no inventa precios ni datos: usa lo de las plantillas y lo que escribas aquí.' })}
+      ${err ? `<span class="ferr">${esc(err.join(' '))}</span>` : ''}
+      <div class="notice info"><div><b>La clave no se guarda en este panel.</b> Viaja una sola vez al Generador, que la guarda cifrada como credencial en n8n. No queda escrita dentro del worker. Si guardas el borrador, tendrás que pegarla otra vez antes de crear.</div></div>
+      ${tutorialClaveIA(ia.proveedor)}
+    </div>`;
+}
+function tutorialClaveIA(prov) {
+  if (prov === 'compatible') return '';
+  const anth = prov === 'anthropic';
+  const sitio = anth ? 'console.anthropic.com' : 'platform.openai.com';
+  return `<details class="more tuto"><summary>¿Cómo saco la clave de ${anth ? 'Claude' : 'OpenAI'}?</summary>
+    <div class="tuto-grid">
+      <ol>
+        <li>Entra a <b>${sitio}</b> con la cuenta del cliente (o la de Nissitech).</li>
+        <li>${anth ? 'Ve a <b>Settings → Billing</b> y carga saldo.' : 'Ve a <b>Settings → Billing</b> y carga saldo (sin saldo la clave no responde).'}</li>
+        <li>Abre <b>API keys</b> y toca <b>${anth ? 'Create Key' : 'Create new secret key'}</b>. Ponle de nombre el del negocio.</li>
+        <li>Copia la clave completa (empieza con <span class="mono">${anth ? 'sk-ant-' : 'sk-'}</span>) y pégala arriba. <b>Solo se muestra una vez.</b></li>
+      </ol>
+      <div><div class="shot" aria-hidden="true"><div class="bar"><i></i><i></i><i></i><span>${sitio}/${anth ? 'settings/keys' : 'api-keys'}</span></div>
+        <div class="body"><div class="sx"><span>Dashboard</span><span class="on">API keys</span><span>Billing</span><span>Usage</span></div>
+        <div class="mx"><div class="t">API keys</div><span class="btnx hl">+ ${anth ? 'Create Key' : 'Create new secret key'}</span><div class="row hl"><small>Clave nueva</small><code>${anth ? 'sk-ant-api03-••••••' : 'sk-proj-••••••••'}</code></div></div></div></div>
+        <div class="shot-cap">Así se ve, más o menos. El botón amarillo es el que tocas.</div></div>
+    </div></details>`;
+}
+/* Mini tutorial: dónde están los datos de Meta (dibujos de cada pantalla; se pueden cambiar por capturas reales). */
+function tutorialMeta(nuevas) {
+  const shot = (url, side, on, titulo, filas) => `<div class="shot" aria-hidden="true"><div class="bar"><i></i><i></i><i></i><span>${url}</span></div>
+    <div class="body"><div class="sx">${side.map(x => `<span class="${x === on ? 'on' : ''}">${x}</span>`).join('')}</div>
+    <div class="mx"><div class="t">${titulo}</div>${filas}</div></div></div>`;
+  const fila = (l, v, hl) => `<div class="row ${hl ? 'hl' : ''}"><small>${l}</small><code>${v}</code></div>`;
+  const parte = (n, titulo, tag, pasos, dibujo, extra = '') => `<div class="tuto-part"><h4>${n}. ${titulo}${tag ? `<span class="tag">${tag}</span>` : ''}</h4>
+    <div class="tuto-grid"><div><ol>${pasos.map(p => `<li>${p}</li>`).join('')}</ol>${extra}</div><div>${dibujo}<div class="shot-cap">Dibujo de la pantalla. El recuadro azul es el dato que copias.</div></div></div></div>`;
+  return `<details class="more tuto" ${S.edit.tutoMeta ? 'open' : ''} data-tuto="meta"><summary>¿Dónde encuentro estos datos? Mini tutorial de Meta</summary>
+    <p class="tuto-intro">Todo está en <b>developers.facebook.com</b> y <b>business.facebook.com</b>, entrando con la cuenta que administra el WhatsApp del cliente. Los nombres pueden salir en inglés o en español.</p>
+    ${parte(1, 'Phone number ID', 'siempre', [
+      'Entra a <b>developers.facebook.com</b> → <b>Mis apps</b> y abre la app del WhatsApp.',
+      'En el menú de la izquierda: <b>WhatsApp → Configuración de la API</b> (API Setup).',
+      'En <b>De</b> (From), elige el número del cliente.',
+      'Debajo aparece <b>Identificador del número de teléfono</b> (Phone number ID). Cópialo y pégalo en el campo de arriba.'],
+      shot('developers.facebook.com/apps/…/whatsapp', ['Panel', 'WhatsApp', 'Configuración de la API', 'Configuración'], 'Configuración de la API', 'Configuración de la API',
+        fila('De', '+51 999 999 999') + fila('Identificador del número de teléfono', '1368900409630135', true) + fila('Identificador de la cuenta de WhatsApp Business', '10293847…')),
+      '<div class="warnline">No es el número de teléfono: es un código largo, solo números.</div>')}
+    ${nuevas ? parte(2, 'Token de acceso permanente', 'credenciales nuevas', [
+      'Entra a <b>business.facebook.com</b> → <b>Configuración del negocio</b>.',
+      '<b>Usuarios → Usuarios del sistema</b> → <b>Agregar</b>. Ponle un nombre (ej. "WorkerOS") y rol <b>Administrador</b>.',
+      'Con ese usuario elegido, toca <b>Asignar activos</b>: marca la <b>app</b> y la <b>cuenta de WhatsApp</b> con control total.',
+      'Toca <b>Generar token</b>, elige la app, en caducidad elige <b>Nunca</b> y marca los permisos <span class="mono">whatsapp_business_messaging</span> y <span class="mono">whatsapp_business_management</span>.',
+      'Copia el token (empieza con <span class="mono">EAA</span>) y pégalo en "Token de acceso de Meta".'],
+      shot('business.facebook.com/settings/system-users', ['Usuarios', 'Personas', 'Usuarios del sistema', 'Cuentas'], 'Usuarios del sistema', 'WorkerOS · Administrador',
+        '<span class="btnx hl">Generar token</span>' + fila('Caducidad', 'Nunca') + fila('Token', 'EAAG••••••••••', true)),
+      '<div class="warnline">El token se muestra una sola vez. Si lo pierdes, genera otro. No lo mandes por chat ni correo.</div>') : ''}
+    ${nuevas ? parte(3, 'App ID y App Secret', 'opcional', [
+      'Solo si el cliente tiene <b>su propia app</b> de Meta. Si usa la de Nissitech, deja estos dos vacíos.',
+      'En <b>developers.facebook.com</b> abre su app → <b>Configuración de la app → Básica</b>.',
+      'Copia el <b>Identificador de la app</b> (App ID).',
+      'En <b>Clave secreta de la app</b> toca <b>Mostrar</b> (te pide tu contraseña de Facebook) y cópiala. Pégala directo en el campo "App Secret".'],
+      shot('developers.facebook.com/apps/…/settings/basic', ['Panel', 'Configuración de la app', 'Básica', 'Avanzada'], 'Básica', 'Configuración básica',
+        fila('Identificador de la app', '1234567890123456', true) + fila('Clave secreta de la app', '•••••••• Mostrar', true)),
+      '<div class="warnline">El App Secret no se comparte con nadie: solo se pega aquí.</div>') : ''}
+    ${nuevas ? '' : '<p class="hint" style="margin-top:10px">Si eliges "Crear credenciales para este cliente", aquí aparecen también los pasos del token y del App ID.</p>'}
+  </details>`;
+}
 
 /* Credenciales de Meta: el formulario las pide y el Generador las crea en n8n. Nunca se guardan en este panel. */
 function credCampo(k, label, { tipo = 'text', ph = '', hint = '', full = false } = {}) {
@@ -1530,6 +1690,7 @@ function vistaCredenciales() {
       ${credCampo('app_secret', 'App Secret (opcional)', { tipo: 'password', ph: 'Va junto con el App ID', hint: 'Meta for Developers → tu app → Configuración → Básica.' })}
     </div>
     <div class="notice info"><div><b>El token no se guarda en este panel.</b> Viaja una sola vez al Generador, n8n lo guarda cifrado como credencial y aquí solo queda el nombre. Si guardas el borrador, tendrás que pegarlo otra vez antes de crear.</div></div>` : ''}
+    ${tutorialMeta(nuevas)}
   </div>`;
 }
 
@@ -1623,9 +1784,8 @@ function leerFormulario() {
   });
   limpiarDependencias(c);
   asegurarSecciones(c);
-  if (isObj(c.p17)) { const m = texto(c.p17.modelo), esClaude = /^claude-/.test(m);
-    if ((c.p17.proveedor || 'anthropic') === 'anthropic') { if (!MODELOS_CLAUDE.some(([v]) => v === m)) c.p17.modelo = MODELOS_CLAUDE[0][0]; }
-    else if (esClaude) c.p17.modelo = ''; }
+  if (!isObj(c.ia)) c.ia = IA_INICIAL();
+  ajustarModeloIA(c);
   $$('#wform [data-cred]').forEach(el => { if (el.type === 'radio') { if (el.checked) E.cred.modo = el.value; } else E.cred[el.dataset.cred] = el.value; });
   if (E.cred.modo === 'nuevas' && !texto(E.cred.nombre)) E.cred.nombre = 'WhatsApp · ' + (c.negocio.nombre || 'cliente');
   E.meta.credenciales = { modo: E.cred.modo, nombre: E.cred.modo === 'nuevas' ? texto(E.cred.nombre) : '' };
@@ -1696,6 +1856,7 @@ function montarEditor() {
     if (t.name === 'paquete') { leerFormulario(); if (aplicarPaquete(t.value)) { S.chat = null; toast('Llené el menú con un ejemplo. Puedes cambiarlo en el paso 4.'); } rerenderEditor(); return; }
     if (t.type === 'radio' || t.dataset.bool || t.dataset.num || t.tagName === 'SELECT') { leerFormulario(); refrescarErrores(); S.chat = null; rerenderEditor(); }
   });
+  $$('[data-tuto="meta"]', m).forEach(d => d.addEventListener('toggle', () => { S.edit.tutoMeta = d.open; }));
   $$('[data-dia]', m).forEach(b => b.addEventListener('click', () => {
     leerFormulario(); const d = Number(b.dataset.dia), ds = S.edit.config.horario.dias;
     S.edit.config.horario.dias = ds.includes(d) ? ds.filter(x => x !== d) : [...ds, d];
