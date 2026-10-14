@@ -154,7 +154,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .field .req { color: var(--bad); }
 .hint { font-size: 12px; color: var(--muted); }
 .hint .mono { font-size: 11.5px; }
-input[type="text"], input[type="password"], input[type="url"], input[type="number"], select, textarea {
+input[type="text"], input[type="password"], input[type="url"], input[type="email"], input[type="number"], select, textarea {
   border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; padding: 8px 10px; width: 100%; min-width: 0;
 }
 textarea { resize: vertical; min-height: 64px; line-height: 1.45; }
@@ -179,6 +179,27 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 .tpick ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; display: flex; flex-direction: column; gap: 2px; }
 .presets { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 @media (max-width: 760px) { .tpick { grid-template-columns: minmax(0, 1fr); } }
+.kinds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.kind { border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: flex; flex-direction: column; gap: 8px; background: var(--surface-2); cursor: pointer; }
+.kind:has(input:checked) { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); background: var(--surface); }
+.kind.soon { cursor: default; opacity: .65; }
+.kind-top { display: flex; align-items: center; gap: 8px; }
+.kind-top input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); flex: none; }
+.kind-top b { font-weight: 600; }
+.kind-top .fx { margin-left: auto; font-size: 11px; padding: 1px 7px; border-radius: 999px; white-space: nowrap; background: var(--accent-soft); color: var(--accent); }
+.kind.soon .kind-top .fx { background: var(--idle-soft); color: var(--muted); }
+.kind p { margin: 0; font-size: 13px; color: var(--muted); }
+.kind-detail { border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; background: var(--surface); display: flex; flex-direction: column; gap: 8px; }
+.kind-detail h3 { margin: 0; }
+.feat { margin: 0; padding-left: 18px; columns: 2; column-gap: 24px; font-size: 13px; }
+.feat li { break-inside: avoid; margin-bottom: 4px; }
+.radio-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.radio-col label { display: flex; gap: 8px; align-items: flex-start; border: 1px solid var(--line); border-radius: var(--r); padding: 8px 10px; cursor: pointer; background: var(--surface-2); }
+.radio-col label:has(input:checked) { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); background: var(--surface); }
+.radio-col input { margin: 3px 0 0; accent-color: var(--accent); flex: none; }
+.radio-col b { display: block; font-weight: 600; font-size: 13px; }
+@media (max-width: 900px) { .kinds { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { .radio-col { grid-template-columns: minmax(0, 1fr); } .feat { columns: 1; } }
 .blk { border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
 .blk.blk-bad { border-color: var(--bad); }
 .blk-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
@@ -378,7 +399,7 @@ pre.json { background: var(--surface-2); border: 1px solid var(--line); border-r
     </nav>
     <div class="side-foot">
       <a class="mode-pill" href="#conexion" id="modePill"><span class="dot"></span><span>Modo simulado</span></a>
-      <p class="hint">Prototipo v1.0 · Generador v0.7</p>
+      <p class="hint">Prototipo v1.1 · Generador v0.8</p>
     </div>
   </aside>
   <main class="main" id="main"></main>
@@ -400,19 +421,19 @@ const PLANTILLAS = [
   { code: 'P05', nombre: 'Catálogo y servicios', desc: 'Muestra productos o servicios con precios.', estado: 'lista' },
   { code: 'P06', nombre: 'Cotizaciones', desc: 'Cotiza varios productos con cantidades, precio por mayor, descuentos e IGV; aceptar la vuelve pedido.', estado: 'lista' },
   { code: 'P07', nombre: 'Pedidos', desc: 'Toma el pedido y los datos de entrega.', estado: 'lista' },
-  { code: 'P08', nombre: 'Pagos', desc: 'Recibe y valida comprobantes de pago.', estado: 'lista' },
+  { code: 'P08', nombre: 'Pagos', desc: 'Envía el total y el link de pago. Si el cliente manda el comprobante, lo pasa al asesor.', estado: 'lista' },
   { code: 'P09', nombre: 'Delivery y despacho', desc: 'Coordina el envío y avisa el estado.', estado: 'lista' },
   { code: 'P10', nombre: 'Agenda de citas', desc: 'Servicios, profesionales y horarios libres; reprogramar y cancelar.', estado: 'lista' },
   { code: 'P11', nombre: 'Mi cuenta', desc: 'Pedidos y su estado, repetir pedido, mis datos, promociones y puntos.', estado: 'lista' },
-  { code: 'P12', nombre: 'Derivación a asesor', desc: 'Avisa al cliente que lo atenderá una persona. Sin Chatwoot por ahora.', estado: 'lista' },
-  { code: 'P13', nombre: 'Seguimiento', desc: 'Escribe al cliente después de una compra o consulta.', estado: 'despues' },
+  { code: 'P12', nombre: 'Derivación a asesor', desc: 'Avisa al cliente que lo atenderá una persona.', estado: 'lista' },
+  { code: 'P13', nombre: 'Chatwoot', desc: 'El asesor lee y responde la conversación desde Chatwoot, con fotos, audios y documentos. Se agrega sola si eliges Chatwoot.', estado: 'lista' },
   { code: 'P14', nombre: 'Campañas', desc: 'Mensajes masivos con plantillas aprobadas por Meta.', estado: 'despues' },
   { code: 'P15', nombre: 'Eventos', desc: 'Inscripciones y recordatorios de eventos.', estado: 'despues' },
   { code: 'P16', nombre: 'Reportes', desc: 'Resúmenes de conversaciones y ventas.', estado: 'despues' }
 ];
 const PAQUETES = [
   { id: 'atencion_basica', nombre: 'Atención básica', mods: ['BASE', 'P01', 'P12'], disponible: true, desc: 'Saludo, menú con respuestas y documentos, y aviso de asesor.' },
-  { id: 'floristeria', nombre: 'Floristería', mods: ['BASE', 'P01', 'P05', 'P07', 'P09', 'P08', 'P12'], disponible: true, desc: 'Catálogo, pedido, delivery y pago.' },
+  { id: 'floristeria', nombre: 'Floristería (plantillas)', mods: ['BASE', 'P01', 'P05', 'P07', 'P09', 'P08', 'P12'], disponible: true, desc: 'Catálogo, pedido, delivery y pago.' },
   { id: 'cec', nombre: 'CEC (educación)', mods: ['BASE', 'P01', 'P02', 'P03', 'P04', 'P12'], disponible: true, desc: 'Identificación, consulta y archivos.' }
 ];
 /* Bloques (plantillas P02…P09): cada uno es un workflow aparte que el worker abre desde una opción del menú. */
@@ -431,8 +452,8 @@ const BLOQUES = {
     funciones: ['Suma uno o varios productos', 'Pide nombre, teléfono y dedicatoria', 'Muestra el resumen para confirmar o corregir', 'Le da un número al pedido'] },
   P09: { nombre: 'Delivery y despacho', desc: 'Dirección, zona y costo de envío, fecha y turno, o recojo en tienda.', sig: 'P08', opcion: 'Delivery', nota: 'Suele ir después de P07 Pedidos.',
     funciones: ['Pide la dirección y calcula el envío por zona', 'Fecha de entrega y turno', 'Opción de recoger en tienda', 'Respeta los días con entrega'] },
-  P08: { nombre: 'Pagos y validación', desc: 'Envía los datos de pago, recibe el comprobante y avisa al equipo.', sig: 'P12', opcion: 'Pagar mi pedido', nota: 'Suele ir después de P09 Delivery.',
-    funciones: ['Envía medios de pago y QR', 'Recibe la foto o PDF del comprobante', 'Avisa al equipo para validar el pago'] },
+  P08: { nombre: 'Pagos', desc: 'Envía el total y el link de pago. Si el cliente manda la foto o PDF del comprobante, se lo pasa al asesor.', sig: 'P12', opcion: 'Pagar mi pedido', nota: 'Suele ir después de P09 Delivery.',
+    funciones: ['Envía el total del pedido', 'Envía el link de pago (y otros medios, si quieres)', 'Si llega el comprobante, lo pasa al asesor'] },
   P10: { nombre: 'Agenda de citas', desc: 'Reserva citas por servicio y profesional en los horarios libres. El cliente puede reprogramar o cancelar.', sig: 'P01', opcion: 'Reservar una cita',
     funciones: ['Servicios con duración y precio', 'Elige profesional (o cualquiera)', 'Muestra 7 días y sus horarios libres', 'Reprogramar y cancelar', 'Lee la agenda ocupada de una hoja'] },
   P11: { nombre: 'Mi cuenta', desc: 'El cliente ve sus pedidos y su estado, repite el último pedido, actualiza sus datos, se suscribe a promociones y ve sus puntos.', sig: 'P09', opcion: 'Mi cuenta',
@@ -445,6 +466,24 @@ const FIJAS = [
   ['P01', 'Atención y menú', ['Saludo y menú numerado', 'Responde texto o documentos', 'Abre las otras plantillas', 'Despedida y opción no válida']],
   ['P12', 'Derivación a asesor', ['Pasa la conversación a una persona', 'Aviso distinto fuera de horario', 'Se activa con palabras como "asesor"']]
 ];
+/* Workers fijos (Generador v0.8): un workflow completo que se copia tal cual y solo cambia su configuración */
+const MODELOS = [
+  { id: 'floreria', nombre: 'Florería', disponible: true, tipo: 'Floristería',
+    corto: 'Vende flores por WhatsApp de principio a fin: catálogo, pedido con entrega, link de pago y asesor.',
+    funciones: ['Menú de hasta 8 opciones en una lista de WhatsApp', 'Catálogo desde una hoja de Google, por categorías', 'Reconoce el arreglo por su código o nombre', 'Pedido completo: quién recibe, dirección, fecha, turno y dedicatoria', 'Costo de envío según el distrito', 'Botón "Pagar ahora" con el link de pago', 'El comprobante llega a Chatwoot con la nota "validar pago"', 'Le dice al cliente en qué estado está su pedido', 'IA (GPT-4o mini) que entiende frases libres', 'Asesor en Chatwoot con texto, fotos, audios, videos y documentos'] },
+  { id: 'barberia', nombre: 'Barbería', disponible: false, tipo: 'Salud y belleza', corto: 'Citas por barbero y servicio, recordatorios y cancelaciones.', funciones: [] }
+];
+/* Qué hace cada opción del menú en un worker fijo (el "tipo" que lee el modelo) */
+const TIPOS_OPCION = [
+  ['catalogo', 'Muestra el catálogo', 'Envía su mensaje (y el PDF, si pones uno) y pide el código o la foto del arreglo.'],
+  ['pedido', 'Toma un pedido', 'Para quien ya sabe qué quiere: pide el código y arma el pedido.'],
+  ['seguimiento', 'Estado de mi pedido', 'Busca el último pedido del cliente y le dice cómo va.'],
+  ['info', 'Responde con texto o documento', 'Ej: horario y ubicación, preguntas frecuentes.'],
+  ['asesor', 'Pasa a un asesor', 'Le avisa a una persona del equipo (en Chatwoot, si lo activas).'],
+  ['ia', 'Pregunta libre con IA', 'El cliente escribe lo que quiera y la IA responde con la información del negocio.']];
+const MENU_FLORERIA = '¿Qué te gustaría hacer hoy?\n\n1. Ver catálogo\n   Ramos y arreglos para toda ocasión\n2. Ya sé qué quiero\n   Tengo el código del arreglo\n3. Mi pedido\n   Estado de mi pedido\n4. Horario y ubicación\n5. Hablar con un asesor';
+const FLOR_INICIAL = () => ({ catalogo_url: '', zonas_texto: '', turnos_texto: 'Mañana (9 a 12)\nTarde (12 a 4)\nNoche (4 a 8)', dias_entrega: [1, 2, 3, 4, 5, 6, 0], pago_link: '', pago_boton: '', registro_url: '', telefono_asesor: '', msg_fuera_horario: '' });
+const CW_INICIAL = () => ({ modo: 'ninguno', nombre: '', correo: '', url: '', account_id: '', inbox_id: '' });
 const ORDEN_BLOQUES = ['P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P09', 'P08', 'P10', 'P11', 'P17'];
 const OPCIONES_P11 = [['pedidos', 'Mis pedidos'], ['estado', 'Estado del último pedido'], ['repetir', 'Repetir el último pedido'], ['citas', 'Mis citas'], ['datos', 'Mis datos'], ['promociones', 'Promociones'], ['puntos', 'Puntos']];
 /* Modelos de IA que ofrece el formulario (P17 con Claude). El primero es el que usa la plantilla si no se elige. */
@@ -530,7 +569,7 @@ const store = {
 /* ───────── Ejemplos iniciales (marcados como ejemplo) ───────── */
 function configVacia() {
   return {
-    plantilla_version: 'base-v0.4', worker_id: '', _bloques: [],
+    plantilla_version: 'base-v0.4', worker_id: '', _bloques: [], _modelo: '', flor: FLOR_INICIAL(), cw: CW_INICIAL(),
     negocio: { nombre: '', nombre_asistente: '', zona_horaria: 'America/Lima' },
     whatsapp: { phone_number_id: '', api_version: 'v22.0' },
     horario: { dias: [1, 2, 3, 4, 5, 6], desde: 9, hasta: 20, texto: 'lunes a sábado, de 9:00 am a 8:00 pm' },
@@ -638,7 +677,7 @@ function seccionInicial(code) {
     case 'P05': return { fuente: { tipo: 'google_sheets', url: '' }, catalogo_archivo: { url: '', nombre: 'Catálogo' }, siguiente: 'P07' };
     case 'P07': return { pedir_cantidad: false, permitir_varios: true, pedir_dedicatoria: true, siguiente: 'P09' };
     case 'P09': return { zonas_texto: '', recojo: { activo: false, direccion: '' }, turnos_texto: 'Mañana: 9-12\nTarde: 13-16\nNoche: 16-20', dias_entrega: [1, 2, 3, 4, 5, 6], siguiente: 'P08' };
-    case 'P08': return { metodos_texto: '', qr: { url: '' }, siguiente: 'P12' };
+    case 'P08': return { link: '', metodos_texto: '', qr: { url: '' }, siguiente: 'P12' };
     case 'P06': return { fuente: { tipo: 'google_sheets', url: '' }, descuentos_texto: '50: 5\n100: 10', igv: { mostrar: true, incluido: true, porcentaje: 18 }, validez_dias: 7, condiciones_texto: '', registro_url: '', siguiente: 'P09' };
     case 'P10': return { servicios_texto: '', profesionales_texto: '', elegir_profesional: true, pausa_texto: '13-14', intervalo_min: 30, agenda_fuente: { url: '' }, registro_url: '', politica_cancelacion: '' };
     case 'P11': return { opciones: OPCIONES_P11.map(([k]) => k), pedidos_fuente: { url: '' }, columna_telefono: 'TELEFONO', puntos: { activo: false, por_cada: 10, nombre: 'puntos' }, premios_texto: '50: Envío gratis\n100: S/ 20 de descuento', registro_url: '' };
@@ -700,6 +739,7 @@ function leerPremios(t) {
 const leerRango = (t) => { const m = String(t || '').match(/^\s*(\d{1,2})\s*(?:-|–|a)\s*(\d{1,2})\s*$/); return m && Number(m[1]) < Number(m[2]) ? [Number(m[1]), Number(m[2])] : null; };
 /* Qué bloques usa el worker: los que abre el menú y los que siguen después de ellos */
 function bloquesUsados(c) {
+  if (c._modelo) return [];   // un worker fijo no usa plantillas sueltas
   if (Array.isArray(c._bloques)) return ORDEN_BLOQUES.filter(x => c._bloques.includes(x));
   return derivarBloques(c);
 }
@@ -718,6 +758,9 @@ function alcanzables(c) {
   return vistos;
 }
 function normalizarConfig(c) {
+  c._modelo = MODELOS.some(m => m.disponible && m.id === c._modelo) ? c._modelo : '';
+  c.flor = { ...FLOR_INICIAL(), ...(isObj(c.flor) ? c.flor : {}) };
+  c.cw = { ...CW_INICIAL(), ...(isObj(c.cw) ? c.cw : {}) };
   // IA de todo el worker (Generador v0.7). Un borrador viejo con Agente IA toma de ahí el proveedor y el modelo.
   if (!isObj(c.ia)) {
     const p = isObj(c.p17) ? c.p17 : {}, prov = ['anthropic', 'openai', 'compatible'].includes(p.proveedor) ? p.proveedor : '';
@@ -767,6 +810,7 @@ function derivarBloques(c) {
 }
 /* Después de quitar plantillas u opciones: nada debe apuntar a una plantilla que ya no está */
 function limpiarDependencias(c) {
+  if (c._modelo) return;   // se guardan por si vuelve a armar con plantillas
   const sel = bloquesUsados(c);
   (c.p01?.opciones || []).forEach(o => {
     if (o.accion !== 'modulo') return;
@@ -816,7 +860,8 @@ function aFormulario(code, s0) {
     if (!texto(s0?.turnos_texto) && Array.isArray(s0?.turnos)) s.turnos_texto = s0.turnos.map(t => `${t.nombre}: ${t.desde}-${t.hasta}`).join('\n');
     delete s.zonas; delete s.turnos;
   }
-  if (code === 'P08' && !texto(s0?.metodos_texto) && Array.isArray(s0?.metodos)) { s.metodos_texto = s0.metodos.map(m => m.detalle ? `${m.nombre}: ${m.detalle}` : m.nombre).join('\n'); delete s.metodos; }
+  if (code === 'P08' && !texto(s0?.metodos_texto) && Array.isArray(s0?.metodos)) { const ln = s0.metodos.find(m => texto(m.link)); if (ln && !texto(s0?.link)) s.link = ln.link; s.metodos_texto = s0.metodos.filter(m => m !== ln).map(m => m.detalle ? `${m.nombre}: ${m.detalle}` : m.nombre).join('\n'); delete s.metodos; }
+  if (code === 'P08') delete s.msg_pedir_comprobante;
   if (code === 'P07' && Array.isArray(s0?.campos)) { s.pedir_dedicatoria = s0.campos.some(x => x.clave === 'dedicatoria'); delete s.campos; }
   if (code === 'P06') {
     if (Array.isArray(s0?.descuentos_volumen)) s.descuentos_texto = s0.descuentos_volumen.map(d => `${d.desde}: ${d.porcentaje}`).join('\n');
@@ -884,7 +929,7 @@ function aContrato(code, s, moneda, sigForm, ia = IA_INICIAL(), cfg = null) {
         puntos: { activo: !!s.puntos?.activo, por_cada: Number(s.puntos?.por_cada) || 10, nombre: texto(s.puntos?.nombre) || 'puntos', premios: leerPremios(s.premios_texto).filter(Boolean) },
         ...(texto(s.registro_url) ? { registro_url: texto(s.registro_url) } : {}),
         ...(sel.includes('P09') ? { siguiente_repetir: 'P09' } : {}), ...(sel.includes('P10') ? { siguiente_citas: 'P10' } : {}) }; }
-    case 'P08': return { moneda, metodos: leerMetodos(s.metodos_texto), ...(texto(s.qr?.url) ? { qr: { url: texto(s.qr.url), tipo: 'image' } } : {}), siguiente: sig };
+    case 'P08': return { moneda, metodos: [...(texto(s.link) ? [{ nombre: 'Pagar en línea', tipo: 'tarjeta', link: texto(s.link), nota: 'Pago seguro desde el link.' }] : []), ...leerMetodos(s.metodos_texto)], ...(texto(s.qr?.url) ? { qr: { url: texto(s.qr.url), tipo: 'image' } } : {}), msg_pedir_comprobante: 'Si ya pagaste, envíame la *foto o PDF del comprobante* y se lo paso a un asesor 📸', siguiente: sig };
   }
   return {};
 }
@@ -906,10 +951,10 @@ function validar(config, cred, { bloques = true } = {}) {
   if (wid && !/^[a-z0-9_]{3,40}$/.test(wid)) add('worker_id', 'Solo minúsculas, números y guion bajo, de 3 a 40 caracteres.');
   const ops = config.p01?.opciones || [];
   if (!ops.length) add('opciones', 'Escribe al menos una opción del menú.');
-  ops.forEach((o, i) => {
+  if (!config._modelo) ops.forEach((o, i) => {
     if (!texto(String(o.numero ?? '')) || !texto(o.titulo)) add('op' + i, `Opción ${i + 1}: falta el título.`);
     else if (o.accion === 'modulo' && !BLOQUES[o.modulo]) add('op' + i, `Opción ${i + 1}: elige qué plantilla abre.`);
-    else if (o.accion === 'modulo' && !bloquesUsados(config).includes(o.modulo)) add('op' + i, `Opción ${i + 1}: abre ${o.modulo}, pero esa plantilla no está marcada en el paso 3.`);
+    else if (o.accion === 'modulo' && !bloquesUsados(config).includes(o.modulo)) add('op' + i, `Opción ${i + 1}: abre ${o.modulo}, pero esa plantilla no está marcada en el paso 2.`);
     else if ((o.accion || 'responder') === 'responder' && !texto(o.respuesta)) add('op' + i, texto(o.archivo_url) ? `Opción ${i + 1}: escribe el texto que acompaña al documento.` : `Opción ${i + 1}: escribe el texto de respuesta.`);
     if ((o.accion || 'responder') === 'responder' && texto(o.archivo_url) && texto(o.respuesta).length > 1024) add('op' + i, `Opción ${i + 1}: el texto de un documento puede tener hasta 1024 caracteres.`);
     if ((o.accion || 'responder') === 'responder' && texto(o.archivo_url) && !/^https:\/\/\S+$/.test(texto(o.archivo_url))) add('op' + i, `Opción ${i + 1}: el link del documento debe empezar con https://`);
@@ -961,7 +1006,7 @@ function validar(config, cred, { bloques = true } = {}) {
       const pz = leerPremios(s.premios_texto), pzm = lineasDe(s.premios_texto).filter((l, j) => !pz[j]);
       if (s.puntos?.activo && pzm.length) add(k, `No entendí el premio "${pzm[0]}". Escríbelo como "50: Envío gratis".`); }
     if (code === 'P17' && config.ia?.activa === false) add(k, 'El Agente IA necesita la IA prendida en el paso 6.');
-    if (code === 'P08') { if (!lineasDe(s.metodos_texto).length) add(k, 'Escribe al menos un medio de pago.'); link(s.qr?.url, 'El link del QR'); }
+    if (code === 'P08') { if (!texto(s.link) && !lineasDe(s.metodos_texto).length) add(k, 'Pega el link de pago (o escribe al menos un medio de pago).'); link(s.link, 'El link de pago'); link(s.qr?.url, 'El link del QR'); }
     if (code === 'P09') {
       const zs = leerZonas(s.zonas_texto), malas = lineasDe(s.zonas_texto).filter((l, j) => !zs[j]);
       if (malas.length) add(k, `No entendí la zona "${malas[0]}". Escríbela como "Miraflores: 10".`);
@@ -971,13 +1016,22 @@ function validar(config, cred, { bloques = true } = {}) {
       if (!(s.dias_entrega || []).length) add(k, 'Elige al menos un día de entrega.');
     }
   }
+  validarChatwoot(config, add);
+  if (config._modelo) validarModelo(config, add);
   return e;
 }
 const listaErrores = (e) => Object.values(e).flat();
-const PASOS = [['s-negocio', 'Negocio'], ['s-whatsapp', 'WhatsApp y Meta'], ['s-paquete', 'Plantillas'], ['s-menu', 'Menú'], ['s-bloques', 'Configurar plantillas'], ['s-ia', 'Inteligencia artificial'], ['s-mensajes', 'Mensajes'], ['s-asesor', 'Asesor y pausa'], ['s-revisar', 'Revisar y crear']];
+const PASOS = [['s-negocio', 'Negocio'], ['s-paquete', 'Tipo de worker'], ['s-whatsapp', 'WhatsApp y Meta'], ['s-menu', 'Menú'], ['s-bloques', 'Configurar plantillas'], ['s-ia', 'Inteligencia artificial'], ['s-mensajes', 'Mensajes'], ['s-asesor', 'Asesor y pausa'], ['s-revisar', 'Revisar y crear']];
+/* Los pasos cambian de nombre según el tipo de worker */
+function pasos() {
+  const fijo = !!S.edit?.config?._modelo;
+  return PASOS.map(([id, l], k) => k === 4 && fijo ? ['s-flor', 'Catálogo, envío y pago'] : k === 7 ? [id, 'Asesor y Chatwoot'] : [id, l]);
+}
 function pasoDeError(k) {
   if (k === 'negocio.nombre' || k === 'worker_id') return 0;
-  if (k.startsWith('whatsapp') || k.startsWith('horario') || k.startsWith('cred.')) return 1;
+  if (k.startsWith('whatsapp') || k.startsWith('horario') || k.startsWith('cred.')) return 2;
+  if (k === 'flor') return 4;
+  if (k === 'cw' || k === 'asesor') return 7;
   if (k === 'alcance') return 3;
   if (k.startsWith('op')) return 3;
   if (k.startsWith('blk.')) return 4;
@@ -1060,7 +1114,10 @@ function respuestaFinal(o) {
 
 /* Lo que se envía al Generador de n8n */
 function armarEnvio(w, cred) {
+  if (w.config._modelo) return armarModelo(w, cred);
   const c = clone(w.config);
+  const cw = { ...CW_INICIAL(), ...(c.cw || {}) };
+  delete c._modelo; delete c.flor; delete c.cw;
   c.plantilla_version = 'unificado-v0.7';
   c.worker_id = texto(c.worker_id);
   if (!c.worker_id) delete c.worker_id;   // el Generador lo crea desde el nombre
@@ -1080,7 +1137,10 @@ function armarEnvio(w, cred) {
   delete c.moneda; delete c._bloques;
   for (const code of usados) c[code.toLowerCase()] = aContrato(code, w.config[code.toLowerCase()] || seccionInicial(code), moneda, sigDe(w.config, code), w.config.ia || IA_INICIAL(), w.config);
   c.ia = iaContrato(w.config);
-  const out = { config: c, meta: { tipo_negocio: w.meta.tipo_negocio, paquete: w.meta.paquete, etiquetas: w.meta.etiquetas || [], notas: w.meta.notas || '', origen: 'workeros-web', version_interfaz: '1.0', bloques: usados } };
+  // Chatwoot (P13): cuenta que ya existe, o cuenta nueva que crea el Generador
+  if (cw.modo === 'existente') c.p13 = { activo: true, url: texto(cw.url).replace(/\/+$/, ''), account_id: texto(String(cw.account_id)), inbox_id: texto(String(cw.inbox_id)) };
+  const out = { config: c, meta: { tipo_negocio: w.meta.tipo_negocio, paquete: w.meta.paquete, etiquetas: w.meta.etiquetas || [], notas: w.meta.notas || '', origen: 'workeros-web', version_interfaz: '1.1', bloques: usados } };
+  if (cw.modo === 'nueva') out.alta_chatwoot = { nombre: texto(cw.nombre) || texto(c.negocio.nombre), correo: texto(cw.correo).toLowerCase() };
   // Credenciales de Meta: van aparte de config para que el token NUNCA quede escrito dentro del worker.
   if (cred && cred.modo === 'nuevas') out.credenciales = { modo: 'nuevas', nombre: texto(cred.nombre), token_meta: texto(cred.token), app_id: texto(cred.app_id), app_secret: texto(cred.app_secret) };
   else out.credenciales = { modo: 'existentes' };
@@ -1095,12 +1155,13 @@ async function enviar(payload, { prueba = false } = {}) {
   if (a.modo === 'simulado') {
     await new Promise(r => setTimeout(r, 900));
     if (prueba) return { status: 400, data: { ok: false, errores: ['negocio.nombre es obligatorio'] }, simulado: true };
-    const e = listaErrores(validar(payload.config, null, { bloques: false }));
+    const e = payload.modelo ? [] : listaErrores(validar(payload.config, null, { bloques: false }));
     if (e.length) return { status: 400, data: { ok: false, errores: e }, simulado: true };
     const id = Array.from({ length: 16 }, () => 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 56)]).join('');
     const wid = payload.config.worker_id || ((slug(payload.config.negocio.nombre) || 'worker') + '_' + Math.random().toString(36).slice(2, 6));
     const base = (a.n8nBase || 'https://n8n.ejemplo').replace(/\/$/, '');
-    return { status: 200, simulado: true, data: { ok: true, workflowId: id, nombre: 'WorkerOS · ' + payload.config.negocio.nombre, worker_id: wid, activo: false, enlace: `${base}/workflow/${id}`, siguiente_paso: 'Abre el enlace, revisa el worker y actívalo cuando esté probado.', credenciales: payload.credenciales?.modo === 'nuevas' ? { creadas: true, token: payload.credenciales.nombre + ' · token', trigger: payload.credenciales.app_id ? payload.credenciales.nombre + ' · trigger' : null } : { creadas: false } } };
+    return { status: 200, simulado: true, data: { ok: true, workflowId: id, nombre: 'WorkerOS · ' + (payload.modelo ? 'Florería · ' : '') + payload.config.negocio.nombre, worker_id: wid, activo: false, enlace: `${base}/workflow/${id}`, siguiente_paso: 'Abre el enlace, revisa el worker y actívalo cuando esté probado.', credenciales: payload.credenciales?.modo === 'nuevas' ? { creadas: true, token: payload.credenciales.nombre + ' · token', trigger: payload.credenciales.app_id ? payload.credenciales.nombre + ' · trigger' : null } : { creadas: false },
+      ...(payload.alta_chatwoot ? { chatwoot: { account_id: 12, inbox_id: 15, cuenta_nueva: true, correo_enviado: true } } : (payload.config.chatwoot || payload.config.p13) ? { chatwoot: { account_id: Number((payload.config.chatwoot || payload.config.p13).account_id), inbox_id: Number((payload.config.chatwoot || payload.config.p13).inbox_id), cuenta_nueva: false, correo_enviado: false } } : {}) } };
   }
   if (SESION) {
     try {
@@ -1178,7 +1239,7 @@ function render() {
 }
 
 /* ───────── Vista: Workers (lista y clasificación) ───────── */
-function modsDe(w) { return ['BASE', 'P01', ...bloquesUsados(w.config || {}), 'P12']; }
+function modsDe(w) { const c = w.config || {}; if (c._modelo) return ['Florería', ...(c.cw?.modo && c.cw.modo !== 'ninguno' ? ['Chatwoot'] : [])]; return ['BASE', 'P01', ...bloquesUsados(c), 'P12', ...(c.cw?.modo && c.cw.modo !== 'ninguno' ? ['P13'] : [])]; }
 function filaWorker(w) {
   const c = w.config, n = w.n8n || {};
   const est = w.estado;
@@ -1204,7 +1265,7 @@ function vistaWorkers() {
     (f.estado === 'todos' || w.estado === f.estado) &&
     (f.tipo === 'todos' || w.meta.tipo_negocio === f.tipo) &&
     (!q || [w.config.negocio.nombre, w.config.negocio.nombre_asistente, w.config.worker_id, w.n8n?.worker_id, ...(w.meta.etiquetas || [])].join(' ').toLowerCase().includes(q)));
-  const clave = { tipo: (w) => w.meta.tipo_negocio || 'Otro', estado: (w) => ESTADOS[w.estado], paquete: (w) => (PAQUETES.find(p => p.id === w.meta.paquete) || PAQUETES[0]).nombre }[f.agrupar];
+  const clave = { tipo: (w) => w.meta.tipo_negocio || 'Otro', estado: (w) => ESTADOS[w.estado], paquete: (w) => w.config?._modelo ? 'Worker fijo · ' + (MODELOS.find(m => m.id === w.config._modelo)?.nombre || '') : (PAQUETES.find(p => p.id === w.meta.paquete) || PAQUETES[0]).nombre }[f.agrupar];
   const grupos = {};
   visibles.sort((a, b) => (b.actualizado_en || '').localeCompare(a.actualizado_en || '')).forEach(w => { (grupos[clave(w)] = grupos[clave(w)] || []).push(w); });
   const tiposUsados = [...new Set(ws.map(w => w.meta.tipo_negocio))];
@@ -1213,7 +1274,7 @@ function vistaWorkers() {
   return `
   <div class="view-head">
     <div><div class="eyebrow">Panel interno</div><h1>Workers</h1>
-      <p>Cada worker es un bot de WhatsApp armado con plantillas. Aquí ves cuáles existen, en qué estado están y de qué tipo de negocio son.</p></div>
+      <p>Cada worker atiende un WhatsApp. Puede ser un worker fijo (como Florería) o uno armado con plantillas. Aquí ves cuáles existen, en qué estado están y de qué tipo de negocio son.</p></div>
     <a class="btn primary" href="#nuevo" data-act="nuevo">Crear worker</a>
   </div>
   ${hayEjemplos ? `<div class="notice info" style="margin-bottom:16px"><div><b>Los 3 workers de abajo son ejemplos</b> para que veas cómo se ordena la lista. Puedes borrarlos cuando crees los tuyos. <button class="btn sm ghost" data-act="borrar-ejemplos">Quitar ejemplos</button></div></div>` : ''}
@@ -1356,21 +1417,21 @@ function vistaEditor() {
   return `
   <div class="view-head">
     <div><div class="eyebrow">${E.id ? 'Editar worker' : 'Nuevo worker'}</div><h1>${esc(c.negocio.nombre || 'Worker sin nombre')}</h1>
-      <p>Ve paso a paso. Los campos vacíos usan un texto genérico, así el bot nunca se queda sin responder. A la derecha ves cómo contestará.</p></div>
+      <p>Ve paso a paso. Los campos vacíos usan un texto genérico, así el worker nunca se queda sin responder. A la derecha ves cómo contestará.</p></div>
     <a class="btn ghost" href="#workers">Volver a la lista</a>
   </div>
   ${creado ? `<div class="notice" style="margin-bottom:14px"><div><b>Este worker ya existe en n8n.</b> Por ahora el Generador solo crea workers nuevos: si cambias algo aquí, se guarda en este panel pero no cambia el worker que ya está en n8n.</div></div>` : ''}
   <nav class="stepper" aria-label="Pasos del formulario">
-    ${PASOS.map(([id, l], k) => `<button type="button" data-paso="${k}" class="${k < S.paso ? 'done' : ''}" ${k === S.paso ? 'aria-current="step"' : ''}><span><span class="n">${k + 1}</span> ${l}</span></button>`).join('')}
+    ${pasos().map(([id, l], k) => `<button type="button" data-paso="${k}" class="${k < S.paso ? 'done' : ''}" ${k === S.paso ? 'aria-current="step"' : ''}><span><span class="n">${k + 1}</span> ${l}</span></button>`).join('')}
   </nav>
   <div class="editor">
     <div>
       <form id="wform" novalidate autocomplete="off">
       <section class="fsec panel" id="s-negocio" ${oculto(0)}>
-        <div class="fsec-head"><div><h2>Negocio</h2><p>Datos que el bot usa dentro de sus mensajes y que sirven para ordenar la lista. No cambian el perfil de WhatsApp (foto, descripción, nombre visible): eso se edita en Meta.</p></div></div>
+        <div class="fsec-head"><div><h2>Negocio</h2><p>Datos que el worker usa dentro de sus mensajes y que sirven para ordenar la lista. No cambian el perfil de WhatsApp (foto, descripción, nombre visible): eso se edita en Meta.</p></div></div>
         <div class="grid2">
           ${campo('negocio.nombre', 'Nombre del negocio', { req: true, ph: 'Ej: Florería Miraflores' })}
-          ${campo('negocio.nombre_asistente', 'Nombre del asistente', { ph: 'Ej: Flora', hint: 'Así se presenta el bot. ' + respaldo(DEFAULTS.negocio.nombre_asistente) })}
+          ${campo('negocio.nombre_asistente', 'Nombre del asistente', { ph: 'Ej: Flora', hint: 'Así se presenta el worker. ' + respaldo(DEFAULTS.negocio.nombre_asistente) })}
           <div class="field"><label for="f_tipo">Tipo de negocio</label><select id="f_tipo" data-meta="tipo_negocio">${TIPOS.map(t => `<option ${t === E.meta.tipo_negocio ? 'selected' : ''}>${t}</option>`).join('')}</select><span class="hint">Sirve para clasificar los workers en la lista.</span></div>
           <div class="field"><label for="f_zona">Zona horaria</label><select id="f_zona" data-path="negocio.zona_horaria">${ZONAS.map(z => `<option ${z === c.negocio.zona_horaria ? 'selected' : ''}>${z}</option>`).join('')}</select><span class="hint">Para saber si un mensaje llega dentro o fuera del horario.</span></div>
           ${campo('worker_id', 'Identificador del worker', { ph: slug(c.negocio.nombre) ? slug(c.negocio.nombre) + '_xxxx (automático)' : 'automático', hint: 'Nombre interno, sin espacios. Separa la memoria de un worker de la de otro. Si lo dejas vacío, se crea solo.' })}
@@ -1378,19 +1439,20 @@ function vistaEditor() {
         </div>
       </section>
 
-      <section class="fsec panel" id="s-paquete" ${oculto(2)}>
-        <div class="fsec-head"><div><h2>Plantillas</h2><p>Elige qué sabe hacer este worker. Cada plantilla es un bloque con una tarea. En los pasos siguientes solo llenas lo que necesitan las que marques.</p></div></div>
+      <section class="fsec panel" id="s-paquete" ${oculto(1)}>
+        ${vistaTipoWorker()}
+        ${c._modelo ? '' : `<h3 style="margin-bottom:0">Plantillas</h3><p class="hint" style="margin-top:-6px">Marca qué sabe hacer este worker. Cada plantilla es un bloque con una tarea. En los pasos siguientes solo llenas lo que necesitan las que marques.</p>
         <div class="presets"><span class="hint">Atajos:</span>${PAQUETES.map(p => `<button type="button" class="btn sm ${E.meta.paquete === p.id ? '' : 'ghost'}" data-preset="${p.id}">${p.nombre}</button>`).join('')}</div>
         <div class="tpick">
           ${FIJAS.map(([code, nom, fs]) => `<label class="fija"><span class="tp-top"><input type="checkbox" checked disabled><span class="code">${code}</span><b>${nom}</b><span class="fx">Siempre</span></span><ul>${fs.map(f => `<li>${f}</li>`).join('')}</ul></label>`).join('')}
           ${ORDEN_BLOQUES.map(code => { const b = BLOQUES[code], on = bloquesUsados(c).includes(code);
             return `<label><span class="tp-top"><input type="checkbox" data-blq="${code}" ${on ? 'checked' : ''}><span class="code">${code}</span><b>${b.nombre}</b></span><ul>${b.funciones.map(f => `<li>${f}</li>`).join('')}</ul>${b.nota ? `<span class="hint">${b.nota}</span>` : ''}</label>`; }).join('')}
         </div>
-        <p class="hint">Más adelante: ${PLANTILLAS.filter(p => p.estado === 'despues').map(p => `${p.code} ${p.nombre}`).join(' · ')}.</p>
+        <p class="hint">P13 Chatwoot se agrega sola si eliges Chatwoot en el paso 8. Más adelante: ${PLANTILLAS.filter(p => p.estado === 'despues').map(p => `${p.code} ${p.nombre}`).join(' · ')}.</p>`}
       </section>
 
-      <section class="fsec panel" id="s-whatsapp" ${oculto(1)}>
-        <div class="fsec-head"><div><h2>WhatsApp y Meta</h2><p>El número desde el que responde el bot, cuándo hay personas para atender y las credenciales de Meta.</p></div></div>
+      <section class="fsec panel" id="s-whatsapp" ${oculto(2)}>
+        <div class="fsec-head"><div><h2>WhatsApp y Meta</h2><p>El número desde el que responde el worker, cuándo hay personas para atender y las credenciales de Meta.</p></div></div>
         <div class="grid2">
           ${campo('whatsapp.phone_number_id', 'Phone number ID', { req: true, ph: 'Ej: 1368900409630135', hint: 'Es el código del número en Meta (no es el teléfono). Abajo, en "¿Dónde encuentro estos datos?", te muestro dónde está.' })}
           ${campo('horario.texto', 'Horario en palabras', { ph: 'lunes a sábado, de 9:00 am a 8:00 pm', hint: E.manual ? 'Lo escribiste a mano. <button type="button" class="btn sm ghost" data-act="horario-auto">Volver a automático</button>' : 'Se escribe solo a partir de los días y horas. Puedes cambiarlo.' })}
@@ -1406,7 +1468,7 @@ function vistaEditor() {
       </section>
 
       <section class="fsec panel" id="s-menu" ${oculto(3)}>
-        <div class="fsec-head"><div><h2>Menú</h2><p>Primero escribe o pega el menú tal como lo verá el cliente. La web detecta las opciones numeradas y arma un desplegable para cada una, donde pones su texto y su documento.</p></div></div>
+        <div class="fsec-head"><div><h2>Menú</h2><p>Primero escribe o pega el menú tal como lo verá el cliente. La web detecta las opciones numeradas y arma un desplegable para cada una, donde eliges qué hace${c._modelo ? '' : ' y pones su texto y su documento'}.${c._modelo ? ' El worker Florería lo muestra como una lista de WhatsApp: hasta 8 opciones, con títulos de hasta 24 letras.' : ''}</p></div></div>
         <div class="menu-writer">
           <div class="field ${S.errores.opciones ? 'invalid' : ''}"><label for="f_menu">Escribe o pega el menú</label>
             <textarea id="f_menu" rows="12" placeholder="Responde con el *número* de la opción que buscas:&#10;&#10;1. Ver catálogo&#10;   Ramos y arreglos para toda ocasión&#10;2. Horario y ubicación&#10;3. Hablar con un asesor">${esc(S.edit.menuTexto)}</textarea>
@@ -1415,7 +1477,7 @@ function vistaEditor() {
             <li>Cada línea que empieza con número es una <b>opción</b> y crea su desplegable abajo.</li>
             <li>Lo que escribes antes del primer número es el <b>encabezado</b> del menú.</li>
             <li>Una línea sin número debajo de una opción es su <b>descripción</b> (sale en cursiva).</li>
-            <li>Si una opción dice "asesor", queda como derivación a asesor. En su desplegable puedes cambiar lo que hace, por ejemplo que abra un bloque (catálogo, pedido, pago…).</li>
+            <li>${c._modelo ? 'La web adivina qué hace cada opción por su título (catálogo, pedido, asesor…). En su desplegable puedes cambiarlo.' : 'Si una opción dice "asesor", queda como derivación a asesor. En su desplegable puedes cambiar lo que hace, por ejemplo que abra un bloque (catálogo, pedido, pago…).'}</li>
             <li>El saludo no va aquí: se escribe en el paso 7 y sale antes del menú.</li></ul></div></div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap"><h3>Respuestas de cada opción</h3><span class="menu-count" id="menuCount">${ops.length} ${ops.length === 1 ? 'opción' : 'opciones'}</span></div>
@@ -1423,9 +1485,9 @@ function vistaEditor() {
         ${vistaSueltos()}
       </section>
 
-      <section class="fsec panel" id="s-bloques" ${oculto(4)}>
-        <div class="fsec-head"><div><h2>Configurar plantillas</h2><p>Los datos que necesita cada plantilla que marcaste en el paso 3.</p></div></div>
-        ${vistaBloques()}
+      <section class="fsec panel" id="${c._modelo ? 's-flor' : 's-bloques'}" ${oculto(4)}>
+        ${c._modelo ? vistaFlor() : `<div class="fsec-head"><div><h2>Configurar plantillas</h2><p>Los datos que necesita cada plantilla que marcaste en el paso 2.</p></div></div>
+        ${vistaBloques()}`}
       </section>
 
       <section class="fsec panel" id="s-ia" ${oculto(5)}>
@@ -1433,29 +1495,31 @@ function vistaEditor() {
       </section>
 
       <section class="fsec panel" id="s-mensajes" ${oculto(6)}>
-        <div class="fsec-head"><div><h2>Mensajes</h2><p>Lo que dice el bot en cada momento. Las palabras entre llaves se reemplazan solas: <span class="mono">{nombre}</span> es el nombre del cliente en WhatsApp, <span class="mono">{negocio}</span> y <span class="mono">{asistente}</span> salen de la parte 1. Para negrita escribe *así*.</p></div></div>
-        ${campo('p01.saludo', 'Saludo', { tipo: 'textarea', vars: ['nombre', 'asistente', 'negocio'], ph: DEFAULTS.p01.saludo, hint: respaldo(DEFAULTS.p01.saludo) })}
+        <div class="fsec-head"><div><h2>Mensajes</h2><p>Lo que dice el worker en cada momento. Las palabras entre llaves se reemplazan solas: <span class="mono">{nombre}</span> es el nombre del cliente en WhatsApp, <span class="mono">{negocio}</span> y <span class="mono">{asistente}</span> salen de la parte 1. Para negrita escribe *así*.</p></div></div>
+        ${campo('p01.saludo', c._modelo ? 'Bienvenida' : 'Saludo', { tipo: 'textarea', vars: ['nombre', 'asistente', 'negocio'], ph: DEFAULTS.p01.saludo, hint: respaldo(DEFAULTS.p01.saludo) })}
         <div class="grid2">
           ${campo('p01.msg_opcion_invalida', 'Cuando no entiende la respuesta', { tipo: 'textarea', rows: 2, ph: DEFAULTS.p01.msg_opcion_invalida, hint: 'Después se repite el menú.' })}
-          <div class="field"><label for="f_max">Intentos antes de pasar a asesor</label><select id="f_max" data-num="p01.max_intentos_invalidos">${[2, 3, 4, 5].map(n => `<option value="${n}" ${n === Number(c.p01.max_intentos_invalidos) ? 'selected' : ''}>${n} respuestas que no entiende</option>`).join('')}</select><span class="hint">Si el cliente se equivoca esas veces seguidas, se le avisa que lo atenderá una persona.</span></div>
+          ${c._modelo ? campo('flor.msg_fuera_horario', 'Aviso fuera de horario', { tipo: 'textarea', rows: 2, ph: '🕘 Ahora estamos fuera de horario ({horario}), pero puedes dejar tu pedido y lo atendemos apenas abramos.', hint: 'Sale después de la bienvenida cuando escriben fuera del horario. Vacío = el de ejemplo.' }) : `<div class="field"><label for="f_max">Intentos antes de pasar a asesor</label><select id="f_max" data-num="p01.max_intentos_invalidos">${[2, 3, 4, 5].map(n => `<option value="${n}" ${n === Number(c.p01.max_intentos_invalidos) ? 'selected' : ''}>${n} respuestas que no entiende</option>`).join('')}</select><span class="hint">Si el cliente se equivoca esas veces seguidas, se le avisa que lo atenderá una persona.</span></div>`}
           ${campo('p01.msg_despedida', 'Despedida', { tipo: 'textarea', rows: 2, vars: ['nombre', 'negocio'], ph: DEFAULTS.p01.msg_despedida, hint: 'Cuando el cliente escribe "gracias", "chau"…' })}
-          ${campo('p01.pie_respuesta', 'Nota al final de cada respuesta', { tipo: 'textarea', rows: 2, ph: DEFAULTS.p01.pie_respuesta.trim(), hint: 'Le recuerda cómo volver al menú.' })}
+          ${c._modelo ? '' : campo('p01.pie_respuesta', 'Nota al final de cada respuesta', { tipo: 'textarea', rows: 2, ph: DEFAULTS.p01.pie_respuesta.trim(), hint: 'Le recuerda cómo volver al menú.' })}
           ${campo('p01.palabras_menu', 'Palabras que muestran el menú', { lista: true, ph: DEFAULTS.p01.palabras_menu.join(', '), hint: 'Separadas por coma. Vacío = las de ejemplo.' })}
           ${campo('p01.palabras_despedida', 'Palabras de despedida', { lista: true, ph: DEFAULTS.p01.palabras_despedida.join(', '), hint: 'Separadas por coma. Vacío = las de ejemplo.' })}
-          ${campo('p01.msg_archivo_no_soportado', 'Cuando mandan una foto o archivo', { tipo: 'textarea', rows: 2, ph: DEFAULTS.p01.msg_archivo_no_soportado, hint: 'Por ahora el bot solo lee texto.', full: true })}
+          ${c._modelo ? '' : campo('p01.msg_archivo_no_soportado', 'Cuando mandan una foto o archivo', { tipo: 'textarea', rows: 2, ph: DEFAULTS.p01.msg_archivo_no_soportado, hint: 'Por ahora el worker solo lee texto.', full: true })}
         </div>
       </section>
 
       <section class="fsec panel" id="s-asesor" ${oculto(7)}>
-        <div class="fsec-head"><div><h2>Asesor y pausa</h2><p>Por ahora el aviso de asesor solo informa al cliente; todavía no abre una conversación con una persona (eso llega con Chatwoot).</p></div></div>
+        <div class="fsec-head"><div><h2>Asesor y Chatwoot</h2><p>Cómo se avisa al cliente que lo atenderá una persona y dónde lo atiende. Con Chatwoot, el asesor lee y responde la conversación desde ahí.</p></div></div>
         <div class="grid2">
           ${campo('p12.nombre_asesor', 'Cómo llamar al asesor', { ph: DEFAULTS.p12.nombre_asesor, hint: 'Se usa en <span class="mono">{asesor}</span>. Ej: "nuestro equipo", "Carla".' })}
+          ${c._modelo ? campo('flor.telefono_asesor', 'WhatsApp del asesor (opcional)', { ph: 'Ej: 51999888777', hint: 'Recibe un aviso por WhatsApp cuando un cliente pide asesor. Con código de país, solo números.' }) : ''}
           ${campo('p12.palabras_asesor', 'Palabras que piden asesor', { lista: true, ph: 'asesor, humano, reclamo…', hint: 'Vacío = asesor, agente, humano, queja, reclamo y otras.' })}
           ${campo('p12.msg_derivacion', 'Aviso dentro del horario', { tipo: 'textarea', vars: ['asesor', 'horario'], ph: DEFAULTS.p12.msg_derivacion, hint: respaldo(DEFAULTS.p12.msg_derivacion) })}
-          ${campo('p12.msg_fuera_horario', 'Aviso fuera del horario', { tipo: 'textarea', vars: ['asesor', 'horario'], ph: DEFAULTS.p12.msg_fuera_horario, hint: 'Se usa cuando escriben fuera del horario de la parte 3.' })}
+          ${campo('p12.msg_fuera_horario', 'Aviso fuera del horario', { tipo: 'textarea', vars: ['asesor', 'horario'], ph: DEFAULTS.p12.msg_fuera_horario, hint: 'Se usa cuando escriben fuera del horario del paso 3.' })}
         </div>
+        ${vistaChatwoot()}
         <label class="switch"><input type="checkbox" id="f_pausa" data-bool="interruptores.pausa" ${c.interruptores.pausa ? 'checked' : ''}>Modo pausa</label>
-        <span class="hint" style="margin-top:-8px">Si está prendido, el bot responde solo el mensaje de pausa a todo. Útil mientras se hacen cambios.</span>
+        <span class="hint" style="margin-top:-8px">Si está prendido, el worker responde solo el mensaje de pausa a todo. Útil mientras se hacen cambios.</span>
         ${c.interruptores.pausa ? campo('interruptores.mensaje_pausa', 'Mensaje de pausa', { tipo: 'textarea', rows: 2, ph: DEFAULTS.interruptores.mensaje_pausa }) : ''}
         <div class="field"><label for="f_ttl">Cuánto recuerda a cada cliente</label><select id="f_ttl" data-num="memoria.ttl_segundos">${[[86400, '1 día'], [259200, '3 días'], [604800, '7 días'], [1209600, '14 días'], [2592000, '30 días']].map(([s, l]) => `<option value="${s}" ${s === Number(c.memoria.ttl_segundos) ? 'selected' : ''}>${l}</option>`).join('')}</select><span class="hint">Pasado ese tiempo sin escribir, el cliente vuelve a recibir el saludo.</span></div>
       </section>
@@ -1466,7 +1530,7 @@ function vistaEditor() {
       </form>
 
       <div class="sendbar panel" id="sendbar">
-        <div class="left">${S.enviando ? '<span class="dot warn"></span>Enviando a n8n…' : `Paso ${S.paso + 1} de ${PASOS.length} · ${PASOS[S.paso][1]}`}</div>
+        <div class="left">${S.enviando ? '<span class="dot warn"></span>Enviando a n8n…' : `Paso ${S.paso + 1} de ${PASOS.length} · ${pasos()[S.paso][1]}`}</div>
         <div class="right">
           ${S.paso > 0 ? '<button type="button" class="btn" data-act="ant">Anterior</button>' : ''}
           <button type="button" class="btn ghost" data-act="guardar">Guardar borrador</button>
@@ -1543,7 +1607,7 @@ function camposBloque(code, s) {
       ${campo('p10.servicios_texto', 'Servicios', { tipo: 'textarea', rows: 5, req: true, full: true, ph: 'Corte de cabello: 45 min, 35 · Lavado, corte y peinado\nTinte completo (Carla): 120 min, 150\nManicure (Lucía): 60 min, 40', hint: 'Uno por línea: <span class="mono">Servicio: minutos, precio</span>. Opcional: entre paréntesis quién lo hace, y después de · una descripción.' })}
       ${campo('p10.profesionales_texto', 'Profesionales (opcional)', { tipo: 'textarea', rows: 4, ph: 'Carla: M X J V S, 10-19\nLucía: L M X J V S, 9-17\nDiego', hint: 'Uno por línea. Días con letras (L M X J V S D) y horas. Solo el nombre = trabaja en el horario del negocio. Vacío = no se elige profesional.' })}
       <div style="display:flex;flex-direction:column;gap:14px">
-        ${campo('p10.pausa_texto', 'Pausa del día', { ph: '13-14', hint: `Sin citas en esas horas. Vacío = sin pausa. El horario es el del paso 2: ${esc(S.edit.config.horario.texto || '')}.` })}
+        ${campo('p10.pausa_texto', 'Pausa del día', { ph: '13-14', hint: `Sin citas en esas horas. Vacío = sin pausa. El horario es el del paso 3: ${esc(S.edit.config.horario.texto || '')}.` })}
         <div class="field"><label for="f_p10_int">Las citas empiezan cada</label><select id="f_p10_int" data-num="p10.intervalo_min">${[15, 30, 60].map(n => `<option value="${n}" ${Number(s.intervalo_min) === n ? 'selected' : ''}>${n} minutos</option>`).join('')}</select></div>
       </div>
       ${campo('p10.agenda_fuente.url', 'Hoja con la agenda ocupada (opcional)', { ph: 'https://docs.google.com/spreadsheets/d/…', hint: 'Columnas FECHA, HORA, DURACION, PROFESIONAL y ESTADO. Esos horarios no se ofrecen. ' + hintHoja })}
@@ -1578,10 +1642,11 @@ function camposBloque(code, s) {
       <label class="switch"><input type="checkbox" data-bool="p09.recojo.activo" ${s.recojo?.activo ? 'checked' : ''}>También puede recoger en tienda</label>
       ${s.recojo?.activo ? campo('p09.recojo.direccion', 'Dirección de la tienda', { ph: 'Av. Ejemplo 123' }) : ''}`;
     case 'P08': return `<div class="grid2">
-      ${campo('p08.metodos_texto', 'Medios de pago', { tipo: 'textarea', rows: 4, req: true, ph: 'Yape / Plin: 999 999 999 (Mi negocio)\nTransferencia BCP: Cuenta 000-0000000-0-00', hint: 'Uno por línea: <span class="mono">Nombre: datos</span>.' })}
+      ${campo('p08.link', 'Link de pago', { req: true, ph: 'https://…', hint: 'La página donde el cliente paga (por ejemplo, la de EasyPay). Si tu link lo acepta, escribe <span class="mono">{monto}</span> y <span class="mono">{pedido_id}</span> y el worker pone el total y el número de pedido.' })}
+      ${campo('p08.metodos_texto', 'Otros medios de pago (opcional)', { tipo: 'textarea', rows: 3, ph: 'Yape / Plin: 999 999 999 (Mi negocio)\nTransferencia BCP: Cuenta 000-0000000-0-00', hint: 'Uno por línea: <span class="mono">Nombre: datos</span>.' })}
       ${campo('p08.qr.url', 'Imagen del QR (link, opcional)', { ph: 'https://drive.google.com/file/d/…/view' })}
       ${selectSiguiente(code, s)}</div>
-      <span class="hint">El bloque no lee el comprobante: lo guarda y avisa a una persona del equipo para que valide el pago.</span>`;
+      <div class="notice info"><div><b>El worker ya no valida comprobantes.</b> Envía el total y el link. Si el cliente manda la foto o PDF del comprobante, se lo pasa al asesor para que lo revise.</div></div>`;
     case 'P17': { const ia = S.edit.config.ia || IA_INICIAL(), lista = MODELOS_IA[ia.proveedor], provN = (PROVEEDORES_IA.find(([v]) => v === ia.proveedor) || ['', ia.proveedor])[1];
       return `<div class="notice info"><div>Usa la IA del <b>paso 6</b>: ${esc(provN)} · <span class="mono">${esc(ia.modelo || '—')}</span>, con la misma clave. Lo que dejes vacío aquí se toma de ese paso.</div></div>
       <div class="grid2">
@@ -1615,7 +1680,7 @@ function vistaSueltos() {
 }
 function vistaBloques() {
   const c = S.edit.config, usados = bloquesUsados(c);
-  if (!usados.length) return `<div class="notice info"><div><b>No marcaste plantillas extra.</b> El worker tendrá saludo, menú y asesor. Si quieres catálogo, pedidos, delivery, pagos o documentos, márcalas en el paso 3.</div></div>`;
+  if (!usados.length) return `<div class="notice info"><div><b>No marcaste plantillas extra.</b> El worker tendrá saludo, menú y asesor. Si quieres catálogo, pedidos, delivery, pagos o documentos, márcalas en el paso 2.</div></div>`;
   const entradas = c.p01.opciones.map((o, i) => [o, i]).filter(([o]) => o.accion === 'modulo' && BLOQUES[o.modulo]);
   const tagB = (b) => `<span class="mod">${b}</span>`;
   const usaMoneda = usados.some(b => ['P05', 'P06', 'P07', 'P09', 'P08', 'P10', 'P11'].includes(b));
@@ -1635,6 +1700,7 @@ function vistaOpciones() {
   return ops.length ? ops.map((o, i) => vistaOpcion(o, i)).join('') : '<div class="panel empty-ops" style="padding:18px;color:var(--muted);text-align:center">Escribe la primera opción arriba y aquí aparecerá su desplegable.</div>';
 }
 function badgeOpcion(o) {
+  if (S.edit?.config?._modelo) { const tp = tipoDe(o); return `<span class="badge ${tp === 'asesor' ? 'asesor' : ''}">${esc(TIPOS_OPCION.find(([v]) => v === tp)[1])}</span>`; }
   if (o.accion === 'asesor') return '<span class="badge asesor">Pasa a asesor</span>';
   if (o.accion === 'modulo') return `<span class="badge">Abre ${esc(o.modulo || 'bloque')}</span>`;
   const doc = !!texto(o.archivo_url), txt = !!texto(o.respuesta);
@@ -1644,6 +1710,7 @@ function badgeOpcion(o) {
   return '<span class="badge asesor">Sin respuesta</span>';
 }
 function vistaOpcion(o, i) {
+  if (S.edit.config._modelo) return vistaOpcionModelo(o, i);
   const abierta = S.edit.abiertas.includes(i) || !!S.errores['op' + i];
   const asesor = o.accion === 'asesor', modulo = o.accion === 'modulo';
   const dl = linkDescarga(o.archivo_url);
@@ -1659,7 +1726,7 @@ function vistaOpcion(o, i) {
     ${abierta ? `<div class="opt-body"><div style="display:flex;flex-direction:column;gap:12px">
       <div class="radio-row" role="radiogroup" aria-label="Qué hace la opción ${i + 1}">
         <label><input type="radio" name="acc${i}" value="responder" data-op="${i}" data-k="accion" ${asesor || modulo ? '' : 'checked'}>Responde con texto o documento</label>
-        <label ${bloquesUsados(S.edit.config).length || modulo ? '' : 'title="Primero marca plantillas en el paso 3"'}><input type="radio" name="acc${i}" value="modulo" data-op="${i}" data-k="accion" ${modulo ? 'checked' : ''} ${bloquesUsados(S.edit.config).length || modulo ? '' : 'disabled'}>Abre una plantilla</label>
+        <label ${bloquesUsados(S.edit.config).length || modulo ? '' : 'title="Primero marca plantillas en el paso 2"'}><input type="radio" name="acc${i}" value="modulo" data-op="${i}" data-k="accion" ${modulo ? 'checked' : ''} ${bloquesUsados(S.edit.config).length || modulo ? '' : 'disabled'}>Abre una plantilla</label>
         <label><input type="radio" name="acc${i}" value="asesor" data-op="${i}" data-k="accion" ${asesor ? 'checked' : ''}>Pasa a un asesor</label>
       </div>
       ${asesor ? '<p class="hint">El cliente recibe el aviso de asesor que configuras en el paso 8.</p>' : modulo ? `
@@ -1673,7 +1740,7 @@ function vistaOpcion(o, i) {
         </div>
         <span class="hint">En Drive, el archivo debe estar compartido como "Cualquier persona con el enlace" y pesar menos de 100 MB.</span><span class="dl" id="op${i}dl">${dl && dl !== texto(o.archivo_url) ? `Link de descarga que usará el worker: ${esc(dl)}` : ''}</span>
       </div>
-      <div class="field"><label for="op${i}r" id="op${i}rl">${texto(o.archivo_url) ? 'Texto que acompaña al documento (caption)' : 'Texto de respuesta'}</label><div class="vars">${['nombre', 'negocio', 'asistente'].map(x => `<button type="button" data-insert="${x}" data-target="op${i}r">{${x}}</button>`).join('')}</div><textarea id="op${i}r" data-op="${i}" data-k="respuesta" rows="3" placeholder="${texto(o.archivo_url) ? 'Ej: 💐 Aquí tienes nuestro catálogo actualizado' : 'Lo que el bot contesta al elegir esta opción'}">${esc(o.respuesta)}</textarea>
+      <div class="field"><label for="op${i}r" id="op${i}rl">${texto(o.archivo_url) ? 'Texto que acompaña al documento (caption)' : 'Texto de respuesta'}</label><div class="vars">${['nombre', 'negocio', 'asistente'].map(x => `<button type="button" data-insert="${x}" data-target="op${i}r">{${x}}</button>`).join('')}</div><textarea id="op${i}r" data-op="${i}" data-k="respuesta" rows="3" placeholder="${texto(o.archivo_url) ? 'Ej: 💐 Aquí tienes nuestro catálogo actualizado' : 'Lo que el worker contesta al elegir esta opción'}">${esc(o.respuesta)}</textarea>
         <span class="hint">${texto(o.archivo_url) ? 'Va pegado al documento, como su descripción. Máximo 1024 caracteres.' : 'Si agregas un documento arriba, este texto irá como su descripción.'}</span></div>`}
       <details class="more"><summary>Más opciones</summary><div style="display:flex;flex-direction:column;gap:12px">
         <div class="field"><label for="op${i}p">Palabras que también la activan</label><input type="text" id="op${i}p" data-op="${i}" data-k="palabras" value="${esc((o.palabras || []).join(', '))}" placeholder="Ej: catalogo, precios"><span class="hint">Si el cliente escribe una de estas palabras en vez del número. Separadas por coma.</span></div>
@@ -1692,14 +1759,15 @@ function vistaRevision() {
   return `${sueltos.length ? `<div class="notice"><div><b>Aviso:</b> ninguna opción del menú abre ${sueltos.join(', ')}. Se copiará al worker, pero el cliente no llegará a ella.</div></div>` : ''}${errs.length ? `<div class="notice bad"><div><b>Antes de crear, corrige esto:</b><ul>${errs.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div></div>` : `<div class="notice ${S.ajustes.modo === 'real' ? 'ok' : 'info'}"><div>${S.ajustes.modo === 'real' ? '<b>Todo listo.</b> Al tocar "Crear en n8n" se envía a tu Generador.' : '<b>Modo simulado.</b> Al tocar "Crear en n8n" no se crea nada de verdad. Cámbialo en Conexión n8n.'}</div></div>`}
   <div class="review">
     ${fila('Negocio', `${esc(c.negocio.nombre) || falta}${c.negocio.nombre_asistente ? ` · asistente <b>${esc(c.negocio.nombre_asistente)}</b>` : ''}<br><span class="hint">${esc(E.meta.tipo_negocio)} · ${esc(c.negocio.zona_horaria)}</span>`, 0)}
-    ${fila('Plantillas', `<span class="mods" style="display:inline-flex;margin-left:6px;gap:4px;flex-wrap:wrap">${['BASE', 'P01', ...bloquesUsados(c), 'P12'].map(m => `<span class="mod">${m}</span>`).join('')}</span>`, 2)}
-    ${fila('WhatsApp', `${c.whatsapp.phone_number_id ? `<span class="mono">${esc(c.whatsapp.phone_number_id)}</span>` : falta}<br><span class="hint">${E.cred.modo === 'nuevas' ? `Credenciales nuevas: ${esc(E.cred.nombre)}${E.cred.token ? '' : ' (falta el token)'}` : 'Credenciales de Nissitech'}</span>`, 1)}
-    ${fila('Horario', esc(c.horario.texto) || falta, 1)}
-    ${fila('Menú', `<ol>${ops.map(o => `<li>${esc(texto(o.titulo) || 'Sin título')} <span class="hint">· ${o.accion === 'asesor' ? 'pasa a asesor' : o.accion === 'modulo' ? 'abre ' + esc(o.modulo) : texto(o.archivo_url) ? (texto(o.respuesta) ? 'documento + texto' : 'documento') : 'texto'}</span></li>`).join('')}</ol>`, 3)}
-    ${fila('Configuración', bloquesUsados(c).length ? `<span class="mods" style="display:inline-flex;gap:4px;flex-wrap:wrap">${bloquesUsados(c).map(b => `<span class="mod">${b}</span>`).join('')}</span><br><span class="hint">${bloquesUsados(c).map(b => BLOQUES[b].nombre).join(' · ')}</span>` : '<span class="hint">Ninguno</span>', 4)}
+    ${fila('Tipo de worker', c._modelo ? `Worker fijo · <b>${esc(MODELOS.find(m => m.id === c._modelo).nombre)}</b>` : `Con plantillas <span class="mods" style="display:inline-flex;margin-left:6px;gap:4px;flex-wrap:wrap">${modsDe({ config: c }).map(m => `<span class="mod">${m}</span>`).join('')}</span>`, 1)}
+    ${fila('WhatsApp', `${c.whatsapp.phone_number_id ? `<span class="mono">${esc(c.whatsapp.phone_number_id)}</span>` : falta}<br><span class="hint">${E.cred.modo === 'nuevas' ? `Credenciales nuevas: ${esc(E.cred.nombre)}${E.cred.token ? '' : ' (falta el token)'}` : 'Credenciales de Nissitech'}</span>`, 2)}
+    ${fila('Horario', esc(c.horario.texto) || falta, 2)}
+    ${fila('Menú', `<ol>${ops.map(o => `<li>${esc(texto(o.titulo) || 'Sin título')} <span class="hint">· ${c._modelo ? esc(TIPOS_OPCION.find(([v]) => v === tipoDe(o))[1].toLowerCase()) : o.accion === 'asesor' ? 'pasa a asesor' : o.accion === 'modulo' ? 'abre ' + esc(o.modulo) : texto(o.archivo_url) ? (texto(o.respuesta) ? 'documento + texto' : 'documento') : 'texto'}</span></li>`).join('')}</ol>`, 3)}
+    ${c._modelo ? fila('Catálogo, envío y pago', resumenFlor(c, falta), 4) : fila('Configuración', bloquesUsados(c).length ? `<span class="mods" style="display:inline-flex;gap:4px;flex-wrap:wrap">${bloquesUsados(c).map(b => `<span class="mod">${b}</span>`).join('')}</span><br><span class="hint">${bloquesUsados(c).map(b => BLOQUES[b].nombre).join(' · ')}</span>` : '<span class="hint">Ninguno</span>', 4)}
     ${fila('Inteligencia artificial', c.ia?.activa === false ? 'Apagada · <span class="hint">solo reglas</span>' : `${esc((PROVEEDORES_IA.find(([v]) => v === c.ia.proveedor) || ['', c.ia.proveedor])[1])} · <span class="mono">${esc(c.ia.modelo || '—')}</span><br><span class="hint">${texto(E.cred.ia_key) ? 'Con clave (API key)' : 'Sin clave: funciona solo con reglas, salvo que el Generador tenga una clave de Nissitech'}</span>`, 5)}
     ${fila('Mensajes', `<span class="hint">Saludo:</span> ${esc((c.p01.saludo || DEFAULTS.p01.saludo).replace(/\n/g, ' '))}`, 6)}
-    ${fila('Asesor y pausa', `${esc(c.p12.nombre_asesor || DEFAULTS.p12.nombre_asesor)} · modo pausa ${c.interruptores.pausa ? '<b>prendido</b>' : 'apagado'}`, 7)}
+    ${fila('Asesor', `${esc(c.p12.nombre_asesor || DEFAULTS.p12.nombre_asesor)} · modo pausa ${c.interruptores.pausa ? '<b>prendido</b>' : 'apagado'}`, 7)}
+    ${fila('Chatwoot', c.cw?.modo === 'nueva' ? `Cuenta nueva para <b>${esc(c.cw.correo) || falta}</b><br><span class="hint">Le llega un correo de bienvenida con su usuario y contraseña.</span>` : c.cw?.modo === 'existente' ? `Cuenta que ya existe · cuenta <span class="mono">${esc(c.cw.account_id) || '—'}</span> · bandeja <span class="mono">${esc(c.cw.inbox_id) || '—'}</span>` : '<span class="hint">Sin Chatwoot: el asesor recibe solo el aviso</span>', 7)}
   </div>
   <button type="button" class="btn ghost" data-act="ver-json" style="align-self:flex-start">Ver lo que se envía a n8n</button>`;
 }
@@ -1709,6 +1777,7 @@ function pintarResultado() {
     const d = r.data;
     return `<div class="notice ok" style="margin-top:14px"><div><b>Worker creado${r.simulado ? ' (simulado)' : ''}.</b> ${esc(d.nombre || '')} con id <span class="mono">${esc(d.workflowId)}</span> y worker_id <span class="mono">${esc(d.worker_id)}</span>. ${esc(d.siguiente_paso || '')}${d.credenciales?.creadas ? ` Credenciales creadas en n8n: <span class="mono">${esc([d.credenciales.token, d.credenciales.trigger].filter(Boolean).join(', '))}</span>.` : ''}
       ${(d.plantillas || []).length ? `<div style="margin-top:6px">Plantillas copiadas: <span class="mono">${esc([].concat(d.plantillas).map(x => typeof x === 'string' ? x : (x.codigo || x.code || JSON.stringify(x))).join(', '))}</span></div>` : ''}
+      ${d.chatwoot ? `<div style="margin-top:6px">Chatwoot: ${d.chatwoot.cuenta_nueva ? 'cuenta nueva' : 'cuenta que ya existía'} · cuenta <span class="mono">${esc(d.chatwoot.account_id ?? '—')}</span> · bandeja <span class="mono">${esc(d.chatwoot.inbox_id ?? '—')}</span>.${d.chatwoot.cuenta_nueva ? (d.chatwoot.correo_enviado ? ' Ya le llegó el correo de bienvenida con su usuario y contraseña.' : ' <b>No se pudo enviar el correo de bienvenida</b>: revisa el flujo "Alta en Chatwoot" en n8n.') : ''}</div>` : ''}
       ${(d.avisos || []).length ? `<div style="margin-top:8px"><b>Avisos del Generador:</b><ul>${d.avisos.map(a => `<li>${esc(a)}</li>`).join('')}</ul></div>` : ''}
       <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${d.enlace ? `<a class="btn sm" href="${esc(d.enlace)}" target="_blank" rel="noopener">Abrir en n8n</a>` : ''}<a class="btn sm ghost" href="#workers">Ver en la lista</a></div></div></div>`;
   }
@@ -1726,8 +1795,8 @@ function vistaIA() {
     <span class="hint" style="margin-top:-8px">${on ? 'Sin clave (API key), el worker funciona igual, solo con números y palabras clave.' : 'Apagada: el worker responde solo con números y palabras clave.'}${p17 && !on ? ' <b>El Agente IA (P17) necesita la IA prendida.</b>' : ''}</span>
     <div class="${on ? '' : 'ia-off'}" style="display:flex;flex-direction:column;gap:14px" ${on ? '' : 'aria-hidden="true"'}>
       <div class="grid2">
-        <div class="field"><label for="f_ia_prov">Qué IA usa</label><select id="f_ia_prov" data-path="ia.proveedor" ${on ? '' : 'disabled'}>${PROVEEDORES_IA.map(([v, l]) => `<option value="${v}" ${ia.proveedor === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
-          <span class="hint">Es la empresa de la que sale la clave. OpenAI es la de ChatGPT.</span></div>
+        ${c._modelo ? `<div class="field"><span class="flabel">Qué IA usa</span><span>OpenAI (ChatGPT)</span><span class="hint">El worker Florería usa OpenAI: entiende audios, fotos del catálogo y mensajes escritos con palabras libres.</span></div>` : `<div class="field"><label for="f_ia_prov">Qué IA usa</label><select id="f_ia_prov" data-path="ia.proveedor" ${on ? '' : 'disabled'}>${PROVEEDORES_IA.map(([v, l]) => `<option value="${v}" ${ia.proveedor === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+          <span class="hint">Es la empresa de la que sale la clave. OpenAI es la de ChatGPT.</span></div>`}
         ${modelos
           ? `<div class="field"><label for="f_ia_mod">Modelo</label><select id="f_ia_mod" data-path="ia.modelo" ${on ? '' : 'disabled'}>${modelos.map(([v, l]) => `<option value="${esc(v)}" ${ia.modelo === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>
             <span class="hint">El modelo es el "cerebro" de la IA. Para entender mensajes cortos basta el recomendado, que cuesta menos.</span></div>`
@@ -1835,7 +1904,7 @@ function vistaPreview() {
   const ini = (S.edit.config.negocio.nombre_asistente || S.edit.config.negocio.nombre || 'W').trim().charAt(0).toUpperCase();
   return `<aside class="preview panel" aria-label="Vista previa en WhatsApp">
     <div class="pv-head"><div class="avatar" aria-hidden="true">${esc(ini)}</div>
-      <div class="who"><b>${esc(S.edit.config.negocio.nombre || 'Tu negocio')}</b><span>Vista previa · así responderá el bot</span></div>
+      <div class="who"><b>${esc(S.edit.config.negocio.nombre || 'Tu negocio')}</b><span>Vista previa · así responderá el worker</span></div>
       <button type="button" class="btn sm ghost" data-act="chat-reset">Reiniciar</button></div>
     <div class="chat" id="chat" aria-live="polite">${pintarChat()}</div>
     <div class="pv-quick">${['Hola', '1', '2', 'asesor', 'xyz', 'gracias'].map(t => `<button type="button" class="chip" data-say="${t}">${t}</button>`).join('')}</div>
@@ -1873,6 +1942,8 @@ function hablar(txt) {
     const opcion = opciones.find(o => t === norm(o.numero) || (o.palabras || []).some(contiene));
     if ((cfg.p12.palabras_asesor || []).some(contiene)) r = derivar('pidió hablar con una persona');
     else if (mem.estado === '') { r = bienvenida; mem.estado = 'en_menu'; mem.intentos = 0; }
+    else if (opcion && S.edit.config._modelo && tipoDe(opcion) === 'asesor') { mem.intentos = 0; r = derivar(`eligió la opción ${opcion.numero}`); }
+    else if (opcion && S.edit.config._modelo && tipoDe(opcion) !== 'info') { mem.intentos = 0; if (texto(opcion.respuesta)) ch.msgs.push({ yo: false, texto: rellenar(opcion.respuesta), hora: h }); ch.msgs.push({ sys: true, texto: `Opción ${opcion.numero} · ${TIPOS_OPCION.find(([v]) => v === tipoDe(opcion))[1]}: desde aquí sigue el worker Florería en n8n` }); r = null; }
     else if (opcion && opcion.accion === 'modulo') { mem.intentos = 0; ch.msgs.push({ sys: true, texto: `${opcion.modulo} · ${BLOQUES[opcion.modulo]?.nombre || 'bloque'}: desde aquí responde el bloque en n8n` }); r = null; }
     else if (opcion) { mem.intentos = 0; if (opcion.accion !== 'asesor' && texto(opcion.archivo_url)) doc = texto(opcion.archivo_nombre) || 'Documento'; r = opcion.accion === 'asesor' ? derivar(`eligió la opción ${opcion.numero}`) : rellenar(doc ? opcion.respuesta : respuestaFinal(opcion)).trim() + p01.pie_respuesta; }
     else if ((p01.palabras_menu || []).some(contiene)) { r = bienvenida; mem.intentos = 0; }
@@ -1910,7 +1981,7 @@ function leerFormulario() {
   $$('#wform [data-bool]').forEach(el => setPath(c, el.dataset.bool, el.checked));
   $$('#wform [data-op]').forEach(el => {
     const o = c.p01.opciones[Number(el.dataset.op)]; if (!o) return;
-    if (el.type === 'radio') { if (el.checked) o.accion = el.value; return; }
+    if (el.type === 'radio') { if (el.checked) o[el.dataset.k] = el.value; return; }
     o[el.dataset.k] = el.dataset.k === 'palabras' ? el.value.split(',').map(s => s.trim()).filter(Boolean) : el.value;
   });
   if (isObj(c.p11) && $('#wform [data-p11op]')) c.p11.opciones = $$('#wform [data-p11op]').filter(el => el.checked).map(el => el.dataset.p11op);
@@ -1921,7 +1992,9 @@ function leerFormulario() {
   limpiarDependencias(c);
   asegurarSecciones(c);
   if (!isObj(c.ia)) c.ia = IA_INICIAL();
+  if (c._modelo && c.ia.proveedor !== 'openai') c.ia.proveedor = 'openai';
   ajustarModeloIA(c);
+  $$('#wform [data-cw]').forEach(el => { if (el.checked) c.cw.modo = el.value; });
   $$('#wform [data-cred]').forEach(el => { if (el.type === 'radio') { if (el.checked) E.cred.modo = el.value; } else E.cred[el.dataset.cred] = el.value; });
   if (E.cred.modo === 'nuevas' && !texto(E.cred.nombre)) E.cred.nombre = 'WhatsApp · ' + (c.negocio.nombre || 'cliente');
   E.meta.credenciales = { modo: E.cred.modo, nombre: E.cred.modo === 'nuevas' ? texto(E.cred.nombre) : '' };
@@ -1991,6 +2064,7 @@ function montarEditor() {
       else if (!quitarPlantilla(code)) { t.checked = true; return; }
       asegurarSecciones(c); limpiarDependencias(c); refrescarErrores(); S.chat = null; rerenderEditor(); return;
     }
+    if (t.name === 'tipow') { leerFormulario(); aplicarModelo(t.value); S.errores = {}; S.chat = null; rerenderEditor(); return; }
     if (t.name === 'paquete') { leerFormulario(); if (aplicarPaquete(t.value)) { S.chat = null; toast('Llené el menú con un ejemplo. Puedes cambiarlo en el paso 4.'); } rerenderEditor(); return; }
     if (t.type === 'radio' || t.dataset.bool || t.dataset.num || t.dataset.p11op || t.tagName === 'SELECT') { leerFormulario(); refrescarErrores(); S.chat = null; rerenderEditor(); }
   });
@@ -2007,6 +2081,10 @@ function montarEditor() {
   $$('[data-add-blk]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); const code = b.dataset.addBlk, ops = S.edit.config.p01.opciones;
     ops.push({ numero: String(ops.length + 1), titulo: BLOQUES[code].opcion, descripcion: '', palabras: [], accion: 'modulo', modulo: code, respuesta: '', archivo_url: '', archivo_nombre: '' });
     S.edit.menuTexto = textoDelMenu(S.edit.config.p01); S.edit.abiertas = [ops.length - 1]; delete S.errores.alcance; S.chat = null; rerenderEditor(); }));
+  $$('[data-dia-flor]', m).forEach(b => b.addEventListener('click', () => {
+    leerFormulario(); const d = Number(b.dataset.diaFlor), f = S.edit.config.flor, ds = f.dias_entrega || [];
+    f.dias_entrega = ds.includes(d) ? ds.filter(x => x !== d) : [...ds, d]; rerenderEditor();
+  }));
   $$('[data-dia-ent]', m).forEach(b => b.addEventListener('click', () => {
     leerFormulario(); const d = Number(b.dataset.diaEnt), s9 = S.edit.config.p09, ds = s9.dias_entrega || [];
     s9.dias_entrega = ds.includes(d) ? ds.filter(x => x !== d) : [...ds, d]; rerenderEditor();
@@ -2079,11 +2157,11 @@ async function crear() {
   const modo = r.simulado ? 'simulado' : 'real';
   if (res.ok) {
     const d = res.data;
-    w.n8n = { workflowId: d.workflowId, enlace: d.enlace, worker_id: d.worker_id, activo: !!d.activo, nombre: d.nombre, modo, enviado_en: ahora, credenciales: d.credenciales || null };
+    w.n8n = { workflowId: d.workflowId, enlace: d.enlace, worker_id: d.worker_id, activo: !!d.activo, nombre: d.nombre, modo, enviado_en: ahora, credenciales: d.credenciales || null, chatwoot: d.chatwoot || null };
     S.edit.cred.token = ''; S.edit.cred.app_secret = ''; S.edit.cred.ia_key = '';
     w.estado = d.activo ? 'activo' : 'creado';
     const sel = bloquesUsados(w.config);
-    if (d.config && isObj(d.config)) { w.config = d.config; w.config._bloques = sel; normalizarConfig(w.config); }
+    if (d.config && isObj(d.config)) { const queda = { _modelo: w.config._modelo, flor: w.config.flor, cw: w.config.cw }; w.config = d.config; Object.assign(w.config, queda); w.config._bloques = sel; normalizarConfig(w.config); }
     else if (d.worker_id) w.config.worker_id = d.worker_id;
     S.edit.config = clone(w.config);
     S.resultado = { ok: true, data: d, simulado: r.simulado };
@@ -2094,6 +2172,200 @@ async function crear() {
   w.actualizado_en = ahora; guardarWorkers();
   rerenderEditor();
   $('#resultado')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/* ───────── Workers fijos (Generador v0.8) ───────── */
+function tipoDe(o) {
+  if (TIPOS_OPCION.some(([v]) => v === o.tipo)) return o.tipo;
+  if (o.accion === 'asesor' || pareceAsesor(o.titulo || '')) return 'asesor';
+  const t = texto(o.titulo).toLowerCase();
+  if (/mi pedido|estado|seguimiento|d[oó]nde est[aá]/.test(t)) return 'seguimiento';
+  if (/cat[aá]logo|ramo|arreglo|flores|productos/.test(t)) return 'catalogo';
+  if (/pedido|comprar|s[eé] qu[eé] quiero|c[oó]digo/.test(t)) return 'pedido';
+  if (/pregunta|consulta libre/.test(t)) return 'ia';
+  return 'info';
+}
+/* "Miraflores, San Isidro: 10" → { nombre, costo, distritos } ; null si la línea no se entiende */
+function leerZonasFlor(t) {
+  return lineasDe(t).map(l => {
+    const m = l.match(/^(.+?)\s*[:=]\s*(?:S\/|\$|US\$)?\s*(\d+(?:[.,]\d+)?)\s*$/); if (!m) return null;
+    const ds = m[1].split(/\s*[,;]\s*|\s+y\s+/).map(x => x.trim()).filter(Boolean);
+    return ds.length ? { nombre: ds.join(', '), costo: Number(m[2].replace(',', '.')), distritos: ds } : null;
+  });
+}
+const esLink = (u) => /^https:\/\/\S+$/.test(texto(u));
+function validarChatwoot(c, add) {
+  const cw = { ...CW_INICIAL(), ...(c.cw || {}) };
+  if (cw.modo === 'nueva' && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(texto(cw.correo))) add('cw', 'Escribe un correo válido para la cuenta de Chatwoot.');
+  if (cw.modo === 'existente') {
+    if (!esLink(cw.url)) add('cw', 'La dirección de Chatwoot debe empezar con https://');
+    if (!/^\d+$/.test(texto(String(cw.account_id ?? '')))) add('cw', 'El número de cuenta (account_id) va solo con números.');
+    if (!/^\d+$/.test(texto(String(cw.inbox_id ?? '')))) add('cw', 'El número de bandeja (inbox_id) va solo con números.');
+  }
+}
+function validarModelo(c, add) {
+  const ops = c.p01?.opciones || [], f = { ...FLOR_INICIAL(), ...(c.flor || {}) };
+  if (ops.length > 8) add('opciones', 'El worker Florería admite hasta 8 opciones en el menú.');
+  ops.forEach((o, i) => {
+    const tp = tipoDe(o), k = 'op' + i, n = i + 1;
+    if (!texto(o.titulo)) add(k, `Opción ${n}: falta el título.`);
+    if (texto(o.titulo).length > 24) add(k, `Opción ${n}: el título puede tener hasta 24 letras (WhatsApp corta el resto en la lista). Pon el detalle en la línea de abajo.`);
+    if (texto(o.descripcion).length > 72) add(k, `Opción ${n}: la descripción puede tener hasta 72 letras.`);
+    if (tp === 'info' && !texto(o.respuesta) && !texto(o.archivo_url)) add(k, `Opción ${n}: escribe el texto de respuesta o pon un documento.`);
+    if (['info', 'catalogo', 'pedido'].includes(tp) && texto(o.archivo_url) && !esLink(o.archivo_url)) add(k, `Opción ${n}: el link del documento debe empezar con https://`);
+    if (tp === 'ia' && c.ia?.activa === false) add(k, `Opción ${n}: la pregunta libre necesita la IA prendida en el paso 6.`);
+  });
+  const vende = ops.some(o => ['catalogo', 'pedido'].includes(tipoDe(o)));
+  if (vende && !texto(f.catalogo_url)) add('flor', 'Pega el link de la hoja de Google del catálogo.');
+  if (texto(f.catalogo_url) && !esLink(f.catalogo_url)) add('flor', 'El link del catálogo debe empezar con https://');
+  const zs = leerZonasFlor(f.zonas_texto), zm = lineasDe(f.zonas_texto).filter((l, j) => !zs[j]);
+  if (zm.length) add('flor', `No entendí la zona "${zm[0]}". Escríbela como "Miraflores, San Isidro: 10".`);
+  else if (vende && !zs.length) add('flor', 'Escribe al menos una zona de envío con su costo.');
+  const largos = lineasDe(f.turnos_texto).filter(x => x.length > 24);
+  if (largos.length) add('flor', `El turno "${largos[0]}" es muy largo: hasta 24 letras.`);
+  if (vende && !(f.dias_entrega || []).length) add('flor', 'Elige al menos un día de entrega.');
+  if (vende && !texto(f.pago_link)) add('flor', 'Pega el link de pago.');
+  if (texto(f.pago_boton).length > 20) add('flor', 'El texto del botón de pago puede tener hasta 20 letras.');
+  if (texto(f.pago_link) && !esLink(f.pago_link)) add('flor', 'El link de pago debe empezar con https://');
+  if (texto(f.registro_url) && !esLink(f.registro_url)) add('flor', 'El link de la hoja de pedidos debe empezar con https://');
+  if (texto(f.telefono_asesor) && !/^\d{8,15}$/.test(texto(f.telefono_asesor).replace(/[\s+-]/g, ''))) add('asesor', 'El WhatsApp del asesor va con código de país y solo números. Ej: 51999888777.');
+}
+function aplicarModelo(id) {
+  const E = S.edit, c = E.config, m = MODELOS.find(x => x.id === id && x.disponible);
+  c._modelo = m ? m.id : '';
+  if (!m) { if (String(E.meta.paquete || '').startsWith('modelo_')) E.meta.paquete = 'atencion_basica'; return; }
+  E.meta.paquete = 'modelo_' + m.id; E.meta.tipo_negocio = m.tipo;
+  c.ia.proveedor = 'openai'; ajustarModeloIA(c);
+  if (c.p01.opciones.length) return;
+  E.menuTexto = MENU_FLORERIA; sincronizarMenu(MENU_FLORERIA);
+  c.p01.opciones.forEach(o => { o.tipo = tipoDe(o); });
+  E.abiertas = [0];
+  toast('Llené el menú con un ejemplo de florería. Puedes cambiarlo en el paso 4.');
+}
+function vistaTipoWorker() {
+  const c = S.edit.config, m = MODELOS.find(x => x.id === c._modelo);
+  return `<div class="fsec-head"><div><h2>Tipo de worker</h2><p>Un <b>worker fijo</b> ya viene armado y probado para un tipo de negocio: solo llenas sus datos. Si ninguno encaja, <b>ármalo con plantillas</b>, pieza por pieza.</p></div></div>
+    <div class="kinds" role="radiogroup" aria-label="Tipo de worker">
+      ${MODELOS.map(x => x.disponible
+        ? `<label class="kind"><span class="kind-top"><input type="radio" name="tipow" value="${x.id}" ${c._modelo === x.id ? 'checked' : ''}><b>${x.nombre}</b><span class="fx">Worker fijo</span></span><p>${x.corto}</p></label>`
+        : `<div class="kind soon" aria-disabled="true"><span class="kind-top"><b>${x.nombre}</b><span class="fx">Próximamente</span></span><p>${x.corto}</p></div>`).join('')}
+      <label class="kind"><span class="kind-top"><input type="radio" name="tipow" value="" ${c._modelo ? '' : 'checked'}><b>Armar con plantillas</b></span><p>Eliges qué sabe hacer, plantilla por plantilla. El formulario pide solo lo que necesitan las que marques.</p></label>
+    </div>
+    ${m ? `<div class="kind-detail"><h3>Qué hace el worker ${m.nombre}</h3><ul class="feat">${m.funciones.map(f => `<li>${f}</li>`).join('')}</ul>
+      <p class="hint" style="margin:0">En los pasos siguientes solo te pido lo que usa: el menú, el catálogo, los distritos de envío, el link de pago, el asesor y Chatwoot.</p></div>` : ''}`;
+}
+function vistaFlor() {
+  const c = S.edit.config, f = c.flor, err = S.errores.flor;
+  return `<div class="fsec-head"><div><h2>Catálogo, envío y pago</h2><p>Lo que necesita el worker Florería para vender: de dónde lee los productos, a qué distritos llega y cómo se paga.</p></div></div>
+    <div class="blk"><div class="blk-head"><h3>Catálogo</h3></div>
+      <div class="grid2">${campo('flor.catalogo_url', 'Hoja de Google del catálogo', { req: true, ph: 'https://docs.google.com/spreadsheets/d/…/edit', hint: 'Columnas: <span class="mono">CODIGO, NOMBRE, PRECIO, CATEGORIA, DESCRIPCION, IMAGEN, STOCK, ACTIVO</span>. ' + hintHoja })}
+      ${campo('moneda', 'Moneda', { ph: 'S/', hint: 'Se usa en precios, envío y total. Ej: S/, $, COP.' })}</div></div>
+    <div class="blk"><div class="blk-head"><h3>Envío</h3></div>
+      <div class="grid2">${campo('flor.zonas_texto', 'Distritos y costo de envío', { tipo: 'textarea', rows: 5, req: true, ph: 'Miraflores, San Isidro, Barranco: 10\nSurco, La Molina: 15', hint: 'Una zona por línea: los distritos separados por coma, dos puntos y el costo. Si el distrito no está, el worker ofrece un asesor.' })}
+      ${campo('flor.turnos_texto', 'Turnos de entrega', { tipo: 'textarea', rows: 5, ph: 'Mañana (9 a 12)\nTarde (12 a 4)\nNoche (4 a 8)', hint: 'Uno por línea, tal como lo verá el cliente (hasta 24 letras). Vacío = los de ejemplo.' })}
+      <div class="field"><span class="flabel">Días con entrega</span><div class="days" role="group" aria-label="Días con entrega">${DIAS.map(([n, l, nom]) => `<button type="button" data-dia-flor="${n}" aria-pressed="${(f.dias_entrega || []).includes(n)}" title="${nom}">${l}</button>`).join('')}</div></div></div></div>
+    <div class="blk"><div class="blk-head"><h3>Pago</h3></div>
+      <div class="grid2">${campo('flor.pago_link', 'Link de pago', { req: true, ph: 'https://…/?ref={pedido}&monto={monto}', hint: 'La página donde el cliente paga (por ejemplo, la de EasyPay). Si tu link lo acepta, escribe <span class="mono">{pedido}</span> y <span class="mono">{monto}</span> y el worker pone el número de pedido y el total.' })}
+      ${campo('flor.pago_boton', 'Texto del botón', { ph: 'Pagar ahora', hint: 'Hasta 20 letras. Vacío = "Pagar ahora".' })}</div>
+      <div class="notice info"><div><b>Así funciona el pago:</b> el worker envía el total con un botón que abre el link. Cuando el cliente manda la foto del comprobante, llega a Chatwoot con la nota "validar pago" para que el asesor revise que llegó el dinero. El worker no valida comprobantes.</div></div></div>
+    <div class="blk"><div class="blk-head"><h3>Registro de pedidos</h3></div>
+      <div class="grid2">${campo('flor.registro_url', 'Hoja de Google de pedidos (opcional)', { ph: 'https://docs.google.com/spreadsheets/d/…/edit', hint: 'Cada pedido se anota como una fila en la pestaña "Pedidos". La hoja debe estar compartida como Editor con la cuenta de Google conectada en n8n.' })}</div></div>
+    ${err ? `<span class="ferr">${esc(err.join(' '))}</span>` : ''}`;
+}
+function resumenFlor(c, falta) {
+  const f = c.flor || FLOR_INICIAL(), zs = leerZonasFlor(f.zonas_texto).filter(Boolean);
+  return `${texto(f.catalogo_url) ? 'Catálogo conectado' : 'Catálogo ' + falta} · ${zs.length} ${zs.length === 1 ? 'zona' : 'zonas'} de envío · ${texto(f.pago_link) ? 'pago con link' : 'sin link de pago'}<br><span class="hint">${texto(f.registro_url) ? 'Anota los pedidos en una hoja de Google' : 'Sin hoja de pedidos'}</span>`;
+}
+function vistaOpcionModelo(o, i) {
+  const abierta = S.edit.abiertas.includes(i) || !!S.errores['op' + i], tp = tipoDe(o);
+  const conTexto = ['info', 'catalogo', 'pedido'].includes(tp), conDoc = ['info', 'catalogo'].includes(tp), dl = linkDescarga(o.archivo_url);
+  return `<div class="opt ${abierta ? 'open' : ''} ${S.errores['op' + i] ? 'invalid' : ''}">
+    <div class="opt-head">
+      <button type="button" class="opt-toggle" data-toggle="${i}" aria-expanded="${abierta}">
+        <span class="opt-num" aria-hidden="true">${i + 1}</span>
+        <span class="opt-title">${esc(o.titulo)}</span>
+        ${badgeOpcion(o)}
+        <svg class="chev" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    ${abierta ? `<div class="opt-body"><div style="display:flex;flex-direction:column;gap:12px">
+      <div class="field"><span class="flabel">Qué hace</span><div class="radio-col" role="radiogroup" aria-label="Qué hace la opción ${i + 1}">
+        ${TIPOS_OPCION.map(([v, l, d]) => `<label><input type="radio" name="tp${i}" value="${v}" data-op="${i}" data-k="tipo" ${tp === v ? 'checked' : ''}><span><b>${l}</b><span class="hint">${d}</span></span></label>`).join('')}
+      </div></div>
+      ${tp === 'catalogo' ? `<div class="field"><label for="op${i}c">Categoría (opcional)</label><input type="text" id="op${i}c" data-op="${i}" data-k="categoria" value="${esc(o.categoria || '')}" placeholder="Ej: Ramos"><span class="hint">Igual a la columna CATEGORIA de la hoja. Si la escribes, solo muestra esa categoría. Vacío = todo el catálogo.</span></div>` : ''}
+      ${conDoc ? `<div class="filebox">
+        <span class="flabel"><b style="font-weight:600">${tp === 'catalogo' ? 'Catálogo en PDF (opcional)' : 'Documento (opcional)'}</b></span>
+        <div class="grid2">
+          <div class="field"><label for="op${i}u">Link compartido de Drive</label><input type="url" id="op${i}u" data-op="${i}" data-k="archivo_url" value="${esc(o.archivo_url || '')}" placeholder="https://drive.google.com/file/d/…/view"></div>
+          <div class="field"><label for="op${i}n">Nombre del archivo</label><input type="text" id="op${i}n" data-op="${i}" data-k="archivo_nombre" value="${esc(o.archivo_nombre || '')}" placeholder="Ej: Catálogo 2026.pdf"></div>
+        </div>
+        <span class="hint">En Drive, el archivo debe estar compartido como "Cualquier persona con el enlace".</span><span class="dl" id="op${i}dl">${dl && dl !== texto(o.archivo_url) ? `Link de descarga que usará el worker: ${esc(dl)}` : ''}</span>
+      </div>` : ''}
+      ${conTexto ? `<div class="field"><label for="op${i}r" id="op${i}rl">${tp === 'info' ? 'Texto de respuesta' : 'Mensaje antes de pedir el arreglo (opcional)'}</label><div class="vars">${['nombre', 'negocio', 'asistente'].map(x => `<button type="button" data-insert="${x}" data-target="op${i}r">{${x}}</button>`).join('')}</div><textarea id="op${i}r" data-op="${i}" data-k="respuesta" rows="3" placeholder="${tp === 'info' ? 'Ej: 📍 Av. Larco 123, Miraflores. 🕘 Lunes a sábado, 9 am a 8 pm' : 'Ej: 🌹 Te comparto nuestro catálogo'}">${esc(o.respuesta)}</textarea></div>` : ''}
+      ${tp === 'asesor' ? '<p class="hint">El cliente recibe el aviso de asesor del paso 8 y la conversación pasa a una persona.</p>' : tp === 'seguimiento' ? '<p class="hint">El worker busca el último pedido del cliente y le dice en qué estado está. No hay que llenar nada.</p>' : tp === 'ia' ? `<p class="hint">Usa la IA del paso 6${S.edit.config.ia?.activa === false ? ' (ahora está apagada: préndela allí)' : ''} y lo que escribas en "Lo que sabe del negocio".</p>` : tp === 'pedido' ? '<p class="hint">Después pide el código, el nombre o la foto del arreglo y arma el pedido con la entrega.</p>' : ''}
+      <details class="more"><summary>Más opciones</summary><div style="display:flex;flex-direction:column;gap:12px">
+        <div class="field"><label for="op${i}p">Palabras que también la activan</label><input type="text" id="op${i}p" data-op="${i}" data-k="palabras" value="${esc((o.palabras || []).join(', '))}" placeholder="Ej: ramos, arreglos"><span class="hint">Si el cliente escribe una de estas palabras en vez de tocar la opción. Separadas por coma.</span></div>
+      </div></details>
+      ${S.errores['op' + i] ? `<span class="ferr">${esc(S.errores['op' + i].join(' '))}</span>` : ''}
+    </div></div>` : ''}
+  </div>`;
+}
+function vistaChatwoot() {
+  const cw = S.edit.config.cw || CW_INICIAL(), err = S.errores.cw;
+  return `<div class="field ${err ? 'invalid' : ''}" style="gap:10px;border-top:1px solid var(--line);padding-top:14px">
+    <span class="flabel">Chatwoot</span>
+    <span class="hint" style="margin-top:-6px">Chatwoot es la bandeja donde una persona del equipo lee y responde las conversaciones que el worker le pasa, con fotos, audios y documentos.</span>
+    <div class="radio-row" role="radiogroup" aria-label="Chatwoot">
+      <label><input type="radio" name="cwmodo" value="ninguno" data-cw="modo" ${cw.modo === 'ninguno' ? 'checked' : ''}>Sin Chatwoot</label>
+      <label><input type="radio" name="cwmodo" value="nueva" data-cw="modo" ${cw.modo === 'nueva' ? 'checked' : ''}>Crear una cuenta nueva</label>
+      <label><input type="radio" name="cwmodo" value="existente" data-cw="modo" ${cw.modo === 'existente' ? 'checked' : ''}>Usar una cuenta que ya existe</label>
+    </div>
+    ${cw.modo === 'nueva' ? `<div class="grid2">${campo('cw.nombre', 'Nombre de quien la usará', { ph: 'Ej: Rosa Pérez', hint: 'La dueña o el asesor. Vacío = el nombre del negocio.' })}${campo('cw.correo', 'Correo', { tipo: 'email', req: true, ph: 'rosa@correo.com', hint: 'Le llega un correo de bienvenida con su usuario y contraseña.' })}</div>
+      <div class="notice info"><div>El Generador crea la cuenta con el nombre del negocio, su bandeja y la conexión con el worker. La contraseña no pasa por este panel: solo va en el correo.</div></div>` : ''}
+    ${cw.modo === 'existente' ? `<div class="grid2">${campo('cw.url', 'Dirección de Chatwoot', { req: true, ph: 'https://chatwoot.tu-dominio.com', hint: 'La dirección con la que entras a Chatwoot, sin nada después del dominio.' })}${campo('cw.account_id', 'Número de cuenta (account_id)', { req: true, ph: 'Ej: 4', hint: 'Al entrar a la cuenta, es el número que sale en la dirección después de <span class="mono">/accounts/</span>.' })}${campo('cw.inbox_id', 'Número de bandeja (inbox_id)', { req: true, ph: 'Ej: 4', hint: 'En Configuración → Bandejas de entrada, abre la bandeja: es el número después de <span class="mono">/inboxes/</span>.' })}</div>` : ''}
+    ${cw.modo === 'ninguno' ? `<span class="hint">Sin Chatwoot, el cliente recibe el aviso de asesor y una persona le escribe por el WhatsApp del negocio.${S.edit.config._modelo ? ' <b>Ojo:</b> sin Chatwoot el worker Florería no recibe fotos ni archivos, así que tampoco el comprobante de pago.' : ''}</span>` : ''}
+    ${err ? `<span class="ferr">${esc(err.join(' '))}</span>` : ''}
+  </div>`;
+}
+/* Lo que se envía al Generador v0.8 para un worker fijo (camino "modelo"). Vacío = el modelo usa su respaldo. */
+function armarModelo(w, cred) {
+  const c = w.config, f = { ...FLOR_INICIAL(), ...(c.flor || {}) }, cw = { ...CW_INICIAL(), ...(c.cw || {}) }, ia = c.ia || IA_INICIAL();
+  const limpio = (o) => { for (const k of Object.keys(o)) { if (isObj(o[k])) limpio(o[k]); if (vacio(o[k]) || (isObj(o[k]) && !Object.keys(o[k]).length)) delete o[k]; } return o; };
+  const opciones = (c.p01.opciones || []).filter(o => texto(o.titulo)).map((o, i) => {
+    const tipo = tipoDe(o), op = { numero: String(i + 1), titulo: texto(o.titulo), descripcion: texto(o.descripcion), tipo, palabras: (o.palabras || []).filter(Boolean) };
+    if (['info', 'catalogo', 'pedido'].includes(tipo)) op.mensaje = texto(o.respuesta);
+    if (['info', 'catalogo'].includes(tipo) && texto(o.archivo_url)) { op.archivo_url = linkDescarga(o.archivo_url); op.archivo_nombre = texto(o.archivo_nombre) || 'Documento.pdf'; }
+    if (tipo === 'catalogo') op.categoria = texto(o.categoria);
+    for (const k of Object.keys(op)) if (vacio(op[k])) delete op[k];
+    return op;
+  });
+  const config = {
+    worker_id: texto(c.worker_id),
+    negocio: { nombre: texto(c.negocio.nombre), nombre_asistente: texto(c.negocio.nombre_asistente), zona_horaria: c.negocio.zona_horaria, moneda: texto(c.moneda) || 'S/' },
+    whatsapp: { phone_number_id: texto(String(c.whatsapp.phone_number_id ?? '')) },
+    horario: { dias: c.horario.dias, desde: Number(c.horario.desde), hasta: Number(c.horario.hasta), texto: texto(c.horario.texto) },
+    interruptores: { pausa: !!c.interruptores.pausa, mensaje_pausa: texto(c.interruptores.mensaje_pausa) },
+    memoria: { ttl_segundos: Number(c.memoria.ttl_segundos) },
+    palabras: { menu: c.p01.palabras_menu || [], despedida: c.p01.palabras_despedida || [], asesor: c.p12.palabras_asesor || [] },
+    menu: { titulo: texto(c.p01.instruccion_menu), opciones },
+    mensajes: { bienvenida: texto(c.p01.saludo), fuera_horario: texto(f.msg_fuera_horario), no_entendi: texto(c.p01.msg_opcion_invalida), despedida: texto(c.p01.msg_despedida),
+      derivacion: texto(c.p12.msg_derivacion), derivacion_fuera_horario: texto(c.p12.msg_fuera_horario) },
+    catalogo: { fuente_url: texto(f.catalogo_url) },
+    pedido: { turnos: lineasDe(f.turnos_texto), dias_entrega: f.dias_entrega || [] },
+    delivery: { zonas: leerZonasFlor(f.zonas_texto).filter(Boolean) },
+    pagos: { link_url: texto(f.pago_link), boton: texto(f.pago_boton) },
+    equipo: { nombre_asesor: texto(c.p12.nombre_asesor), telefono_asesor: texto(f.telefono_asesor).replace(/[\s+-]/g, '') },
+    registro: { sheet_url: texto(f.registro_url) },
+    ia: { activa: ia.activa !== false, modelo: texto(ia.modelo) || 'gpt-4o-mini', instrucciones: texto(ia.instrucciones), conocimiento: texto(ia.conocimiento) }
+  };
+  if (cw.modo === 'existente') config.chatwoot = { activo: true, url: texto(cw.url).replace(/\/+$/, ''), account_id: texto(String(cw.account_id)), inbox_id: texto(String(cw.inbox_id)) };
+  limpio(config);
+  const out = { modelo: c._modelo, config, meta: { modelo: c._modelo, tipo_negocio: w.meta.tipo_negocio, etiquetas: w.meta.etiquetas || [], notas: w.meta.notas || '', origen: 'workeros-web', version_interfaz: '1.1' } };
+  if (cred && cred.modo === 'nuevas') out.credenciales = { modo: 'nuevas', nombre: texto(cred.nombre), token_meta: texto(cred.token), app_id: texto(cred.app_id), app_secret: texto(cred.app_secret) };
+  else out.credenciales = { modo: 'existentes' };
+  if (texto(cred?.ia_key) && ia.activa !== false) out.credenciales.ia = { api_key: texto(cred.ia_key) };
+  if (cw.modo === 'nueva') out.alta_chatwoot = { nombre: texto(cw.nombre) || texto(c.negocio.nombre), correo: texto(cw.correo).toLowerCase() };
+  return out;
 }
 
 /* ───────── Vista: Plantillas ───────── */
@@ -2108,10 +2380,14 @@ function vistaPlantillas() {
   return `
   <div class="view-head"><div><div class="eyebrow">Biblioteca</div><h1>Plantillas y paquetes</h1>
     <p>Una plantilla es un bloque de n8n con una sola función. Un paquete junta varias para un tipo de negocio. El formulario solo puede pedir lo que las plantillas listas saben hacer.</p></div></div>
-  <section class="group"><div class="group-head"><h3>Paquetes</h3></div>
+  <section class="group"><div class="group-head"><h3>Workers fijos</h3></div>
+    <p class="hint" style="margin:-4px 0 10px">Un worker completo, ya armado y probado para un tipo de negocio. Solo se llenan sus datos.</p>
+    <div class="tgrid">${MODELOS.map(m => `<div class="tcard panel ${m.disponible ? '' : 'soon'}"><div class="tc-top"><h3>${m.nombre}</h3>${m.disponible ? '<span class="state activo">Disponible</span>' : '<span class="state borrador">Próximamente</span>'}</div><p>${m.corto}</p>${m.funciones.length ? `<ul class="feat" style="columns:1">${m.funciones.map(f => `<li>${f}</li>`).join('')}</ul>` : ''}</div>`).join('')}</div>
+  </section>
+  <section class="group"><div class="group-head"><h3>Paquetes de plantillas</h3></div>
     <div class="tgrid">${PAQUETES.map(p => `<div class="tcard panel ${p.disponible ? '' : 'soon'}"><div class="tc-top"><h3>${p.nombre}</h3>${p.disponible ? '<span class="state activo">Disponible</span>' : '<span class="state borrador">Próximamente</span>'}</div><p>${p.desc}</p><div class="flow">${p.mods.map((m, i) => `${i ? '<span class="arrow">→</span>' : ''}<span class="mod ${p.disponible ? '' : 'off'}">${m}</span>`).join('')}</div></div>`).join('')}</div>
   </section>
-  ${grupo('lista', 'Listas para usar', 'Cada plantilla vive en n8n como workflow aparte, solo como pieza. El Generador v0.6 copia las que elijas y crea un worker independiente con todo adentro: si después cambias o borras una plantilla, los workers ya creados no se tocan.')}
+  ${grupo('lista', 'Listas para usar', 'Cada plantilla vive en n8n como workflow aparte, solo como pieza. El Generador v0.8 copia las que elijas y crea un worker independiente con todo adentro: si después cambias o borras una plantilla, los workers ya creados no se tocan.')}
   ${grupo('prioridad', 'Prioridad', 'Las siguientes en construirse. Cuando una esté probada, el formulario suma una sección para configurarla.')}
   ${grupo('despues', 'Más adelante', '')}`;
 }
