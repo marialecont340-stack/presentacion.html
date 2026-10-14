@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="robots" content="noindex, nofollow"><script src="workeros-config.js"></script>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="robots" content="noindex, nofollow"><meta name="workeros-acceso" content="https://manchas-opticanissi-n8n.wxeafs.easypanel.host/webhook/workeros/acceso">
 <title>WorkerOS Nissitech</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -82,6 +82,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .btn.sm { padding: 5px 10px; font-size: 13px; }
 .btn[disabled] { opacity: .5; cursor: not-allowed; }
 
+/* Entrada con usuario y contraseña (solo en la versión publicada) */
+.login-wrap { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: radial-gradient(1200px 500px at 50% -10%, var(--accent-soft), transparent 70%), var(--bg); }
+.login-card { width: min(400px, 100%); padding: 28px 26px 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: var(--shadow); }
+.login-card h1 { font-family: var(--f-display); font-size: 24px; margin: 6px 0 0; }
+.login-card p { margin: 0; color: var(--muted); font-size: 14px; }
+.login-card .btn.primary { justify-content: center; padding-block: 11px; font-size: 15px; }
+.login-foot { font-size: 12px; color: var(--muted); text-align: center; }
+.side-user { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
 .notice { display: flex; gap: 10px; padding: 12px 14px; border-radius: var(--r); background: var(--warn-soft); color: var(--ink); font-size: 13px; }
 .notice.info { background: var(--accent-soft); }
@@ -339,7 +347,7 @@ pre.json { background: var(--surface-2); border: 1px solid var(--line); border-r
     </nav>
     <div class="side-foot">
       <a class="mode-pill" href="#conexion" id="modePill"><span class="dot"></span><span>Modo simulado</span></a>
-      <p class="hint">Prototipo v0.8 · Generador v0.6</p>
+      <p class="hint">Prototipo v0.9 · Generador v0.6</p>
     </div>
   </aside>
   <main class="main" id="main"></main>
@@ -535,7 +543,14 @@ function ejemplos() {
 /* ───────── Estado ───────── */
 /* Conexión fija: cuando el panel se publica en el servidor, el archivo workeros-config.js trae la dirección y la clave del Generador.
    Así nadie tiene que configurarla en su navegador y el panel arranca conectado a n8n. */
-const FIJA = (window.WORKEROS_CONFIG && typeof window.WORKEROS_CONFIG.url === 'string' && /^https:\/\//.test(window.WORKEROS_CONFIG.url.trim())) ? window.WORKEROS_CONFIG : null;
+/* Entrada: si la página trae <meta name="workeros-acceso" content="…/webhook/workeros/acceso">, pide usuario y contraseña.
+   n8n (flujo "WorkerOS · Acceso") revisa la contraseña y entrega un pase (token) que vence en 12 horas.
+   El panel nunca recibe la clave del Generador: manda cada worker al flujo de acceso con su pase, y n8n lo reenvía al Generador. */
+const ACCESO = (document.querySelector('meta[name="workeros-acceso"]')?.content || '').trim();
+const CLAVE_SESION = 'workeros:sesion';
+function leerSesion() { try { const x = JSON.parse(sessionStorage.getItem(CLAVE_SESION) || 'null'); return x && typeof x.token === 'string' && x.token && x.expira > Date.now() ? x : null; } catch (e) { return null; } }
+const SESION = ACCESO ? leerSesion() : null;
+const FIJA = SESION ? { url: ACCESO, header: '', clave: '', n8n: SESION.n8n || '' } : ((window.WORKEROS_CONFIG && typeof window.WORKEROS_CONFIG.url === 'string' && /^https:\/\//.test(window.WORKEROS_CONFIG.url.trim())) ? window.WORKEROS_CONFIG : null);
 const S = {
   workers: store.get('workers', null) || (FIJA ? [] : ejemplos()),
   ajustes: FIJA
@@ -916,6 +931,15 @@ async function enviar(payload, { prueba = false } = {}) {
     const base = (a.n8nBase || 'https://n8n.ejemplo').replace(/\/$/, '');
     return { status: 200, simulado: true, data: { ok: true, workflowId: id, nombre: 'WorkerOS · ' + payload.config.negocio.nombre, worker_id: wid, activo: false, enlace: `${base}/workflow/${id}`, siguiente_paso: 'Abre el enlace, revisa el worker y actívalo cuando esté probado.', credenciales: payload.credenciales?.modo === 'nuevas' ? { creadas: true, token: payload.credenciales.nombre + ' · token', trigger: payload.credenciales.app_id ? payload.credenciales.nombre + ' · trigger' : null } : { creadas: false } } };
   }
+  if (SESION) {
+    try {
+      const r = await fetch(ACCESO, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accion: 'crear', token: SESION.token, envio: payload }) });
+      let d = null; try { d = await r.json(); } catch (e) {}
+      if (r.status === 401 || d?.sesion === false) { sesionVencida(); return { status: 0, red: 'Tu sesión venció. Vuelve a entrar con tu usuario y contraseña.' }; }
+      if (!d || typeof d.status !== 'number') return { status: r.status || 502, data: d };
+      return { status: d.status, data: d.data };
+    } catch (err) { return { status: 0, red: 'El navegador no pudo hablar con n8n. ¿Está activo el flujo "WorkerOS · Acceso"?' }; }
+  }
   if (!/^https?:\/\//.test(a.url)) return { status: 0, red: 'Falta la dirección del Generador. Complétala en Conexión n8n.' };
   const headers = { 'Content-Type': 'application/json' };
   if (a.header && a.clave) headers[a.header] = a.clave;
@@ -969,6 +993,7 @@ $('#nav a[data-view="nuevo"]').addEventListener('click', (e) => { e.preventDefau
 window.addEventListener('hashchange', () => { if (vistaActual() === 'nuevo' && !S.edit) abrirEditor(null, false); render(); window.scrollTo(0, 0); });
 
 function render() {
+  if (!$('#main')) return;   // pantalla de entrada
   const v = vistaActual();
   if (v !== 'nuevo') S.edit = null;
   $$('#nav a').forEach(a => a.setAttribute('aria-current', a.dataset.view === v ? 'page' : 'false'));
@@ -1799,9 +1824,9 @@ function vistaConexion() {
   <div class="view-head"><div><div class="eyebrow">Ajustes</div><h1>Conexión con n8n</h1>
     <p>Este panel ya viene conectado al Generador de Nissitech. No hay nada que configurar aquí.</p></div></div>
   <div class="conn"><form class="panel fsec" id="connForm" novalidate autocomplete="off">
-    <div class="notice ok"><div><b>Conectado a n8n.</b> Los workers se crean de verdad en <span class="mono">${esc(a.n8nBase || new URL(a.url).origin)}</span>.</div></div>
-    <div class="field"><span class="flabel">Dirección del Generador</span><span class="mono" style="word-break:break-all">${esc(a.url)}</span>
-      <span class="hint">Se cambia en el archivo <span class="mono">workeros-config.js</span>, en el servidor.</span></div>
+    <div class="notice ok"><div><b>Conectado a n8n.</b> Los workers se crean de verdad en <span class="mono">${esc(a.n8nBase || new URL(a.url).origin)}</span>.${SESION ? ` Sesión de <b>${esc(SESION.usuario)}</b> hasta las ${new Date(SESION.expira).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}.` : ''}</div></div>
+    <div class="field"><span class="flabel">${SESION ? 'Los workers pasan por' : 'Dirección del Generador'}</span><span class="mono" style="word-break:break-all">${esc(a.url)}</span>
+      <span class="hint">${SESION ? 'El flujo <span class="mono">WorkerOS · Acceso</span> de n8n revisa tu sesión y reenvía al Generador. La clave del Generador no sale de n8n.' : 'Se cambia en el archivo <span class="mono">workeros-config.js</span>, en el servidor.'}</span></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" data-act="probar">Probar conexión</button></div>
     <div id="connRes"></div>
   </form></div>`;
@@ -1859,9 +1884,55 @@ function montarConexion() {
   });
 }
 
+/* ───────── Entrada ───────── */
+function pintarLogin() {
+  document.title = 'Entrar · WorkerOS';
+  $('.app').outerHTML = `<div class="login-wrap"><form class="panel login-card" id="loginForm" novalidate>
+    <div class="brand" style="padding:0"><div class="brand-mark" aria-hidden="true">W/</div><div><div class="brand-name">WorkerOS</div><div class="brand-sub">Nissitech</div></div></div>
+    <div><h1>Entrar al panel</h1><p>Solo para el equipo de Nissitech. Aquí se crean los workers de WhatsApp.</p></div>
+    <div class="field"><label for="lgUser">Usuario</label><input type="text" id="lgUser" autocomplete="username" autocapitalize="none" spellcheck="false" required></div>
+    <div class="field"><label for="lgPass">Contraseña</label><input type="password" id="lgPass" autocomplete="current-password" required></div>
+    <div id="lgMsg" role="alert"></div>
+    <button type="submit" class="btn primary" id="lgBtn">Entrar</button>
+    <p class="login-foot">¿Sin usuario? Pídelo a quien administra el n8n de Nissitech.</p>
+  </form></div>`;
+  const f = $('#loginForm'), msg = (t) => { $('#lgMsg').innerHTML = t ? `<div class="notice bad"><div>${esc(t)}</div></div>` : ''; };
+  $('#lgUser').focus();
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const usuario = $('#lgUser').value.trim(), clave = $('#lgPass').value;
+    if (!usuario || !clave) { msg('Escribe tu usuario y tu contraseña.'); return; }
+    const b = $('#lgBtn'); b.disabled = true; b.textContent = 'Entrando…'; msg('');
+    try {
+      const r = await fetch(ACCESO, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accion: 'entrar', usuario, clave }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d.ok || !d.token) { msg(r.status === 401 || d.ok === false ? 'Usuario o contraseña incorrectos.' : 'n8n respondió algo inesperado. Avisa a quien administra el panel.'); return; }
+      const ses = { usuario: d.usuario || usuario, token: String(d.token), n8n: d.n8n || '', expira: Math.min(Number(d.expira) || Infinity, Date.now() + 12 * 3600 * 1000) };
+      try { sessionStorage.setItem(CLAVE_SESION, JSON.stringify(ses)); } catch (err) { msg('Tu navegador no deja guardar la sesión. Prueba sin modo incógnito.'); return; }
+      location.reload();
+    } catch (err) { msg('No pude conectar con n8n. Revisa tu internet o que el flujo "WorkerOS · Acceso" esté activo.'); }
+    finally { b.disabled = false; b.textContent = 'Entrar'; }
+  });
+}
+function borrarSesion() { try { sessionStorage.removeItem(CLAVE_SESION); } catch (e) {} }
+/* Salir: n8n anula el pase, así ya no sirve aunque alguien lo haya copiado */
+function salir() {
+  try { fetch(ACCESO, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accion: 'salir', token: SESION.token }), keepalive: true }).catch(() => {}); } catch (e) {}
+  borrarSesion(); location.hash = ''; location.reload();
+}
+function sesionVencida() { borrarSesion(); setTimeout(() => { location.hash = ''; location.reload(); }, 2500); }
+
 /* ───────── Inicio ───────── */
-if (!store.get('workers', null)) guardarWorkers();
-render();
+if (ACCESO && !SESION) pintarLogin();
+else {
+  if (SESION) {
+    const pie = $('.side-foot');
+    pie.insertAdjacentHTML('afterbegin', `<div class="side-user"><span>Hola, <b>${esc(SESION.usuario)}</b></span><button type="button" class="btn sm ghost" id="btnSalir">Salir</button></div>`);
+    $('#btnSalir').addEventListener('click', salir);
+  }
+  if (!store.get('workers', null)) guardarWorkers();
+  render();
+}
 })();
 </script>
 </body></html>
