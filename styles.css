@@ -3946,3 +3946,19 @@ a.nm-item.nm-item--link:hover svg { opacity: .9; transform: translateX(3px); }
   .divband-title { font-size: 28px; }
   .divband-sub br { display: none; }
 }
+
+/* ── Acceso del equipo: WorkerOS (panel interno, con usuario y contraseña) ── */
+.nav-links a.nav-team{
+  display:inline-flex;align-items:center;gap:7px;
+  margin-left:6px;
+  color:var(--text2);
+  border-color:rgba(0,200,255,.18);
+  background:rgba(0,200,255,.04);
+}
+.nav-links a.nav-team svg{width:13px;height:13px;opacity:.8}
+.nav-links a.nav-team:hover{color:var(--cyan);border-color:rgba(0,200,255,.35);background:rgba(0,200,255,.08)}
+.nm-item-dot--team{ background: var(--cyan); box-shadow: 0 0 6px rgba(0,200,255,.5); }
+@media (max-width:1280px){
+  .nav-links a.nav-team{padding:9px 11px}
+  .nav-links a.nav-team .nav-team-label{display:none}
+}
