@@ -3966,3 +3966,5 @@ a.nm-item.nm-item--link:hover svg { opacity: .9; transform: translateX(3px); }
   /* en el celular el botón WorkerOS va dentro del menú */
   .nav-ctas .nav-cta--workeros{display:none}
 }
+/* El nombre WorkerOS se escribe tal cual (sin pasar a mayúsculas) */
+.nav-cta.nav-cta--workeros,.nav-mobile .nav-mobile-cta--workeros{text-transform:none!important;letter-spacing:.02em}
