@@ -398,12 +398,12 @@ const PLANTILLAS = [
   { code: 'P03', nombre: 'Consulta de bases', desc: 'Busca información del cliente en una base de datos.', estado: 'lista' },
   { code: 'P04', nombre: 'Información y archivos', desc: 'Envía documentos, PDFs e información fija.', estado: 'lista' },
   { code: 'P05', nombre: 'Catálogo y servicios', desc: 'Muestra productos o servicios con precios.', estado: 'lista' },
-  { code: 'P06', nombre: 'Cotizaciones', desc: 'Arma una cotización según lo que pide el cliente.', estado: 'despues' },
+  { code: 'P06', nombre: 'Cotizaciones', desc: 'Cotiza varios productos con cantidades, precio por mayor, descuentos e IGV; aceptar la vuelve pedido.', estado: 'lista' },
   { code: 'P07', nombre: 'Pedidos', desc: 'Toma el pedido y los datos de entrega.', estado: 'lista' },
   { code: 'P08', nombre: 'Pagos', desc: 'Recibe y valida comprobantes de pago.', estado: 'lista' },
   { code: 'P09', nombre: 'Delivery y despacho', desc: 'Coordina el envío y avisa el estado.', estado: 'lista' },
-  { code: 'P10', nombre: 'Agendamiento', desc: 'Reserva citas en horarios disponibles.', estado: 'despues' },
-  { code: 'P11', nombre: 'CRM e historial', desc: 'Guarda el historial de cada cliente.', estado: 'despues' },
+  { code: 'P10', nombre: 'Agenda de citas', desc: 'Servicios, profesionales y horarios libres; reprogramar y cancelar.', estado: 'lista' },
+  { code: 'P11', nombre: 'Mi cuenta', desc: 'Pedidos y su estado, repetir pedido, mis datos, promociones y puntos.', estado: 'lista' },
   { code: 'P12', nombre: 'Derivación a asesor', desc: 'Avisa al cliente que lo atenderá una persona. Sin Chatwoot por ahora.', estado: 'lista' },
   { code: 'P13', nombre: 'Seguimiento', desc: 'Escribe al cliente después de una compra o consulta.', estado: 'despues' },
   { code: 'P14', nombre: 'Campañas', desc: 'Mensajes masivos con plantillas aprobadas por Meta.', estado: 'despues' },
@@ -425,12 +425,18 @@ const BLOQUES = {
     funciones: ['Muestra una lista numerada de documentos', 'Envía el archivo con su texto como caption', 'Puede limitar documentos a clientes al día (con P02)'] },
   P05: { nombre: 'Catálogo y servicios', desc: 'Muestra categorías y productos desde una hoja de Google.', sig: 'P07', opcion: 'Ver catálogo y hacer un pedido',
     funciones: ['Lee los productos de una hoja de Google', 'Muestra categorías, precios y fotos', 'Entiende número, código o nombre', 'Envía el catálogo en PDF'] },
+  P06: { nombre: 'Cotizaciones', desc: 'Cotiza varios productos con su cantidad, desde una hoja de Google, con precio por mayor, descuentos e IGV.', sig: 'P09', opcion: 'Cotizar para empresas',
+    funciones: ['Entiende "50 polos y 20 gorras"', 'Precio por mayor y descuento por volumen', 'IGV, número de cotización y vigencia', 'Envía la foto de cada producto con su precio', 'Aceptar la vuelve pedido'] },
   P07: { nombre: 'Pedidos y carrito', desc: 'Arma el pedido, pide los datos del cliente y muestra el resumen.', sig: 'P09', opcion: 'Hacer un pedido', nota: 'Suele ir después de P05 Catálogo.',
     funciones: ['Suma uno o varios productos', 'Pide nombre, teléfono y dedicatoria', 'Muestra el resumen para confirmar o corregir', 'Le da un número al pedido'] },
   P09: { nombre: 'Delivery y despacho', desc: 'Dirección, zona y costo de envío, fecha y turno, o recojo en tienda.', sig: 'P08', opcion: 'Delivery', nota: 'Suele ir después de P07 Pedidos.',
     funciones: ['Pide la dirección y calcula el envío por zona', 'Fecha de entrega y turno', 'Opción de recoger en tienda', 'Respeta los días con entrega'] },
   P08: { nombre: 'Pagos y validación', desc: 'Envía los datos de pago, recibe el comprobante y avisa al equipo.', sig: 'P12', opcion: 'Pagar mi pedido', nota: 'Suele ir después de P09 Delivery.',
     funciones: ['Envía medios de pago y QR', 'Recibe la foto o PDF del comprobante', 'Avisa al equipo para validar el pago'] },
+  P10: { nombre: 'Agenda de citas', desc: 'Reserva citas por servicio y profesional en los horarios libres. El cliente puede reprogramar o cancelar.', sig: 'P01', opcion: 'Reservar una cita',
+    funciones: ['Servicios con duración y precio', 'Elige profesional (o cualquiera)', 'Muestra 7 días y sus horarios libres', 'Reprogramar y cancelar', 'Lee la agenda ocupada de una hoja'] },
+  P11: { nombre: 'Mi cuenta', desc: 'El cliente ve sus pedidos y su estado, repite el último pedido, actualiza sus datos, se suscribe a promociones y ve sus puntos.', sig: 'P09', opcion: 'Mi cuenta',
+    funciones: ['Mis pedidos y estado del último', 'Repetir el último pedido', 'Mis datos (nombre, correo, dirección)', 'Promociones (suscribirse o baja)', 'Puntos de fidelidad y premios'] },
   P17: { nombre: 'Agente IA', desc: 'Entiende mensajes escritos con palabras libres y responde con IA (Claude, OpenAI u otra), usando la información del negocio.', sig: 'P01', opcion: 'Pregúntame lo que quieras', nota: 'Cada respuesta se cobra en la cuenta de IA del cliente.',
     funciones: ['Responde cuando el menú no entiende lo que escribió el cliente', 'O como opción del menú, conversa hasta que escriba "menú"', 'Si quiere comprar, abre la opción que corresponde', 'Si pide una persona o reclama, pasa a asesor', 'Si no sabe algo, no lo inventa: ofrece un asesor'] }
 };
@@ -439,7 +445,8 @@ const FIJAS = [
   ['P01', 'Atención y menú', ['Saludo y menú numerado', 'Responde texto o documentos', 'Abre las otras plantillas', 'Despedida y opción no válida']],
   ['P12', 'Derivación a asesor', ['Pasa la conversación a una persona', 'Aviso distinto fuera de horario', 'Se activa con palabras como "asesor"']]
 ];
-const ORDEN_BLOQUES = ['P02', 'P03', 'P04', 'P05', 'P07', 'P09', 'P08', 'P17'];
+const ORDEN_BLOQUES = ['P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P09', 'P08', 'P10', 'P11', 'P17'];
+const OPCIONES_P11 = [['pedidos', 'Mis pedidos'], ['estado', 'Estado del último pedido'], ['repetir', 'Repetir el último pedido'], ['citas', 'Mis citas'], ['datos', 'Mis datos'], ['promociones', 'Promociones'], ['puntos', 'Puntos']];
 /* Modelos de IA que ofrece el formulario (P17 con Claude). El primero es el que usa la plantilla si no se elige. */
 const MODELOS_CLAUDE = [['claude-opus-5-5', 'Opus 5.5 · más inteligente'], ['claude-sonnet-5-5', 'Sonnet 5.5 · equilibrado'], ['claude-haiku-5-5', 'Haiku 5.5 · más barato']];
 /* Modelos para la IA de todo el worker (sección "ia" del Generador v0.7). El primero es el recomendado. */
@@ -632,6 +639,9 @@ function seccionInicial(code) {
     case 'P07': return { pedir_cantidad: false, permitir_varios: true, pedir_dedicatoria: true, siguiente: 'P09' };
     case 'P09': return { zonas_texto: '', recojo: { activo: false, direccion: '' }, turnos_texto: 'Mañana: 9-12\nTarde: 13-16\nNoche: 16-20', dias_entrega: [1, 2, 3, 4, 5, 6], siguiente: 'P08' };
     case 'P08': return { metodos_texto: '', qr: { url: '' }, siguiente: 'P12' };
+    case 'P06': return { fuente: { tipo: 'google_sheets', url: '' }, descuentos_texto: '50: 5\n100: 10', igv: { mostrar: true, incluido: true, porcentaje: 18 }, validez_dias: 7, condiciones_texto: '', registro_url: '', siguiente: 'P09' };
+    case 'P10': return { servicios_texto: '', profesionales_texto: '', elegir_profesional: true, pausa_texto: '13-14', intervalo_min: 30, agenda_fuente: { url: '' }, registro_url: '', politica_cancelacion: '' };
+    case 'P11': return { opciones: OPCIONES_P11.map(([k]) => k), pedidos_fuente: { url: '' }, columna_telefono: 'TELEFONO', puntos: { activo: false, por_cada: 10, nombre: 'puntos' }, premios_texto: '50: Envío gratis\n100: S/ 20 de descuento', registro_url: '' };
     case 'P17': return { modelo: '', instrucciones: '', conocimiento: '', usar_como_respaldo: true };
   }
   return {};
@@ -655,6 +665,39 @@ function leerTurnos(t) {
 function leerMetodos(t) {
   return lineasDe(t).map(l => { const i = l.indexOf(':'); return i > 0 ? { nombre: l.slice(0, i).trim(), detalle: l.slice(i + 1).trim() } : { nombre: l, detalle: '' }; });
 }
+/* "50: 5" → { desde: 50, porcentaje: 5 } */
+function leerDescuentos(t) {
+  return lineasDe(t).map(l => { const m = l.match(/^(?:desde\s*)?(\d+)\s*(?:u(?:nidades)?)?\s*[:=→-]+\s*(\d+(?:[.,]\d+)?)\s*%?$/i); return m ? { desde: Number(m[1]), porcentaje: Number(m[2].replace(',', '.')) } : null; });
+}
+/* "Corte de cabello (Carla, Lucía): 45 min, 35 · Lavado y corte" → { nombre, duracion, precio, descripcion, profesionales } */
+function leerServicios(t) {
+  return lineasDe(t).map(l => {
+    const m = l.match(/^(.+?)(?:\s*\(([^)]*)\))?\s*[:=]\s*(\d{1,3})\s*(?:min(?:utos)?)?\s*(?:[,;]\s*(?:S\/|US\$|\$)?\s*(\d+(?:[.,]\d+)?))?\s*(?:[·|]\s*(.+))?$/i);
+    if (!m) return null;
+    const x = { nombre: m[1].trim(), duracion: Number(m[3]), precio: m[4] ? Number(m[4].replace(',', '.')) : 0 };
+    if (texto(m[5])) x.descripcion = m[5].trim();
+    const pr = (m[2] || '').split(',').map(v => v.trim()).filter(Boolean); if (pr.length) x.profesionales = pr;
+    return x.duracion > 0 ? x : null;
+  });
+}
+/* "Carla: M X J V S, 10-19" o "Carla: 10-19" (días del horario) o "Carla" → { nombre, dias?, desde?, hasta? } */
+function leerProfesionales(t) {
+  const letra = Object.fromEntries(DIAS.map(([n, l]) => [l, n]));
+  return lineasDe(t).map(l => {
+    const i = l.indexOf(':'); if (i < 0) return texto(l) ? { nombre: l.trim() } : null;
+    const x = { nombre: l.slice(0, i).trim() }, r = l.slice(i + 1).trim();
+    const h = r.match(/(\d{1,2})\s*(?:-|–|a)\s*(\d{1,2})\s*$/);
+    if (h) { if (Number(h[1]) >= Number(h[2])) return null; x.desde = Number(h[1]); x.hasta = Number(h[2]); }
+    const ds = (h ? r.slice(0, h.index) : r).replace(/,/g, ' ').split(/\s+/).filter(Boolean);
+    if (ds.length) { if (ds.some(d => !(d.toUpperCase() in letra))) return null; x.dias = ds.map(d => letra[d.toUpperCase()]); }
+    return x.nombre ? x : null;
+  });
+}
+/* "50: Envío gratis" → { puntos: 50, premio } */
+function leerPremios(t) {
+  return lineasDe(t).map(l => { const m = l.match(/^(\d+)\s*(?:puntos?)?\s*[:=]\s*(.+)$/i); return m ? { puntos: Number(m[1]), premio: m[2].trim() } : null; });
+}
+const leerRango = (t) => { const m = String(t || '').match(/^\s*(\d{1,2})\s*(?:-|–|a)\s*(\d{1,2})\s*$/); return m && Number(m[1]) < Number(m[2]) ? [Number(m[1]), Number(m[2])] : null; };
 /* Qué bloques usa el worker: los que abre el menú y los que siguen después de ellos */
 function bloquesUsados(c) {
   if (Array.isArray(c._bloques)) return ORDEN_BLOQUES.filter(x => c._bloques.includes(x));
@@ -775,11 +818,25 @@ function aFormulario(code, s0) {
   }
   if (code === 'P08' && !texto(s0?.metodos_texto) && Array.isArray(s0?.metodos)) { s.metodos_texto = s0.metodos.map(m => m.detalle ? `${m.nombre}: ${m.detalle}` : m.nombre).join('\n'); delete s.metodos; }
   if (code === 'P07' && Array.isArray(s0?.campos)) { s.pedir_dedicatoria = s0.campos.some(x => x.clave === 'dedicatoria'); delete s.campos; }
+  if (code === 'P06') {
+    if (Array.isArray(s0?.descuentos_volumen)) s.descuentos_texto = s0.descuentos_volumen.map(d => `${d.desde}: ${d.porcentaje}`).join('\n');
+    if (Array.isArray(s0?.condiciones)) s.condiciones_texto = s0.condiciones.join('\n');
+    if (s0?.siguiente_aceptar !== undefined && s0?.siguiente === undefined) s.siguiente = s0.siguiente_aceptar || 'P01';
+    delete s.descuentos_volumen; delete s.condiciones; delete s.siguiente_aceptar;
+  }
+  if (code === 'P10') {
+    if (Array.isArray(s0?.servicios)) s.servicios_texto = s0.servicios.map(x => `${x.nombre}${(x.profesionales || []).length ? ` (${x.profesionales.join(', ')})` : ''}: ${x.duracion} min${x.precio ? `, ${x.precio}` : ''}${x.descripcion ? ` · ${x.descripcion}` : ''}`).join('\n');
+    if (Array.isArray(s0?.profesionales)) s.profesionales_texto = s0.profesionales.map(x => `${x.nombre}${x.dias || x.desde !== undefined ? ': ' : ''}${(x.dias || []).map(d => DIAS.find(z => z[0] === d)?.[1]).join(' ')}${x.dias && x.desde !== undefined ? ', ' : ''}${x.desde !== undefined ? `${x.desde}-${x.hasta}` : ''}`).join('\n');
+    if (s0?.horario?.pausa_desde !== undefined) s.pausa_texto = s0.horario.pausa_desde < s0.horario.pausa_hasta ? `${s0.horario.pausa_desde}-${s0.horario.pausa_hasta}` : '';
+    delete s.servicios; delete s.profesionales; delete s.horario;
+  }
+  if (code === 'P11' && Array.isArray(s0?.puntos?.premios)) { s.premios_texto = s0.puntos.premios.map(p => `${p.puntos}: ${p.premio}`).join('\n'); delete s.puntos.premios; }
   if (code === 'P04') s.items = (Array.isArray(s0?.items) && s0.items.length ? s0.items : seccionInicial('P04').items).map(it => ({ titulo: it.titulo || '', texto: it.texto || '', archivo: { url: it.archivo?.url || '', nombre: it.archivo?.nombre || '' } }));
   return s;
 }
 /* Forma del formulario → lo que espera el Generador v0.4 (campos vacíos no se envían: el bloque usa su respaldo) */
-function aContrato(code, s, moneda, sigForm, ia = IA_INICIAL()) {
+function aContrato(code, s, moneda, sigForm, ia = IA_INICIAL(), cfg = null) {
+  const sel = cfg ? bloquesUsados(cfg) : [];
   const sv = sigForm ?? s.siguiente ?? BLOQUES[code].sig;
   const sig = sv === 'FIN' ? '' : sv;
   const hoja = (f) => ({ tipo: 'google_sheets', url: texto(f?.url) });
@@ -807,6 +864,26 @@ function aContrato(code, s, moneda, sigForm, ia = IA_INICIAL()) {
       return { proveedor: prov, ...(texto(s.modelo) ? { modelo: texto(s.modelo) } : {}),
         ...(texto(s.instrucciones) ? { instrucciones: s.instrucciones.trim() } : {}), ...(texto(s.conocimiento) ? { conocimiento: s.conocimiento.trim() } : {}),
         usar_como_respaldo: s.usar_como_respaldo !== false }; }
+    case 'P06': { const cond = lineasDe(s.condiciones_texto), url = (u) => texto(u) ? { registro_url: texto(u) } : {};
+      return { moneda, fuente: hoja(s.fuente), descuentos_volumen: leerDescuentos(s.descuentos_texto).filter(Boolean).sort((a, b) => a.desde - b.desde),
+        igv: { mostrar: s.igv?.mostrar !== false, incluido: s.igv?.incluido !== false, porcentaje: Number(s.igv?.porcentaje) >= 0 ? Number(s.igv.porcentaje) : 18 },
+        validez_dias: Math.max(1, Number(s.validez_dias) || 7), ...(cond.length ? { condiciones: cond } : {}), ...url(s.registro_url),
+        siguiente_aceptar: sig, siguiente: sig }; }
+    case 'P10': { const h = cfg?.horario || DEFAULTS.horario, pausa = leerRango(s.pausa_texto);
+      return { moneda, servicios: leerServicios(s.servicios_texto).filter(Boolean), profesionales: leerProfesionales(s.profesionales_texto).filter(Boolean),
+        elegir_profesional: !!s.elegir_profesional && lineasDe(s.profesionales_texto).length > 0,
+        horario: { dias: (h.dias || []).slice().sort(), desde: Number(h.desde), hasta: Number(h.hasta), ...(pausa ? { pausa_desde: pausa[0], pausa_hasta: pausa[1] } : { pausa_desde: 0, pausa_hasta: 0 }) },
+        intervalo_min: Number(s.intervalo_min) || 30, ...(texto(s.agenda_fuente?.url) ? { agenda_fuente: hoja(s.agenda_fuente) } : {}),
+        ...(texto(s.registro_url) ? { registro_url: texto(s.registro_url) } : {}), ...(texto(s.politica_cancelacion) ? { politica_cancelacion: s.politica_cancelacion.trim() } : {}),
+        siguiente: 'P01' }; }
+    case 'P11': { let ops = (s.opciones || []).filter(k => OPCIONES_P11.some(([v]) => v === k));
+      if (!sel.includes('P10')) ops = ops.filter(k => k !== 'citas');
+      if (!sel.includes('P09')) ops = ops.filter(k => k !== 'repetir');
+      if (!s.puntos?.activo) ops = ops.filter(k => k !== 'puntos');
+      return { moneda, opciones: ops, ...(texto(s.pedidos_fuente?.url) ? { pedidos_fuente: hoja(s.pedidos_fuente) } : {}), columna_telefono: texto(s.columna_telefono) || 'TELEFONO',
+        puntos: { activo: !!s.puntos?.activo, por_cada: Number(s.puntos?.por_cada) || 10, nombre: texto(s.puntos?.nombre) || 'puntos', premios: leerPremios(s.premios_texto).filter(Boolean) },
+        ...(texto(s.registro_url) ? { registro_url: texto(s.registro_url) } : {}),
+        ...(sel.includes('P09') ? { siguiente_repetir: 'P09' } : {}), ...(sel.includes('P10') ? { siguiente_citas: 'P10' } : {}) }; }
     case 'P08': return { moneda, metodos: leerMetodos(s.metodos_texto), ...(texto(s.qr?.url) ? { qr: { url: texto(s.qr.url), tipo: 'image' } } : {}), siguiente: sig };
   }
   return {};
@@ -854,6 +931,7 @@ function validar(config, cred, { bloques = true } = {}) {
     else if (key && (key.length < 20 || /\s/.test(key))) add('ia', 'La clave de la IA no parece completa: cópiala otra vez.');
   }
   if (bloques) for (const code of bloquesUsados(config)) {
+    if (code === 'P11' && isObj(config.p11) && config.p11.puntos?.activo && !(Number(config.p11.puntos.por_cada) > 0)) add('blk.P11', 'Escribe cada cuánto se gana un punto.');
     const s = config[code.toLowerCase()] || {}, k = 'blk.' + code;
     const link = (u, que) => { if (texto(u) && !/^https:\/\/\S+$/.test(texto(u))) add(k, `${que} debe empezar con https://`); };
     if (['P02', 'P03', 'P05'].includes(code)) { if (!texto(s.fuente?.url)) add(k, 'Pega el link de la hoja de Google.'); else link(s.fuente.url, 'El link de la hoja'); }
@@ -864,6 +942,24 @@ function validar(config, cred, { bloques = true } = {}) {
       if (!its.length) add(k, 'Agrega al menos un documento o información, con su título.');
       its.forEach(it => { if (!texto(it.texto) && !texto(it.archivo?.url)) add(k, `"${texto(it.titulo)}" necesita un texto o un link.`); link(it.archivo?.url, `El link de "${texto(it.titulo)}"`); });
     }
+    if (code === 'P06') { if (!texto(s.fuente?.url)) add(k, 'Pega el link de la hoja de productos.'); else link(s.fuente.url, 'El link de la hoja'); link(s.registro_url, 'El link de registro');
+      const ds = leerDescuentos(s.descuentos_texto), dm = lineasDe(s.descuentos_texto).filter((l, j) => !ds[j]);
+      if (dm.length) add(k, `No entendí el descuento "${dm[0]}". Escríbelo como "50: 5" (desde 50 unidades, 5%).`); }
+    if (code === 'P10') {
+      const sv = leerServicios(s.servicios_texto), sm = lineasDe(s.servicios_texto).filter((l, j) => !sv[j]);
+      if (!sv.filter(Boolean).length && !sm.length) add(k, 'Escribe al menos un servicio con su duración.');
+      if (sm.length) add(k, `No entendí el servicio "${sm[0]}". Escríbelo como "Corte: 45 min, 35".`);
+      const pr = leerProfesionales(s.profesionales_texto), pm = lineasDe(s.profesionales_texto).filter((l, j) => !pr[j]);
+      if (pm.length) add(k, `No entendí "${pm[0]}". Escríbelo como "Carla: M X J V S, 10-19" o solo el nombre.`);
+      const nombres = pr.filter(Boolean).map(x => x.nombre.toLowerCase());
+      sv.filter(Boolean).forEach(x => (x.profesionales || []).forEach(n => { if (nombres.length && !nombres.includes(n.toLowerCase())) add(k, `"${x.nombre}" menciona a ${n}, que no está en la lista de profesionales.`); }));
+      if (texto(s.pausa_texto) && !leerRango(s.pausa_texto)) add(k, 'Escribe la pausa como "13-14", o déjala vacía.');
+      link(s.agenda_fuente?.url, 'El link de la agenda'); link(s.registro_url, 'El link de registro');
+    }
+    if (code === 'P11') { link(s.pedidos_fuente?.url, 'El link de la hoja de pedidos'); link(s.registro_url, 'El link de registro');
+      if (!(s.opciones || []).length) add(k, 'Elige al menos una cosa que el cliente pueda ver.');
+      const pz = leerPremios(s.premios_texto), pzm = lineasDe(s.premios_texto).filter((l, j) => !pz[j]);
+      if (s.puntos?.activo && pzm.length) add(k, `No entendí el premio "${pzm[0]}". Escríbelo como "50: Envío gratis".`); }
     if (code === 'P17' && config.ia?.activa === false) add(k, 'El Agente IA necesita la IA prendida en el paso 6.');
     if (code === 'P08') { if (!lineasDe(s.metodos_texto).length) add(k, 'Escribe al menos un medio de pago.'); link(s.qr?.url, 'El link del QR'); }
     if (code === 'P09') {
@@ -982,7 +1078,7 @@ function armarEnvio(w, cred) {
   const usados = bloquesUsados(w.config), moneda = texto(c.moneda) || 'S/';
   for (const code of ORDEN_BLOQUES) delete c[code.toLowerCase()];
   delete c.moneda; delete c._bloques;
-  for (const code of usados) c[code.toLowerCase()] = aContrato(code, w.config[code.toLowerCase()] || seccionInicial(code), moneda, sigDe(w.config, code), w.config.ia || IA_INICIAL());
+  for (const code of usados) c[code.toLowerCase()] = aContrato(code, w.config[code.toLowerCase()] || seccionInicial(code), moneda, sigDe(w.config, code), w.config.ia || IA_INICIAL(), w.config);
   c.ia = iaContrato(w.config);
   const out = { config: c, meta: { tipo_negocio: w.meta.tipo_negocio, paquete: w.meta.paquete, etiquetas: w.meta.etiquetas || [], notas: w.meta.notas || '', origen: 'workeros-web', version_interfaz: '1.0', bloques: usados } };
   // Credenciales de Meta: van aparte de config para que el token NUNCA quede escrito dentro del worker.
@@ -1384,10 +1480,10 @@ function vistaEditor() {
   </div>`;
 }
 const oculto = (k) => S.paso === k ? '' : 'hidden';
-function selectSiguiente(code, s) {
+function selectSiguiente(code, s, label = 'Al terminar, pasa a') {
   const opts = [['P01', 'Volver al menú'], ['P12', 'Pasar a un asesor'], ...(code === 'P05' ? [['FIN', 'Nada más (solo mostrar el catálogo)']] : []), ...ORDEN_BLOQUES.filter(b => b !== code && b !== 'P17' && bloquesUsados(S.edit.config).includes(b)).map(b => [b, `${b} · ${BLOQUES[b].nombre}`])];
   const v = sigDe(S.edit.config, code);
-  return `<div class="field"><label for="f_${code}_sig">Al terminar, pasa a</label><select id="f_${code}_sig" data-path="${code.toLowerCase()}.siguiente">${opts.map(([k, l]) => `<option value="${k}" ${k === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></div>`;
+  return `<div class="field"><label for="f_${code}_sig">${label}</label><select id="f_${code}_sig" data-path="${code.toLowerCase()}.siguiente">${opts.map(([k, l]) => `<option value="${k}" ${k === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></div>`;
 }
 const COLS_P05 = [['nombre', 'Nombre del producto', 'NOMBRE'], ['precio', 'Precio', 'PRECIO'], ['codigo', 'Código', 'CODIGO'], ['categoria', 'Categoría', 'CATEGORIA'], ['descripcion', 'Descripción', 'DESCRIPCION'], ['imagen', 'Link de la foto', 'IMAGEN']];
 const hintHoja = 'Compártela como "Cualquier persona con el enlace · Lector" y pega el link normal de la hoja.';
@@ -1430,6 +1526,44 @@ function camposBloque(code, s) {
       <details class="more" ${COLS_P05.some(([k]) => texto(s.columnas?.[k])) ? 'open' : ''}><summary>Columnas de la hoja</summary>
         <p class="hint" style="margin:6px 0 10px">Escribe el título de la columna tal como está en la hoja del cliente. Vacío = el nombre de ejemplo. Solo el nombre del producto y el precio son necesarios; las demás pueden no existir.</p>
         <div class="grid2">${COLS_P05.map(([k, l, d]) => campo('p05.columnas.' + k, l, { ph: d })).join('')}</div></details>`;
+    case 'P06': return `<div class="grid2">
+      ${campo('p06.fuente.url', 'Link de la hoja de productos', { req: true, ph: 'https://docs.google.com/spreadsheets/d/…', hint: 'Puede ser la misma del catálogo. Columnas extra que usa: PRECIO_MAYOR, MAYOR_DESDE, UNIDAD, MINIMO y TIEMPO (todas opcionales). ' + hintHoja })}
+      ${campo('p06.descuentos_texto', 'Descuento por cantidad', { tipo: 'textarea', rows: 3, ph: '50: 5\n100: 10', hint: 'Una por línea: <span class="mono">desde cuántas unidades: % de descuento</span>. Vacío = sin descuento.' })}
+      <div class="field"><label for="f_p06_validez">La cotización vale por</label><select id="f_p06_validez" data-num="p06.validez_dias">${[3, 7, 15, 30].map(n => `<option value="${n}" ${Number(s.validez_dias) === n ? 'selected' : ''}>${n} días</option>`).join('')}</select></div>
+      ${selectSiguiente(code, s, 'Si acepta, pasa a')}
+      ${campo('p06.condiciones_texto', 'Condiciones', { tipo: 'textarea', rows: 3, full: true, ph: '50% de adelanto para iniciar la producción y 50% contra entrega.\nEntrega en Lima sin costo desde S/ 500.', hint: 'Una por línea. Salen al final de la cotización. Vacío = las de ejemplo.' })}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+      <label class="switch"><input type="checkbox" data-bool="p06.igv.mostrar" ${s.igv?.mostrar !== false ? 'checked' : ''}>Mostrar el IGV en la cotización</label>
+      ${s.igv?.mostrar !== false ? `<label class="switch"><input type="checkbox" data-bool="p06.igv.incluido" ${s.igv?.incluido !== false ? 'checked' : ''}>Los precios de la hoja ya incluyen IGV</label>` : ''}
+      </div>
+      <details class="more" ${texto(s.registro_url) ? 'open' : ''}><summary>Guardar cada cotización (opcional)</summary>
+        ${campo('p06.registro_url', 'Link de registro', { ph: 'https://script.google.com/macros/s/…/exec', hint: 'Si tienes un Apps Script que guarda filas en una hoja, cada cotización llega ahí.' })}</details>`;
+    case 'P10': return `<div class="grid2">
+      ${campo('p10.servicios_texto', 'Servicios', { tipo: 'textarea', rows: 5, req: true, full: true, ph: 'Corte de cabello: 45 min, 35 · Lavado, corte y peinado\nTinte completo (Carla): 120 min, 150\nManicure (Lucía): 60 min, 40', hint: 'Uno por línea: <span class="mono">Servicio: minutos, precio</span>. Opcional: entre paréntesis quién lo hace, y después de · una descripción.' })}
+      ${campo('p10.profesionales_texto', 'Profesionales (opcional)', { tipo: 'textarea', rows: 4, ph: 'Carla: M X J V S, 10-19\nLucía: L M X J V S, 9-17\nDiego', hint: 'Uno por línea. Días con letras (L M X J V S D) y horas. Solo el nombre = trabaja en el horario del negocio. Vacío = no se elige profesional.' })}
+      <div style="display:flex;flex-direction:column;gap:14px">
+        ${campo('p10.pausa_texto', 'Pausa del día', { ph: '13-14', hint: `Sin citas en esas horas. Vacío = sin pausa. El horario es el del paso 2: ${esc(S.edit.config.horario.texto || '')}.` })}
+        <div class="field"><label for="f_p10_int">Las citas empiezan cada</label><select id="f_p10_int" data-num="p10.intervalo_min">${[15, 30, 60].map(n => `<option value="${n}" ${Number(s.intervalo_min) === n ? 'selected' : ''}>${n} minutos</option>`).join('')}</select></div>
+      </div>
+      ${campo('p10.agenda_fuente.url', 'Hoja con la agenda ocupada (opcional)', { ph: 'https://docs.google.com/spreadsheets/d/…', hint: 'Columnas FECHA, HORA, DURACION, PROFESIONAL y ESTADO. Esos horarios no se ofrecen. ' + hintHoja })}
+      ${campo('p10.registro_url', 'Link para guardar cada cita (opcional)', { ph: 'https://script.google.com/macros/s/…/exec', hint: 'Ej. un Apps Script que escribe la cita en esa misma hoja. Sin esto, dos clientes podrían pedir la misma hora.' })}
+      ${campo('p10.politica_cancelacion', 'Política para cancelar', { ph: 'Puedes cancelar o reprogramar sin costo hasta 12 horas antes.', hint: 'Vacío = el texto de ejemplo.' })}
+      </div>
+      ${lineasDe(s.profesionales_texto).length ? `<label class="switch"><input type="checkbox" data-bool="p10.elegir_profesional" ${s.elegir_profesional ? 'checked' : ''}>El cliente elige con quién (o "Cualquiera")</label>` : ''}`;
+    case 'P11': { const sel = bloquesUsados(S.edit.config), falta = { citas: 'P10', repetir: 'P09' };
+      return `<div class="field"><span class="flabel">Qué puede ver el cliente</span>
+        <div class="presets" role="group" aria-label="Qué puede ver el cliente" style="gap:6px 14px">${OPCIONES_P11.map(([k, l]) => { const req = falta[k], off = (req && !sel.includes(req)) || (k === 'puntos' && !s.puntos?.activo);
+          return `<label class="switch" style="font-size:13.5px" ${off ? `title="${k === 'puntos' ? 'Activa los puntos abajo' : 'Necesita ' + req}"` : ''}><input type="checkbox" data-p11op="${k}" ${(s.opciones || []).includes(k) ? 'checked' : ''} ${off ? 'disabled' : ''}>${l}${off ? ` <span class="hint">(${k === 'puntos' ? 'activa los puntos' : 'necesita ' + req})</span>` : ''}</label>`; }).join('')}</div></div>
+      <div class="grid2">
+      ${campo('p11.pedidos_fuente.url', 'Hoja de pedidos (opcional)', { ph: 'https://docs.google.com/spreadsheets/d/…', hint: 'Para mostrar pedidos anteriores y su ESTADO. Se busca por la columna de teléfono. ' + hintHoja })}
+      ${campo('p11.columna_telefono', 'Columna del teléfono', { ph: 'TELEFONO' })}
+      ${campo('p11.registro_url', 'Link para guardar los datos del cliente (opcional)', { ph: 'https://script.google.com/macros/s/…/exec', hint: 'Cada cambio de datos o de promociones llega ahí (sirve como CRM en Google Sheets).', full: true })}
+      </div>
+      <label class="switch"><input type="checkbox" data-bool="p11.puntos.activo" ${s.puntos?.activo ? 'checked' : ''}>Programa de puntos</label>
+      ${s.puntos?.activo ? `<div class="grid2">
+        ${campo('p11.puntos.por_cada', 'Un punto por cada', { tipo: 'number', ph: '10', hint: 'Cuánto gasta el cliente por cada punto, en la moneda del worker.' })}
+        ${campo('p11.premios_texto', 'Premios', { tipo: 'textarea', rows: 3, ph: '50: Envío gratis\n100: S/ 20 de descuento', hint: 'Uno por línea: <span class="mono">puntos: premio</span>.' })}</div>` : ''}`; }
     case 'P07': return `<div style="display:flex;flex-direction:column;gap:10px">
       <label class="switch"><input type="checkbox" data-bool="p07.permitir_varios" ${s.permitir_varios ? 'checked' : ''}>Puede agregar varios productos al pedido</label>
       <label class="switch"><input type="checkbox" data-bool="p07.pedir_cantidad" ${s.pedir_cantidad ? 'checked' : ''}>Pregunta la cantidad de cada producto</label>
@@ -1484,7 +1618,7 @@ function vistaBloques() {
   if (!usados.length) return `<div class="notice info"><div><b>No marcaste plantillas extra.</b> El worker tendrá saludo, menú y asesor. Si quieres catálogo, pedidos, delivery, pagos o documentos, márcalas en el paso 3.</div></div>`;
   const entradas = c.p01.opciones.map((o, i) => [o, i]).filter(([o]) => o.accion === 'modulo' && BLOQUES[o.modulo]);
   const tagB = (b) => `<span class="mod">${b}</span>`;
-  const usaMoneda = usados.some(b => ['P05', 'P07', 'P09', 'P08'].includes(b));
+  const usaMoneda = usados.some(b => ['P05', 'P06', 'P07', 'P09', 'P08', 'P10', 'P11'].includes(b));
   return `<div class="field" style="gap:8px"><span class="flabel">Recorrido del cliente</span>
       ${entradas.map(([o, i]) => `<div class="chain"><span>Opción ${i + 1} · ${esc(o.titulo)}</span><span class="arrow">→</span>${cadena(c, o.modulo).map(tagB).join('<span class="arrow">→</span>')}</div>`).join('')}
       <span class="hint">El cliente puede salir de cualquier bloque escribiendo <b>menú</b>, o pedir un <b>asesor</b>.</span></div>
@@ -1772,12 +1906,14 @@ function leerFormulario() {
     setPath(c, el.dataset.path, v);
   });
   $$('#wform [data-num]').forEach(el => setPath(c, el.dataset.num, Number(el.value)));
+  if (isObj(c.p11?.puntos) && c.p11.puntos.por_cada !== undefined) c.p11.puntos.por_cada = Number(c.p11.puntos.por_cada) || '';
   $$('#wform [data-bool]').forEach(el => setPath(c, el.dataset.bool, el.checked));
   $$('#wform [data-op]').forEach(el => {
     const o = c.p01.opciones[Number(el.dataset.op)]; if (!o) return;
     if (el.type === 'radio') { if (el.checked) o.accion = el.value; return; }
     o[el.dataset.k] = el.dataset.k === 'palabras' ? el.value.split(',').map(s => s.trim()).filter(Boolean) : el.value;
   });
+  if (isObj(c.p11) && $('#wform [data-p11op]')) c.p11.opciones = $$('#wform [data-p11op]').filter(el => el.checked).map(el => el.dataset.p11op);
   $$('#wform [data-item]').forEach(el => {
     const it = c.p04?.items?.[Number(el.dataset.item)]; if (!it) return;
     if (el.dataset.ik === 'url' || el.dataset.ik === 'nombre') { it.archivo = it.archivo || {}; it.archivo[el.dataset.ik] = el.value; } else it[el.dataset.ik] = el.value;
@@ -1849,12 +1985,14 @@ function montarEditor() {
     const t = e.target;
     if (t.dataset.blq) {
       leerFormulario(); const c = S.edit.config, sel = bloquesUsados(c), code = t.dataset.blq;
-      if (t.checked) c._bloques = [...sel, code];
+      if (t.checked) { c._bloques = [...sel, code];
+        // las plantillas que normalmente pasan a esta vuelven a pasar a ella (ej. marcar P07 después de P05)
+        for (const b of sel) { const sec = c[b.toLowerCase()]; if (BLOQUES[b].sig === code && isObj(sec) && ['P01', 'FIN', ''].includes(sec.siguiente ?? '')) sec.siguiente = code; } }
       else if (!quitarPlantilla(code)) { t.checked = true; return; }
       asegurarSecciones(c); limpiarDependencias(c); refrescarErrores(); S.chat = null; rerenderEditor(); return;
     }
     if (t.name === 'paquete') { leerFormulario(); if (aplicarPaquete(t.value)) { S.chat = null; toast('Llené el menú con un ejemplo. Puedes cambiarlo en el paso 4.'); } rerenderEditor(); return; }
-    if (t.type === 'radio' || t.dataset.bool || t.dataset.num || t.tagName === 'SELECT') { leerFormulario(); refrescarErrores(); S.chat = null; rerenderEditor(); }
+    if (t.type === 'radio' || t.dataset.bool || t.dataset.num || t.dataset.p11op || t.tagName === 'SELECT') { leerFormulario(); refrescarErrores(); S.chat = null; rerenderEditor(); }
   });
   $$('[data-tuto="meta"]', m).forEach(d => d.addEventListener('toggle', () => { S.edit.tutoMeta = d.open; }));
   $$('[data-dia]', m).forEach(b => b.addEventListener('click', () => {
