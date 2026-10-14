@@ -2161,7 +2161,7 @@ async function crear() {
     S.edit.cred.token = ''; S.edit.cred.app_secret = ''; S.edit.cred.ia_key = '';
     w.estado = d.activo ? 'activo' : 'creado';
     const sel = bloquesUsados(w.config);
-    if (d.config && isObj(d.config)) { const queda = { _modelo: w.config._modelo, flor: w.config.flor, cw: w.config.cw }; w.config = d.config; Object.assign(w.config, queda); w.config._bloques = sel; normalizarConfig(w.config); }
+    if (d.config && isObj(d.config) && !w.config._modelo) { const queda = { _modelo: w.config._modelo, flor: w.config.flor, cw: w.config.cw }; w.config = d.config; Object.assign(w.config, queda); w.config._bloques = sel; normalizarConfig(w.config); }
     else if (d.worker_id) w.config.worker_id = d.worker_id;
     S.edit.config = clone(w.config);
     S.resultado = { ok: true, data: d, simulado: r.simulado };
