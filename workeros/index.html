@@ -2437,7 +2437,7 @@ function armarModelo(w, cred) {
 }
 
 /* ───────── Worker fijo Evento (Generador v0.9): encuestas, votaciones y simulaciones por WhatsApp ───────── */
-function EV_INICIAL() { return { numero_publico: '', frase_qr: '', abierta: true, modo: 'prueba', admins: '', pruebas: '', palabra_reinicio: '', exportar_nombre: true, ya_participo: '', cerrada: '', pasos: [] }; }
+function EV_INICIAL() { return { numero_publico: '', frase_qr: '', abierta: true, modo: 'prueba', admins: '', pruebas: '', palabra_reinicio: '', exportar_nombre: true, sheet_url: '', pestana: '', ya_participo: '', cerrada: '', pasos: [] }; }
 const TIPOS_PASO = [
   ['mensaje', 'Mensaje', 'Texto o imagen. Sale y sigue con el siguiente paso, sin esperar respuesta.'],
   ['opciones', 'Pregunta de opciones', 'Elige una sola. Hasta 3 opciones salen como botones; de 4 a 10, como lista.'],
@@ -2471,6 +2471,9 @@ function validarEvento(c, cred, add) {
     const malos = telefonosDe(ev[k]).filter(t => !/^\d{8,15}$/.test(t));
     if (malos.length) add('ev.' + k, `No entendí "${malos[0]}" en los números ${nom}. Van con código de país, solo números, uno por línea.`);
   }
+  const hoja = texto(ev.sheet_url);
+  if (hoja && !/^https:\/\//.test(hoja)) add('ev.sheet_url', 'El link de la hoja debe empezar con https://');
+  else if (hoja && !/docs\.google\.com\/spreadsheets\/d\//.test(hoja)) add('ev.sheet_url', 'Tiene que ser una hoja de Google (docs.google.com/spreadsheets/…). Excel y OneDrive no sirven.');
   if (!ps.length) { add('evpasos', 'Agrega al menos un paso.'); return; }
   if (!ps.some(p => ['opciones', 'texto'].includes(p.tipo))) add('evpasos', 'El evento necesita al menos una pregunta (de opciones o abierta).');
   const ids = new Set();
@@ -2545,6 +2548,7 @@ function armarEvento(w, cred) {
     equipo: { telefonos_admin: telefonosDe(ev.admins), telefonos_prueba: telefonosDe(ev.pruebas), palabra_reinicio: texto(ev.palabra_reinicio) },
     datos: { exportar_telefono: true, exportar_nombre: ev.exportar_nombre !== false },
     textos: { ya_participo: texto(ev.ya_participo), cerrada: texto(ev.cerrada) },
+    registro: { sheet_url: texto(ev.sheet_url), pestana: texto(ev.pestana) },
     pasos
   };
   if (conIA) config.ia = { modelo: texto(ia.modelo) || 'gpt-4o-mini' };
@@ -2663,6 +2667,11 @@ function vistaEvento() {
       ${campo('ev.palabra_reinicio', 'Palabra para volver a probar (opcional)', { ph: 'reiniciar-prueba', hint: 'Si un número del equipo o de prueba la escribe, se borran solo sus respuestas y puede empezar de nuevo.' })}
       <label class="switch" style="align-self:center"><input type="checkbox" data-bool="ev.exportar_nombre" ${ev.exportar_nombre !== false ? 'checked' : ''}>Incluir el nombre de WhatsApp en el CSV</label>
     </div>
+    <h3 style="margin-bottom:0">Registro en Google Sheets</h3>
+    <div class="grid2">
+      ${campo('ev.sheet_url', 'Hoja de Google para las respuestas (opcional)', { ph: 'https://docs.google.com/spreadsheets/d/…/edit', hint: 'Cada minuto el worker copia ahí una fila por participante con sus respuestas, solo si hubo cambios. Las respuestas reales se quedan aunque se borren de la memoria del worker. Compártela como <b>Editor</b> con la cuenta de Google conectada en n8n. Vacío = sin hoja; igual puedes sacar el CSV con #exportar.' })}
+      ${campo('ev.pestana', 'Pestaña de la hoja (opcional)', { ph: 'Respuestas', hint: 'El nombre de la pestaña de abajo de la hoja. Vacío = la primera.' })}
+    </div>
     <h3 style="margin-bottom:0">Mensajes</h3>
     <div class="grid2">
       ${campo('ev.ya_participo', 'Si ya participó', { tipo: 'textarea', rows: 2, ph: 'Ya registramos tu participación ✅ ¡Gracias!', hint: 'Cuando alguien que ya terminó vuelve a escribir. Vacío = el de ejemplo.' })}
@@ -2695,7 +2704,7 @@ function vistaRevisionEvento() {
     ${fila('Tipo de worker', 'Worker fijo · <b>Evento</b>', 1)}
     ${fila('WhatsApp', `${c.whatsapp.phone_number_id ? `<span class="mono">${esc(c.whatsapp.phone_number_id)}</span>` : falta}<br><span class="hint">${qr ? `Link del QR: <span class="mono">${esc(qr)}</span>` : 'Sin número del QR'} · ${E.cred.modo === 'nuevas' ? `Credenciales nuevas: ${esc(E.cred.nombre)}` : 'Credenciales de Nissitech'}</span>`, 2)}
     ${fila('Pasos', ps.length ? `<ol>${ps.map(p => `<li>${esc((resumenPaso(p) || 'Sin texto').replace(/\s+/g, ' ').slice(0, 70))} <span class="hint">· ${p.tipo === 'opciones' ? `${(p.opciones || []).length} opciones en ${p.formato === 'texto' ? 'texto numerado' : formatoOpciones((p.opciones || []).length)}` : TIPOS_PASO.find(([v]) => v === p.tipo)[1].toLowerCase()}</span></li>`).join('')}</ol>` : falta, 3)}
-    ${fila('Votación', `Empieza ${ev.abierta !== false ? '<b>abierta</b>' : '<b>cerrada</b>'} · en modo ${ev.modo === 'real' ? '<b>real</b>' : '<b>prueba</b>'}<br><span class="hint">${adm} ${adm === 1 ? 'número' : 'números'} del equipo · ${pr} de prueba${texto(ev.palabra_reinicio) ? ` · palabra para volver a probar: <span class="mono">${esc(ev.palabra_reinicio)}</span>` : ''}</span>`, 4)}
+    ${fila('Votación', `Empieza ${ev.abierta !== false ? '<b>abierta</b>' : '<b>cerrada</b>'} · en modo ${ev.modo === 'real' ? '<b>real</b>' : '<b>prueba</b>'}<br><span class="hint">${adm} ${adm === 1 ? 'número' : 'números'} del equipo · ${pr} de prueba${texto(ev.palabra_reinicio) ? ` · palabra para volver a probar: <span class="mono">${esc(ev.palabra_reinicio)}</span>` : ''}<br>${texto(ev.sheet_url) ? `Registra las respuestas en una hoja de Google${texto(ev.pestana) ? ` (pestaña <span class="mono">${esc(ev.pestana)}</span>)` : ''}` : 'Sin hoja de Google: las respuestas se sacan con #exportar'}</span>`, 4)}
     ${ps.some(p => p.tipo === 'ia') ? fila('Inteligencia artificial', `OpenAI · <span class="mono">${esc(c.ia?.modelo || 'gpt-4o-mini')}</span><br><span class="hint">${texto(E.cred.ia_key) ? 'Con clave (API key) nueva' : 'Sin clave nueva: usa la de Nissitech, si tiene'}</span>`, 5) : ''}
   </div>
   <button type="button" class="btn ghost" data-act="ver-json" style="align-self:flex-start">Ver lo que se envía a n8n</button>`;
