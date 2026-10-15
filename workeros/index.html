@@ -2095,7 +2095,7 @@ function montarEditor() {
         if (lb) lb.textContent = u ? 'Texto que acompaña al documento (caption)' : 'Texto de respuesta';
         if (dlb) dlb.textContent = dl && dl !== u ? `Link de descarga que usará el worker: ${dl}` : ''; } } }
     if (e.target.dataset.evo) { const [i, j] = e.target.dataset.evo.split(':').map(Number), p = S.edit.config.ev.pasos[i], o = p?.opciones?.[j], cnt = document.getElementById(`evc${i}_${j}`);
-      if (o && cnt) { o[e.target.dataset.k] = e.target.value; const largo = (texto(o.corto) || texto(o.texto)).length, max = maxCorto(p.opciones.length); cnt.textContent = `${largo}/${max}`; cnt.classList.toggle('bad', largo > max); } }
+      if (o && cnt && p.formato !== 'texto') { o[e.target.dataset.k] = e.target.value; const largo = (texto(o.corto) || texto(o.texto)).length, max = maxCorto(p.opciones.length); cnt.textContent = `${largo}/${max}`; cnt.classList.toggle('bad', largo > max); } }
     leerFormulario();
     if (e.target.dataset.path === 'ev.numero_publico' || e.target.dataset.path === 'ev.frase_qr') { const q = $('#evQR'); if (q) q.textContent = linkQR(S.edit.config.ev) || 'Aparece cuando pongas el número.'; }
     const h1 = $('.view-head h1'); if (h1) h1.textContent = S.edit.config.negocio.nombre || 'Worker sin nombre';
@@ -2485,13 +2485,13 @@ function validarEvento(c, cred, add) {
     }
     if (['opciones', 'texto'].includes(p.tipo) && !texto(p.texto)) add(k, `${n}: escribe la pregunta.`);
     if (p.tipo === 'opciones') {
-      const os = p.opciones || [], max = maxCorto(os.length);
+      const os = p.opciones || [], max = p.formato === 'texto' ? Infinity : maxCorto(os.length);
       if (os.length < 2 || os.length > 10) add(k, `${n}: una pregunta de opciones lleva de 2 a 10 opciones.`);
       os.forEach((o, j) => {
         if (!texto(o.texto)) add(k, `${n}, opción ${j + 1}: escribe la opción.`);
         else if ((texto(o.corto) || texto(o.texto)).length > max) add(k, `${n}, opción ${j + 1}: en ${os.length <= 3 ? 'un botón' : 'la lista'} caben ${max} letras. Escribe un texto corto.`);
       });
-      if (texto(p.boton_lista).length > 20) add(k, `${n}: el botón que abre la lista puede tener hasta 20 letras.`);
+      if (p.formato !== 'texto' && texto(p.boton_lista).length > 20) add(k, `${n}: el botón que abre la lista puede tener hasta 20 letras.`);
     }
     if (p.tipo === 'texto' && texto(String(p.min_caracteres ?? '')) && !(Number(p.min_caracteres) >= 0)) add(k, `${n}: el mínimo de letras debe ser un número.`);
     if (p.tipo === 'ia') {
@@ -2525,7 +2525,8 @@ function armarEvento(w, cred) {
     const q = { id: texto(p.id), tipo: p.tipo };
     if (p.tipo === 'mensaje') { q.texto = texto(p.texto); q.imagen_url = linkDescarga(p.imagen_url); }
     if (p.tipo === 'opciones') { Object.assign(q, { texto: texto(p.texto), instruccion: texto(p.instruccion), titulo_corto: texto(p.titulo_corto), al_responder: texto(p.al_responder) });
-      if ((p.opciones || []).length > 3) q.boton_lista = texto(p.boton_lista);
+      if (p.formato === 'texto') q.formato = 'texto';
+      else if ((p.opciones || []).length > 3) q.boton_lista = texto(p.boton_lista);
       q.opciones = (p.opciones || []).map((o, j) => { const x = { n: String(j + 1), texto: texto(o.texto) }; if (texto(o.corto)) x.corto = texto(o.corto); return x; }); }
     if (p.tipo === 'texto') { Object.assign(q, { texto: texto(p.texto), etiqueta: texto(p.etiqueta) }); if (texto(String(p.min_caracteres ?? ''))) q.min_caracteres = Number(p.min_caracteres); }
     if (p.tipo === 'ia') { const campos = camposPlantilla(p.plantilla), r = {};
@@ -2570,7 +2571,7 @@ function resumenPaso(p) {
   return texto(p.texto);
 }
 function badgePaso(p) {
-  if (p.tipo === 'opciones') { const n = (p.opciones || []).length; return `<span class="badge">${n} ${n === 1 ? 'opción' : 'opciones'} · ${formatoOpciones(n)}</span>`; }
+  if (p.tipo === 'opciones') { const n = (p.opciones || []).length; return `<span class="badge">${n} ${n === 1 ? 'opción' : 'opciones'} · ${p.formato === 'texto' ? 'texto numerado' : formatoOpciones(n)}</span>`; }
   return `<span class="badge ${p.tipo === 'mensaje' ? 'asesor' : ''}">${TIPOS_PASO.find(([v]) => v === p.tipo)[1]}</span>`;
 }
 function vistaPasoEvento(p, i) {
@@ -2587,20 +2588,24 @@ function vistaPasoEvento(p, i) {
   if (p.tipo === 'mensaje') cuerpo = `${f('texto', 'Texto', { tipo: 'textarea', rows: 4, vars: varsTxt, ph: '¡Hola{nombre}! 👋 Gracias por participar.' })}
     ${f('imagen_url', 'Imagen (opcional)', { tipo: 'url', ph: 'https://drive.google.com/file/d/…/view', hint: 'Link de la imagen. Si es de Drive, compártela como "Cualquier persona con el enlace". Con imagen, el texto sale debajo como pie de foto.' })}`;
   if (p.tipo === 'opciones') {
-    const os = p.opciones || [], n = os.length, max = maxCorto(n);
+    const os = p.opciones || [], n = os.length, txt = p.formato === 'texto', max = maxCorto(n);
     cuerpo = `${f('texto', 'Pregunta', { tipo: 'textarea', rows: 3, vars: varsTxt, ph: '*Pregunta 1 de 2*\n¿Qué priorizaría primero?' })}
+    <div class="field"><span class="flabel">Cómo se muestran las opciones</span><div class="radio-row" role="radiogroup" aria-label="Formato de la pregunta ${i + 1}">
+      <label><input type="radio" name="evf${i}" value="" data-evf="${i}" ${txt ? '' : 'checked'}>Botones o lista</label>
+      <label><input type="radio" name="evf${i}" value="texto" data-evf="${i}" ${txt ? 'checked' : ''}>Mensaje numerado</label></div>
+      <span class="hint">${txt ? 'Sale como un mensaje normal: "1. …", "2. …". La persona responde con el número o el nombre. No hay límite de letras.' : 'Se tocan en WhatsApp. La persona también puede responder con el número o el nombre.'}</span></div>
     <div class="field"><span class="flabel">Opciones</span>
-      <p class="hint ev-fmt">${n <= 3 ? `Con ${n} opciones sale con <b>botones</b>: caben ${max} letras en cada uno.` : `Con ${n} opciones sale como <b>lista</b>: caben ${max} letras en cada fila.`} Si la opción es más larga, escribe al lado un texto corto para el ${n <= 3 ? 'botón' : 'listado'}.</p>
+      <p class="hint ev-fmt">${txt ? 'Escribe cada opción completa. El texto corto es opcional: solo se usa en los resultados.' : n <= 3 ? `Con ${n} opciones sale con <b>botones</b>: caben ${max} letras en cada uno.` : `Con ${n} opciones sale como <b>lista</b>: caben ${max} letras en cada fila.`}${txt ? '' : ` Si la opción es más larga, escribe al lado un texto corto para el ${n <= 3 ? 'botón' : 'listado'}.`}</p>
       <div class="ev-ops">${os.map((o, j) => { const largo = (texto(o.corto) || texto(o.texto)).length;
         return `<div class="ev-op"><span class="ev-n">${j + 1}</span>
           <input type="text" data-evo="${i}:${j}" data-k="texto" value="${esc(o.texto || '')}" placeholder="Opción ${j + 1}" aria-label="Opción ${j + 1}">
           <input type="text" data-evo="${i}:${j}" data-k="corto" value="${esc(o.corto || '')}" placeholder="Corto (opcional)" aria-label="Texto corto de la opción ${j + 1}">
-          <span class="ev-cnt ${largo > max ? 'bad' : ''}" id="evc${i}_${j}">${largo}/${max}</span>
+          <span class="ev-cnt ${!txt && largo > max ? 'bad' : ''}" id="evc${i}_${j}">${txt ? '' : `${largo}/${max}`}</span>
           <button type="button" class="btn sm ghost" data-evo-del="${i}:${j}" aria-label="Quitar opción ${j + 1}" ${n <= 2 ? 'disabled' : ''}>Quitar</button></div>`; }).join('')}</div>
       <button type="button" class="btn sm" data-evo-add="${i}" ${n >= 10 ? 'disabled' : ''} style="align-self:flex-start">+ Agregar opción</button>
       ${n >= 10 ? '<span class="hint">WhatsApp permite hasta 10 opciones.</span>' : ''}</div>
-    ${n > 3 ? f('boton_lista', 'Texto del botón que abre la lista', { ph: 'Ver opciones', max: 20 }) : ''}
-    ${f('instruccion', 'Instrucción (opcional)', { ph: n <= 3 ? 'Toca una opción o responde 1, 2 o 3.' : 'Toca el botón o responde con un número.', hint: 'Sale debajo de la pregunta. También se repite si la persona responde algo que no es una opción.' })}
+    ${n > 3 && !txt ? f('boton_lista', 'Texto del botón que abre la lista', { ph: 'Ver opciones', max: 20 }) : ''}
+    ${f('instruccion', 'Instrucción (opcional)', { ph: txt ? `Responde con un número del 1 al ${n}.` : n <= 3 ? 'Toca una opción o responde 1, 2 o 3.' : 'Toca el botón o responde con un número.', hint: 'Sale debajo de la pregunta. También se repite si la persona responde algo que no es una opción.' })}
     <details class="more"><summary>Más opciones</summary><div class="grid2" style="margin-top:10px">
       ${f('al_responder', 'Mensaje al responder', { ph: '✅ ¡Anotado!', hint: 'Sale apenas elige. Vacío = pasa directo al siguiente paso.' })}
       ${f('titulo_corto', 'Título para el resultado', { ph: '¿Dónde invertir primero?', hint: 'Nombre corto de la pregunta en #estado, en el CSV y en la pantalla de resultados.' })}
@@ -2689,7 +2694,7 @@ function vistaRevisionEvento() {
     ${fila('Evento', esc(c.negocio.nombre) || falta, 0)}
     ${fila('Tipo de worker', 'Worker fijo · <b>Evento</b>', 1)}
     ${fila('WhatsApp', `${c.whatsapp.phone_number_id ? `<span class="mono">${esc(c.whatsapp.phone_number_id)}</span>` : falta}<br><span class="hint">${qr ? `Link del QR: <span class="mono">${esc(qr)}</span>` : 'Sin número del QR'} · ${E.cred.modo === 'nuevas' ? `Credenciales nuevas: ${esc(E.cred.nombre)}` : 'Credenciales de Nissitech'}</span>`, 2)}
-    ${fila('Pasos', ps.length ? `<ol>${ps.map(p => `<li>${esc((resumenPaso(p) || 'Sin texto').replace(/\s+/g, ' ').slice(0, 70))} <span class="hint">· ${p.tipo === 'opciones' ? `${(p.opciones || []).length} opciones en ${formatoOpciones((p.opciones || []).length)}` : TIPOS_PASO.find(([v]) => v === p.tipo)[1].toLowerCase()}</span></li>`).join('')}</ol>` : falta, 3)}
+    ${fila('Pasos', ps.length ? `<ol>${ps.map(p => `<li>${esc((resumenPaso(p) || 'Sin texto').replace(/\s+/g, ' ').slice(0, 70))} <span class="hint">· ${p.tipo === 'opciones' ? `${(p.opciones || []).length} opciones en ${p.formato === 'texto' ? 'texto numerado' : formatoOpciones((p.opciones || []).length)}` : TIPOS_PASO.find(([v]) => v === p.tipo)[1].toLowerCase()}</span></li>`).join('')}</ol>` : falta, 3)}
     ${fila('Votación', `Empieza ${ev.abierta !== false ? '<b>abierta</b>' : '<b>cerrada</b>'} · en modo ${ev.modo === 'real' ? '<b>real</b>' : '<b>prueba</b>'}<br><span class="hint">${adm} ${adm === 1 ? 'número' : 'números'} del equipo · ${pr} de prueba${texto(ev.palabra_reinicio) ? ` · palabra para volver a probar: <span class="mono">${esc(ev.palabra_reinicio)}</span>` : ''}</span>`, 4)}
     ${ps.some(p => p.tipo === 'ia') ? fila('Inteligencia artificial', `OpenAI · <span class="mono">${esc(c.ia?.modelo || 'gpt-4o-mini')}</span><br><span class="hint">${texto(E.cred.ia_key) ? 'Con clave (API key) nueva' : 'Sin clave nueva: usa la de Nissitech, si tiene'}</span>`, 5) : ''}
   </div>
@@ -2706,9 +2711,10 @@ function vistaPreviewEvento() {
       out.push(`<div class="bub in">${texto(p.imagen_url) ? '<div class="ev-img">Imagen</div>' : ''}${waFormat(rell(p.texto))}<span class="t">9:00</span></div>`); }
     if (p.tipo === 'opciones') { const os = (p.opciones || []).filter(o => texto(o.texto)), cuerpo = waFormat(rell(p.texto)) + (texto(p.instruccion) ? '<br>' + waFormat(p.instruccion) : '');
       const corto = (o) => texto(o.corto) || texto(o.texto);
-      if (os.length <= 3) out.push(`<div class="ev-inter"><div class="bub in">${cuerpo}<span class="t">9:01</span></div>${os.map(o => `<div class="wa-btn">${esc(corto(o).slice(0, 20))}</div>`).join('')}</div>`);
+      if (p.formato === 'texto') out.push(`<div class="bub in">${waFormat(rell(p.texto))}<br><br>${os.map((o, j) => `${j + 1}. ${esc(texto(o.texto))}`).join('<br>')}<br><br>${waFormat(texto(p.instruccion) || `Responde con un número del 1 al ${os.length}.`)}<span class="t">9:01</span></div>`);
+      else if (os.length <= 3) out.push(`<div class="ev-inter"><div class="bub in">${cuerpo}<span class="t">9:01</span></div>${os.map(o => `<div class="wa-btn">${esc(corto(o).slice(0, 20))}</div>`).join('')}</div>`);
       else out.push(`<div class="ev-inter"><div class="bub in">${cuerpo}<span class="t">9:01</span></div><div class="wa-btn">☰ ${esc(texto(p.boton_lista) || 'Ver opciones')}</div><div class="wa-list">${os.map(o => `<div>${esc(corto(o).slice(0, 24))}</div>`).join('')}</div></div>`);
-      if (os[0]) { resp[p.id] = texto(os[0].texto); out.push(`<div class="bub out">${esc(corto(os[0]))}<span class="t">9:01</span></div>`); }
+      if (os[0]) { resp[p.id] = texto(os[0].texto); out.push(`<div class="bub out">${p.formato === 'texto' ? '1' : esc(corto(os[0]))}<span class="t">9:01</span></div>`); }
       if (texto(p.al_responder)) out.push(`<div class="bub in">${waFormat(rell(p.al_responder))}<span class="t">9:01</span></div>`); }
     if (p.tipo === 'texto') { out.push(`<div class="bub in">${waFormat(rell(p.texto)) || '<i>Pregunta sin texto</i>'}<span class="t">9:02</span></div>`);
       resp[p.id] = 'Primero conversaría con él…'; out.push(`<div class="bub out">${esc(resp[p.id])}<span class="t">9:03</span></div>`); }
@@ -2740,6 +2746,7 @@ function leerEvento(c) {
   const marcados = {}; $$('#wform [data-ev-in]').forEach(el => { const i = el.dataset.evIn; (marcados[i] = marcados[i] || []); if (el.checked) marcados[i].push(el.value); });
   for (const [i, v] of Object.entries(marcados)) if (ps[Number(i)]) ps[Number(i)].entrada = v;
   $$('#wform [data-evr]').forEach(el => { const p = ps[Number(el.dataset.evr)]; if (p) { p.respaldo = isObj(p.respaldo) ? p.respaldo : {}; p.respaldo[el.dataset.campo] = el.value; } });
+  $$('#wform [data-evf]').forEach(el => { const p = ps[Number(el.dataset.evf)]; if (p && el.checked) p.formato = el.value; });
   $$('#wform [data-evb]').forEach(el => { if (el.checked) c.ev.abierta = el.value === '1'; });
   $$('#wform [data-evm]').forEach(el => { if (el.checked) c.ev.modo = el.value; });
 }
