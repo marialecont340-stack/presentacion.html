@@ -1552,7 +1552,7 @@ function selectSiguiente(code, s, label = 'Al terminar, pasa a') {
   return `<div class="field"><label for="f_${code}_sig">${label}</label><select id="f_${code}_sig" data-path="${code.toLowerCase()}.siguiente">${opts.map(([k, l]) => `<option value="${k}" ${k === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></div>`;
 }
 const COLS_P05 = [['nombre', 'Nombre del producto', 'NOMBRE'], ['precio', 'Precio', 'PRECIO'], ['codigo', 'Código', 'CODIGO'], ['categoria', 'Categoría', 'CATEGORIA'], ['descripcion', 'Descripción', 'DESCRIPCION'], ['imagen', 'Link de la foto', 'IMAGEN']];
-const hintHoja = 'Compártela como "Cualquier persona con el enlace · Lector" y pega el link normal de la hoja.';
+const hintHoja = 'Compártela como "Cualquier persona con el enlace · Lector" y pega el link de la barra del navegador, con la pestaña abierta (termina en <span class="mono">#gid=…</span>).';
 function camposBloque(code, s) {
   const k = code.toLowerCase();
   switch (code) {
