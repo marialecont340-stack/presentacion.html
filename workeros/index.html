@@ -475,7 +475,7 @@ const MODELOS = [
 ];
 /* Qué hace cada opción del menú en un worker fijo (el "tipo" que lee el modelo) */
 const TIPOS_OPCION = [
-  ['catalogo', 'Muestra el catálogo', 'Envía su mensaje (y el PDF, si pones uno) y pide el código o la foto del arreglo.'],
+  ['catalogo', 'Muestra el catálogo', 'Envía su mensaje (y el PDF, si pones uno) y pide el código o el nombre del arreglo.'],
   ['pedido', 'Toma un pedido', 'Para quien ya sabe qué quiere: pide el código y arma el pedido.'],
   ['seguimiento', 'Estado de mi pedido', 'Busca el último pedido del cliente y le dice cómo va.'],
   ['info', 'Responde con texto o documento', 'Ej: horario y ubicación, preguntas frecuentes.'],
@@ -1794,7 +1794,7 @@ function vistaIA() {
     <span class="hint" style="margin-top:-8px">${on ? 'Sin clave (API key), el worker funciona igual, solo con números y palabras clave.' : 'Apagada: el worker responde solo con números y palabras clave.'}${p17 && !on ? ' <b>El Agente IA (P17) necesita la IA prendida.</b>' : ''}</span>
     <div class="${on ? '' : 'ia-off'}" style="display:flex;flex-direction:column;gap:14px" ${on ? '' : 'aria-hidden="true"'}>
       <div class="grid2">
-        ${c._modelo ? `<div class="field"><span class="flabel">Qué IA usa</span><span>OpenAI (ChatGPT)</span><span class="hint">El worker Florería usa OpenAI: entiende audios, fotos del catálogo y mensajes escritos con palabras libres.</span></div>` : `<div class="field"><label for="f_ia_prov">Qué IA usa</label><select id="f_ia_prov" data-path="ia.proveedor" ${on ? '' : 'disabled'}>${PROVEEDORES_IA.map(([v, l]) => `<option value="${v}" ${ia.proveedor === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+        ${c._modelo ? `<div class="field"><span class="flabel">Qué IA usa</span><span>OpenAI (ChatGPT)</span><span class="hint">El worker Florería usa OpenAI para entender mensajes escritos con palabras libres. Todavía no reconoce fotos ni audios.</span></div>` : `<div class="field"><label for="f_ia_prov">Qué IA usa</label><select id="f_ia_prov" data-path="ia.proveedor" ${on ? '' : 'disabled'}>${PROVEEDORES_IA.map(([v, l]) => `<option value="${v}" ${ia.proveedor === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
           <span class="hint">Es la empresa de la que sale la clave. OpenAI es la de ChatGPT.</span></div>`}
         ${modelos
           ? `<div class="field"><label for="f_ia_mod">Modelo</label><select id="f_ia_mod" data-path="ia.modelo" ${on ? '' : 'disabled'}>${modelos.map(([v, l]) => `<option value="${esc(v)}" ${ia.modelo === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>
@@ -2301,7 +2301,7 @@ function vistaOpcionModelo(o, i) {
         <span class="hint">En Drive, el archivo debe estar compartido como "Cualquier persona con el enlace".</span><span class="dl" id="op${i}dl">${dl && dl !== texto(o.archivo_url) ? `Link de descarga que usará el worker: ${esc(dl)}` : ''}</span>
       </div>` : ''}
       ${conTexto ? `<div class="field"><label for="op${i}r" id="op${i}rl">${tp === 'info' ? 'Texto de respuesta' : 'Mensaje antes de pedir el arreglo (opcional)'}</label><div class="vars">${['nombre', 'negocio', 'asistente'].map(x => `<button type="button" data-insert="${x}" data-target="op${i}r">{${x}}</button>`).join('')}</div><textarea id="op${i}r" data-op="${i}" data-k="respuesta" rows="3" placeholder="${tp === 'info' ? 'Ej: 📍 Av. Larco 123, Miraflores. 🕘 Lunes a sábado, 9 am a 8 pm' : 'Ej: 🌹 Te comparto nuestro catálogo'}">${esc(o.respuesta)}</textarea></div>` : ''}
-      ${tp === 'asesor' ? '<p class="hint">El cliente recibe el aviso de asesor del paso 8 y la conversación pasa a una persona.</p>' : tp === 'seguimiento' ? '<p class="hint">El worker busca el último pedido del cliente y le dice en qué estado está. No hay que llenar nada.</p>' : tp === 'ia' ? `<p class="hint">Usa la IA del paso 6${S.edit.config.ia?.activa === false ? ' (ahora está apagada: préndela allí)' : ''} y lo que escribas en "Lo que sabe del negocio".</p>` : tp === 'pedido' ? '<p class="hint">Después pide el código, el nombre o la foto del arreglo y arma el pedido con la entrega.</p>' : ''}
+      ${tp === 'asesor' ? '<p class="hint">El cliente recibe el aviso de asesor del paso 8 y la conversación pasa a una persona.</p>' : tp === 'seguimiento' ? '<p class="hint">El worker busca el último pedido del cliente y le dice en qué estado está. No hay que llenar nada.</p>' : tp === 'ia' ? `<p class="hint">Usa la IA del paso 6${S.edit.config.ia?.activa === false ? ' (ahora está apagada: préndela allí)' : ''} y lo que escribas en "Lo que sabe del negocio".</p>` : tp === 'pedido' ? '<p class="hint">Después pide el código o el nombre del arreglo y arma el pedido con la entrega.</p>' : ''}
       <details class="more"><summary>Más opciones</summary><div style="display:flex;flex-direction:column;gap:12px">
         <div class="field"><label for="op${i}p">Palabras que también la activan</label><input type="text" id="op${i}p" data-op="${i}" data-k="palabras" value="${esc((o.palabras || []).join(', '))}" placeholder="Ej: ramos, arreglos"><span class="hint">Si el cliente escribe una de estas palabras en vez de tocar la opción. Separadas por coma.</span></div>
       </div></details>
