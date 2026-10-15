@@ -681,7 +681,7 @@ function seccionInicial(code) {
     case 'P06': return { fuente: { tipo: 'google_sheets', url: '' }, descuentos_texto: '50: 5\n100: 10', igv: { mostrar: true, incluido: true, porcentaje: 18 }, validez_dias: 7, condiciones_texto: '', registro_url: '', siguiente: 'P09' };
     case 'P10': return { servicios_texto: '', profesionales_texto: '', elegir_profesional: true, pausa_texto: '13-14', intervalo_min: 30, agenda_fuente: { url: '' }, registro_url: '', politica_cancelacion: '' };
     case 'P11': return { opciones: OPCIONES_P11.map(([k]) => k), pedidos_fuente: { url: '' }, columna_telefono: 'TELEFONO', puntos: { activo: false, por_cada: 10, nombre: 'puntos' }, premios_texto: '50: Envío gratis\n100: S/ 20 de descuento', registro_url: '' };
-    case 'P17': return { modelo: '', instrucciones: '', conocimiento: '', usar_como_respaldo: true };
+    case 'P17': return { catalogo_url: '', instrucciones: '', conocimiento: '', usar_como_respaldo: true };
   }
   return {};
 }
@@ -876,6 +876,7 @@ function aFormulario(code, s0) {
     delete s.servicios; delete s.profesionales; delete s.horario;
   }
   if (code === 'P11' && Array.isArray(s0?.puntos?.premios)) { s.premios_texto = s0.puntos.premios.map(p => `${p.puntos}: ${p.premio}`).join('\n'); delete s.puntos.premios; }
+  if (code === 'P17') { if (!texto(s0?.catalogo_url) && texto(s0?.catalogo?.url)) s.catalogo_url = s0.catalogo.url; delete s.catalogo; delete s.modelo; delete s.proveedor; delete s.esfuerzo; }
   if (code === 'P04') s.items = (Array.isArray(s0?.items) && s0.items.length ? s0.items : seccionInicial('P04').items).map(it => ({ titulo: it.titulo || '', texto: it.texto || '', archivo: { url: it.archivo?.url || '', nombre: it.archivo?.nombre || '' } }));
   return s;
 }
@@ -905,8 +906,8 @@ function aContrato(code, s, moneda, sigForm, ia = IA_INICIAL(), cfg = null) {
     case 'P09': { const turnos = leerTurnos(s.turnos_texto).filter(Boolean);
       return { moneda, zonas: leerZonas(s.zonas_texto).filter(Boolean), recojo: { activo: !!s.recojo?.activo, texto: 'Recoger en tienda', direccion: texto(s.recojo?.direccion) },
         usar_turnos: turnos.length > 0, ...(turnos.length ? { turnos } : {}), dias_entrega: (s.dias_entrega || []).slice().sort(), siguiente: sig }; }
-    case 'P17': { const prov = ['anthropic', 'openai', 'compatible'].includes(ia.proveedor) ? ia.proveedor : 'openai';
-      return { proveedor: prov, ...(texto(s.modelo) ? { modelo: texto(s.modelo) } : {}),
+    case 'P17': {   // proveedor y modelo salen de la sección "ia" (nodo Agente IA de n8n)
+      return { ...(texto(s.catalogo_url) ? { catalogo: { url: texto(s.catalogo_url) } } : {}),
         ...(texto(s.instrucciones) ? { instrucciones: s.instrucciones.trim() } : {}), ...(texto(s.conocimiento) ? { conocimiento: s.conocimiento.trim() } : {}),
         usar_como_respaldo: s.usar_como_respaldo !== false }; }
     case 'P06': { const cond = lineasDe(s.condiciones_texto), url = (u) => texto(u) ? { registro_url: texto(u) } : {};
@@ -1006,6 +1007,7 @@ function validar(config, cred, { bloques = true } = {}) {
       const pz = leerPremios(s.premios_texto), pzm = lineasDe(s.premios_texto).filter((l, j) => !pz[j]);
       if (s.puntos?.activo && pzm.length) add(k, `No entendí el premio "${pzm[0]}". Escríbelo como "50: Envío gratis".`); }
     if (code === 'P17' && config.ia?.activa === false) add(k, 'El Agente IA necesita la IA prendida en el paso 6.');
+    if (code === 'P17') link(s.catalogo_url, 'El link del catálogo');
     if (code === 'P08') { if (!texto(s.link) && !lineasDe(s.metodos_texto).length) add(k, 'Pega el link de pago (o escribe al menos un medio de pago).'); link(s.link, 'El link de pago'); link(s.qr?.url, 'El link del QR'); }
     if (code === 'P09') {
       const zs = leerZonas(s.zonas_texto), malas = lineasDe(s.zonas_texto).filter((l, j) => !zs[j]);
@@ -1647,13 +1649,10 @@ function camposBloque(code, s) {
       ${campo('p08.qr.url', 'Imagen del QR (link, opcional)', { ph: 'https://drive.google.com/file/d/…/view' })}
       ${selectSiguiente(code, s)}</div>
       <div class="notice info"><div><b>El worker ya no valida comprobantes.</b> Envía el total y el link. Si el cliente manda la foto o PDF del comprobante, se lo pasa al asesor para que lo revise.</div></div>`;
-    case 'P17': { const ia = S.edit.config.ia || IA_INICIAL(), lista = MODELOS_IA[ia.proveedor], provN = (PROVEEDORES_IA.find(([v]) => v === ia.proveedor) || ['', ia.proveedor])[1];
-      return `<div class="notice info"><div>Usa la IA del <b>paso 6</b>: ${esc(provN)} · <span class="mono">${esc(ia.modelo || '—')}</span>, con la misma clave. Lo que dejes vacío aquí se toma de ese paso.</div></div>
+    case 'P17': { const ia = S.edit.config.ia || IA_INICIAL(), provN = (PROVEEDORES_IA.find(([v]) => v === ia.proveedor) || ['', ia.proveedor])[1];
+      return `<div class="notice info"><div>Usa la IA del <b>paso 6</b>: ${esc(provN)} · <span class="mono">${esc(ia.modelo || '—')}</span>, con la misma clave. Recuerda cada conversación y puede consultar el catálogo para responder.</div></div>
       <div class="grid2">
-      ${lista
-        ? `<div class="field"><label for="f_p17_mod">Modelo para conversar</label><select id="f_p17_mod" data-path="p17.modelo"><option value="">Igual que el paso 6</option>${lista.map(([v, l]) => `<option value="${v}" ${s.modelo === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
-          <span class="hint">Para conversar libremente puede convenir un modelo más inteligente que el del resto del worker.</span></div>`
-        : campo('p17.modelo', 'Modelo para conversar', { ph: ia.modelo || 'Igual que el paso 6', hint: 'Vacío = el mismo del paso 6.' })}
+      ${campo('p17.catalogo_url', 'Hoja del catálogo (opcional)', { ph: 'https://docs.google.com/spreadsheets/d/…/edit', full: true, hint: bloquesUsados(S.edit.config).includes('P05') ? 'Vacío = usa el catálogo de P05.' : 'Para que la IA pueda responder precios y productos. ' + hintHoja })}
       ${campo('p17.instrucciones', 'Cómo debe hablar', { tipo: 'textarea', rows: 3, full: true, ph: texto(ia.instrucciones) || 'Eres amable y breve. Tuteas al cliente. Si preguntan algo que no está en la información, ofrece pasar con una persona.', hint: 'Tono, reglas y lo que NO debe hacer. Vacío = lo del paso 6.' })}
       ${campo('p17.conocimiento', 'Lo que sabe del negocio', { tipo: 'textarea', rows: 6, full: true, ph: texto(ia.conocimiento) || 'Vendemos laptops, monitores y accesorios.\nGarantía de 12 meses en todos los productos.\nDelivery en Lima de 24 a 48 horas, desde S/ 10.', hint: 'Vacío = lo del paso 6. La IA solo responde con lo que está escrito; lo demás no lo inventa.' })}
       </div>
