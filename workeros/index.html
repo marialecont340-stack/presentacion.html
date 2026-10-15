@@ -1509,7 +1509,7 @@ function vistaEditor() {
             <select id="f_hasta" data-num="horario.hasta" aria-label="Hasta">${horas.map(h => `<option value="${h}" ${h === Number(c.horario.hasta) ? 'selected' : ''}>${hora12(h)}</option>`).join('')}</select></div>
             ${S.errores['horario.horas'] ? `<span class="ferr">${S.errores['horario.horas'][0]}</span>` : ''}</div>
         </div>
-        ${vistaCredenciales()}
+        ${esEvento(c) ? '' : vistaCredenciales()}
       </section>
 
       <section class="fsec panel" id="s-menu" ${oculto(3)}>${esEvento(c) ? vistaPasosEvento() + '</section><section hidden>' : ''}
