@@ -319,6 +319,23 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 .bub.in { background: var(--bubble-in); align-self: flex-start; border-top-left-radius: 2px; }
 .bub.out { background: var(--bubble-out); align-self: flex-end; border-top-right-radius: 2px; }
 .bub .t { display: block; text-align: right; font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+.ev-add { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); padding-top: 14px; }
+.ev-add-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.ev-tipos { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; display: flex; flex-direction: column; gap: 2px; }
+.ev-ops { display: flex; flex-direction: column; gap: 6px; }
+.ev-op { display: grid; grid-template-columns: 22px minmax(0, 3fr) minmax(0, 2fr) 48px auto; gap: 6px; align-items: center; }
+.ev-n { font-family: var(--f-mono); font-size: 12px; color: var(--muted); text-align: center; }
+.ev-cnt { font-family: var(--f-mono); font-size: 12px; color: var(--muted); text-align: right; }
+.ev-cnt.bad { color: var(--bad); font-weight: 600; }
+.ev-qr { overflow-wrap: anywhere; font-size: 12.5px; padding: 8px 10px; background: var(--surface-2); border-radius: 8px; }
+.ev-inter { display: flex; flex-direction: column; gap: 2px; max-width: 88%; align-self: flex-start; }
+.ev-inter .bub { max-width: 100%; }
+.wa-btn { background: var(--bubble-in); border-radius: 8px; text-align: center; color: #0B7FC4; font-size: 13.5px; padding: 7px 9px; box-shadow: 0 1px 1px rgba(0,0,0,.08); }
+.wa-list { background: var(--bubble-in); border-radius: 8px; font-size: 13px; padding: 4px 10px; box-shadow: 0 1px 1px rgba(0,0,0,.08); }
+.wa-list div { padding: 5px 0; border-bottom: 1px solid var(--line); }
+.wa-list div:last-child { border-bottom: 0; }
+.ev-img { height: 90px; border-radius: 6px; background: var(--surface-2); display: grid; place-items: center; color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+@media (max-width: 700px) { #evList .opt-head { flex-wrap: wrap; } #evList .opt-tools { width: 100%; justify-content: flex-end; border-top: 1px solid var(--line); padding-top: 4px; } .ev-op { grid-template-columns: 22px minmax(0, 1fr) 48px; } .ev-op input[data-k="corto"] { grid-column: 2 / 3; } .ev-op .btn { grid-column: 2 / 4; justify-self: start; } }
 .sysline { align-self: center; font-size: 11px; color: var(--muted); background: var(--surface); padding: 2px 9px; border-radius: 6px; text-align: center; max-width: 92%; }
 .pv-quick { display: flex; gap: 5px; flex-wrap: wrap; padding: 8px 12px 0; }
 .pv-input { display: flex; gap: 8px; padding: 8px 12px 12px; }
@@ -468,9 +485,13 @@ const FIJAS = [
 ];
 /* Workers fijos (Generador v0.8): un workflow completo que se copia tal cual y solo cambia su configuración */
 const MODELOS = [
-  { id: 'floreria', nombre: 'Florería', disponible: true, tipo: 'Floristería',
+  { id: 'floreria', nombre: 'Florería', disponible: true, tipo: 'Floristería', pide: 'el menú, el catálogo, los distritos de envío, el link de pago, el asesor y Chatwoot',
     corto: 'Vende flores por WhatsApp de principio a fin: catálogo, pedido con entrega, link de pago y asesor.',
     funciones: ['Menú de hasta 8 opciones en una lista de WhatsApp', 'Catálogo desde una hoja de Google, por categorías', 'Reconoce el arreglo por su código o nombre', 'Pedido completo: quién recibe, dirección, fecha, turno y dedicatoria', 'Costo de envío según el distrito', 'Botón "Pagar ahora" con el link de pago', 'El comprobante llega a Chatwoot con la nota "validar pago"', 'Le dice al cliente en qué estado está su pedido', 'IA (GPT-4o mini) que entiende frases libres', 'Asesor en Chatwoot con texto, fotos, audios, videos y documentos'] },
+  { id: 'evento', nombre: 'Evento', disponible: true, tipo: 'Eventos',
+    corto: 'Encuestas en vivo, votaciones y simulaciones por WhatsApp para un evento o un taller.',
+    pide: 'los pasos del evento (mensajes y preguntas), cómo empieza la votación y los números del equipo',
+    funciones: ['Preguntas de una sola opción: botones hasta 3 opciones, lista de 4 a 10', 'Preguntas abiertas que guardan lo que escribe cada persona', 'Mensajes con texto o imagen entre las preguntas', 'Análisis con IA de las respuestas, con texto de respaldo si la IA falla', 'Cada persona participa una vez: no se duplican votos', 'El equipo abre, cierra y exporta por WhatsApp (#abrir, #cerrar, #estado, #exportar)', 'Pruebas separadas de la votación real', 'Entrada por QR con una frase lista'] },
   { id: 'barberia', nombre: 'Barbería', disponible: false, tipo: 'Salud y belleza', corto: 'Citas por barbero y servicio, recordatorios y cancelaciones.', funciones: [] }
 ];
 /* Qué hace cada opción del menú en un worker fijo (el "tipo" que lee el modelo) */
@@ -499,7 +520,7 @@ const MODELOS_IA = {
 const IA_INICIAL = () => ({ activa: true, proveedor: 'openai', modelo: 'gpt-4o-mini', base_url: '', instrucciones: '', conocimiento: '' });
 const PROVEEDORES_IA = [['anthropic', 'Claude (Anthropic)'], ['openai', 'OpenAI (ChatGPT)'], ['compatible', 'Otra compatible con OpenAI (Groq, OpenRouter, DeepSeek…)']];
 const CON_SIGUIENTE = ['P02', 'P05', 'P07', 'P09', 'P08'];
-const TIPOS = ['Floristería', 'Educación', 'Restaurante y comida', 'Salud y belleza', 'Tienda', 'Servicios', 'Otro'];
+const TIPOS = ['Floristería', 'Eventos', 'Educación', 'Restaurante y comida', 'Salud y belleza', 'Tienda', 'Servicios', 'Otro'];
 const ESTADOS = { borrador: 'Borrador', creado: 'Creado, apagado', activo: 'Activo', error: 'Con error' };
 const ZONAS = ['America/Lima', 'America/Bogota', 'America/Guayaquil', 'America/Mexico_City', 'America/Caracas', 'America/Santiago', 'America/Argentina/Buenos_Aires', 'Europe/Madrid'];
 const DIAS = [[1, 'L', 'lunes'], [2, 'M', 'martes'], [3, 'X', 'miércoles'], [4, 'J', 'jueves'], [5, 'V', 'viernes'], [6, 'S', 'sábado'], [0, 'D', 'domingo']];
@@ -572,7 +593,7 @@ const store = {
 /* ───────── Ejemplos iniciales (marcados como ejemplo) ───────── */
 function configVacia() {
   return {
-    plantilla_version: 'base-v0.4', worker_id: '', _bloques: [], _modelo: '', flor: FLOR_INICIAL(), cw: CW_INICIAL(),
+    plantilla_version: 'base-v0.4', worker_id: '', _bloques: [], _modelo: '', flor: FLOR_INICIAL(), cw: CW_INICIAL(), ev: EV_INICIAL(),
     negocio: { nombre: '', nombre_asistente: '', zona_horaria: 'America/Lima' },
     whatsapp: { phone_number_id: '', api_version: 'v22.0' },
     horario: { dias: [1, 2, 3, 4, 5, 6], desde: 9, hasta: 20, texto: 'lunes a sábado, de 9:00 am a 8:00 pm' },
@@ -763,6 +784,7 @@ function alcanzables(c) {
 function normalizarConfig(c) {
   c._modelo = MODELOS.some(m => m.disponible && m.id === c._modelo) ? c._modelo : '';
   c.flor = { ...FLOR_INICIAL(), ...(isObj(c.flor) ? c.flor : {}) };
+  c.ev = { ...EV_INICIAL(), ...(isObj(c.ev) ? c.ev : {}) }; if (!Array.isArray(c.ev.pasos)) c.ev.pasos = [];
   c.cw = { ...CW_INICIAL(), ...(isObj(c.cw) ? c.cw : {}) };
   // IA de todo el worker (Generador v0.7). Un borrador viejo con Agente IA toma de ahí el proveedor y el modelo.
   if (!isObj(c.ia)) {
@@ -949,10 +971,11 @@ function validar(config, cred, { bloques = true } = {}) {
     if (texto(cred.app_id) && !/^\d{6,25}$/.test(texto(cred.app_id))) add('cred.app_id', 'El App ID tiene solo números.');
     if (!!texto(cred.app_id) !== !!texto(cred.app_secret)) add('cred.app_secret', 'Llena el App ID y el App Secret juntos, o deja los dos vacíos.');
   }
-  if (!texto(config.negocio?.nombre)) add('negocio.nombre', 'Escribe el nombre del negocio.');
+  if (!texto(config.negocio?.nombre)) add('negocio.nombre', esEvento(config) ? 'Escribe el nombre del evento.' : 'Escribe el nombre del negocio.');
   if (!/^\d{8,20}$/.test(texto(String(config.whatsapp?.phone_number_id ?? '')))) add('whatsapp.phone_number_id', 'Debe tener solo números (entre 8 y 20).');
   const wid = texto(config.worker_id);
   if (wid && !/^[a-z0-9_]{3,40}$/.test(wid)) add('worker_id', 'Solo minúsculas, números y guion bajo, de 3 a 40 caracteres.');
+  if (esEvento(config)) { validarEvento(config, cred, add); return e; }
   const ops = config.p01?.opciones || [];
   if (!ops.length) add('opciones', 'Escribe al menos una opción del menú.');
   if (!config._modelo) ops.forEach((o, i) => {
@@ -1029,10 +1052,22 @@ const listaErrores = (e) => Object.values(e).flat();
 const PASOS = [['s-negocio', 'Negocio'], ['s-paquete', 'Tipo de worker'], ['s-whatsapp', 'WhatsApp y Meta'], ['s-menu', 'Menú'], ['s-bloques', 'Configurar plantillas'], ['s-ia', 'Inteligencia artificial'], ['s-mensajes', 'Mensajes'], ['s-asesor', 'Asesor y pausa'], ['s-revisar', 'Revisar y crear']];
 /* Los pasos cambian de nombre según el tipo de worker */
 function pasos() {
-  const fijo = !!S.edit?.config?._modelo;
+  const c = S.edit?.config, fijo = !!c?._modelo;
+  if (esEvento(c)) { const conIA = (c.ev?.pasos || []).some(p => p.tipo === 'ia');
+    return PASOS.map(([id, l], k) => k === 0 ? [id, 'Evento'] : k === 3 ? ['s-menu', 'Pasos del evento'] : k === 4 ? ['s-evento', 'Votación y equipo'] : k === 5 ? (conIA ? [id, l] : null) : k === 6 || k === 7 ? null : [id, l]); }
   return PASOS.map(([id, l], k) => k === 4 && fijo ? ['s-flor', 'Catálogo, envío y pago'] : k === 7 ? [id, 'Asesor y Chatwoot'] : [id, l]);
 }
+/* Pasos que se muestran, con su número en pantalla */
+const pasosVisibles = () => pasos().map((p, k) => p ? [k, ...p] : null).filter(Boolean);
 function pasoDeError(k) {
+  if (esEvento(S.edit?.config)) {
+    if (k === 'negocio.nombre' || k === 'worker_id') return 0;
+    if (k.startsWith('whatsapp') || k.startsWith('cred.') || k === 'ev.numero_publico' || k === 'ev.frase_qr') return 2;
+    if (k.startsWith('evp')) return 3;
+    if (k.startsWith('ev.')) return 4;
+    if (k === 'ia') return 5;
+    return 8;
+  }
   if (k === 'negocio.nombre' || k === 'worker_id') return 0;
   if (k.startsWith('whatsapp') || k.startsWith('horario') || k.startsWith('cred.')) return 2;
   if (k === 'flor') return 4;
@@ -1119,6 +1154,7 @@ function respuestaFinal(o) {
 
 /* Lo que se envía al Generador de n8n */
 function armarEnvio(w, cred) {
+  if (esEvento(w.config)) return armarEvento(w, cred);
   if (w.config._modelo) return armarModelo(w, cred);
   const c = clone(w.config);
   const cw = { ...CW_INICIAL(), ...(c.cw || {}) };
@@ -1165,7 +1201,7 @@ async function enviar(payload, { prueba = false } = {}) {
     const id = Array.from({ length: 16 }, () => 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 56)]).join('');
     const wid = payload.config.worker_id || ((slug(payload.config.negocio.nombre) || 'worker') + '_' + Math.random().toString(36).slice(2, 6));
     const base = (a.n8nBase || 'https://n8n.ejemplo').replace(/\/$/, '');
-    return { status: 200, simulado: true, data: { ok: true, workflowId: id, nombre: 'WorkerOS · ' + (payload.modelo ? 'Florería · ' : '') + payload.config.negocio.nombre, worker_id: wid, activo: false, enlace: `${base}/workflow/${id}`, siguiente_paso: 'Abre el enlace, revisa el worker y actívalo cuando esté probado.', credenciales: payload.credenciales?.modo === 'nuevas' ? { creadas: true, token: payload.credenciales.nombre + ' · token', trigger: payload.credenciales.app_id ? payload.credenciales.nombre + ' · trigger' : null } : { creadas: false },
+    return { status: 200, simulado: true, data: { ok: true, workflowId: id, nombre: 'WorkerOS · ' + (payload.modelo ? (payload.modelo === 'evento' ? 'Evento · ' : 'Florería · ') : '') + payload.config.negocio.nombre, worker_id: wid, activo: false, enlace: `${base}/workflow/${id}`, siguiente_paso: 'Abre el enlace, revisa el worker y actívalo cuando esté probado.', credenciales: payload.credenciales?.modo === 'nuevas' ? { creadas: true, token: payload.credenciales.nombre + ' · token', trigger: payload.credenciales.app_id ? payload.credenciales.nombre + ' · trigger' : null } : { creadas: false },
       ...(payload.alta_chatwoot ? { chatwoot: { account_id: 12, inbox_id: 15, cuenta_nueva: true, correo_enviado: true } } : (payload.config.chatwoot || payload.config.p13) ? { chatwoot: { account_id: Number((payload.config.chatwoot || payload.config.p13).account_id), inbox_id: Number((payload.config.chatwoot || payload.config.p13).inbox_id), cuenta_nueva: false, correo_enviado: false } } : {}) } };
   }
   if (SESION) {
@@ -1244,7 +1280,7 @@ function render() {
 }
 
 /* ───────── Vista: Workers (lista y clasificación) ───────── */
-function modsDe(w) { const c = w.config || {}; if (c._modelo) return ['Florería', ...(c.cw?.modo && c.cw.modo !== 'ninguno' ? ['Chatwoot'] : [])]; return ['BASE', 'P01', ...bloquesUsados(c), 'P12', ...(c.cw?.modo && c.cw.modo !== 'ninguno' ? ['P13'] : [])]; }
+function modsDe(w) { const c = w.config || {}; if (esEvento(c)) return ['Evento']; if (c._modelo) return ['Florería', ...(c.cw?.modo && c.cw.modo !== 'ninguno' ? ['Chatwoot'] : [])]; return ['BASE', 'P01', ...bloquesUsados(c), 'P12', ...(c.cw?.modo && c.cw.modo !== 'ninguno' ? ['P13'] : [])]; }
 function filaWorker(w) {
   const c = w.config, n = w.n8n || {};
   const est = w.estado;
@@ -1427,16 +1463,16 @@ function vistaEditor() {
   </div>
   ${creado ? `<div class="notice" style="margin-bottom:14px"><div><b>Este worker ya existe en n8n.</b> Por ahora el Generador solo crea workers nuevos: si cambias algo aquí, se guarda en este panel pero no cambia el worker que ya está en n8n.</div></div>` : ''}
   <nav class="stepper" aria-label="Pasos del formulario">
-    ${pasos().map(([id, l], k) => `<button type="button" data-paso="${k}" class="${k < S.paso ? 'done' : ''}" ${k === S.paso ? 'aria-current="step"' : ''}><span><span class="n">${k + 1}</span> ${l}</span></button>`).join('')}
+    ${pasosVisibles().map(([k, id, l], n) => `<button type="button" data-paso="${k}" class="${k < S.paso ? 'done' : ''}" ${k === S.paso ? 'aria-current="step"' : ''}><span><span class="n">${n + 1}</span> ${l}</span></button>`).join('')}
   </nav>
   <div class="editor">
     <div>
       <form id="wform" novalidate autocomplete="off">
       <section class="fsec panel" id="s-negocio" ${oculto(0)}>
-        <div class="fsec-head"><div><h2>Negocio</h2><p>Datos que el worker usa dentro de sus mensajes y que sirven para ordenar la lista. No cambian el perfil de WhatsApp (foto, descripción, nombre visible): eso se edita en Meta.</p></div></div>
+        <div class="fsec-head"><div><h2>${esEvento(c) ? 'Evento' : 'Negocio'}</h2><p>${esEvento(c) ? 'El nombre del evento o del taller. Sirve para ordenar la lista y sale en los resultados.' : 'Datos que el worker usa dentro de sus mensajes y que sirven para ordenar la lista.'} No cambian el perfil de WhatsApp (foto, descripción, nombre visible): eso se edita en Meta.</p></div></div>
         <div class="grid2">
-          ${campo('negocio.nombre', 'Nombre del negocio', { req: true, ph: 'Ej: Florería Miraflores' })}
-          ${campo('negocio.nombre_asistente', 'Nombre del asistente', { ph: 'Ej: Flora', hint: 'Así se presenta el worker. ' + respaldo(DEFAULTS.negocio.nombre_asistente) })}
+          ${esEvento(c) ? campo('negocio.nombre', 'Nombre del evento', { req: true, ph: 'Ej: EXPOCEC 2026' }) : campo('negocio.nombre', 'Nombre del negocio', { req: true, ph: 'Ej: Florería Miraflores' })}
+          ${esEvento(c) ? '' : campo('negocio.nombre_asistente', 'Nombre del asistente', { ph: 'Ej: Flora', hint: 'Así se presenta el worker. ' + respaldo(DEFAULTS.negocio.nombre_asistente) })}
           <div class="field"><label for="f_tipo">Tipo de negocio</label><select id="f_tipo" data-meta="tipo_negocio">${TIPOS.map(t => `<option ${t === E.meta.tipo_negocio ? 'selected' : ''}>${t}</option>`).join('')}</select><span class="hint">Sirve para clasificar los workers en la lista.</span></div>
           <div class="field"><label for="f_zona">Zona horaria</label><select id="f_zona" data-path="negocio.zona_horaria">${ZONAS.map(z => `<option ${z === c.negocio.zona_horaria ? 'selected' : ''}>${z}</option>`).join('')}</select><span class="hint">Para saber si un mensaje llega dentro o fuera del horario.</span></div>
           ${campo('worker_id', 'Identificador del worker', { ph: slug(c.negocio.nombre) ? slug(c.negocio.nombre) + '_xxxx (automático)' : 'automático', hint: 'Nombre interno, sin espacios. Separa la memoria de un worker de la de otro. Si lo dejas vacío, se crea solo.' })}
@@ -1457,9 +1493,13 @@ function vistaEditor() {
       </section>
 
       <section class="fsec panel" id="s-whatsapp" ${oculto(2)}>
-        <div class="fsec-head"><div><h2>WhatsApp y Meta</h2><p>El número desde el que responde el worker, cuándo hay personas para atender y las credenciales de Meta.</p></div></div>
+        <div class="fsec-head"><div><h2>WhatsApp y Meta</h2><p>${esEvento(c) ? 'El número del evento, la frase que trae el QR y las credenciales de Meta.' : 'El número desde el que responde el worker, cuándo hay personas para atender y las credenciales de Meta.'}</p></div></div>
         <div class="grid2">
           ${campo('whatsapp.phone_number_id', 'Phone number ID', { req: true, ph: 'Ej: 1368900409630135', hint: 'Es el código del número en Meta (no es el teléfono). Abajo, en "¿Dónde encuentro estos datos?", te muestro dónde está.' })}
+          ${esEvento(c) ? `${campo('ev.numero_publico', 'Número del QR', { ph: 'Ej: 51999888777', hint: 'El teléfono del evento, con código de país y solo números. Con él se arma el link del QR.' })}
+          ${campo('ev.frase_qr', 'Frase del QR (opcional)', { ph: 'Quiero participar en EXPOCEC', hint: 'El mensaje que ya viene escrito al escanear el QR.' })}
+          <div class="field"><span class="flabel">Link para el QR</span><span class="mono ev-qr" id="evQR">${esc(linkQR(c.ev)) || '<span class="hint">Aparece cuando pongas el número.</span>'}</span><span class="hint">Pega este link en cualquier generador de QR.</span></div>
+          </div>${vistaCredenciales()}</section><section hidden><div>` : ''}
           ${campo('horario.texto', 'Horario en palabras', { ph: 'lunes a sábado, de 9:00 am a 8:00 pm', hint: E.manual ? 'Lo escribiste a mano. <button type="button" class="btn sm ghost" data-act="horario-auto">Volver a automático</button>' : 'Se escribe solo a partir de los días y horas. Puedes cambiarlo.' })}
           <div class="field ${S.errores['horario.dias'] ? 'invalid' : ''}"><span class="flabel">Días de atención</span>
             <div class="days" role="group" aria-label="Días de atención">${DIAS.map(([n, l, nom]) => `<button type="button" data-dia="${n}" aria-pressed="${c.horario.dias.includes(n)}" title="${nom}">${l}</button>`).join('')}</div>
@@ -1472,7 +1512,7 @@ function vistaEditor() {
         ${vistaCredenciales()}
       </section>
 
-      <section class="fsec panel" id="s-menu" ${oculto(3)}>
+      <section class="fsec panel" id="s-menu" ${oculto(3)}>${esEvento(c) ? vistaPasosEvento() + '</section><section hidden>' : ''}
         <div class="fsec-head"><div><h2>Menú</h2><p>Primero escribe o pega el menú tal como lo verá el cliente. La web detecta las opciones numeradas y arma un desplegable para cada una, donde eliges qué hace${c._modelo ? '' : ' y pones su texto y su documento'}.${c._modelo ? ' El worker Florería lo muestra como una lista de WhatsApp: hasta 8 opciones, con títulos de hasta 24 letras.' : ''}</p></div></div>
         <div class="menu-writer">
           <div class="field ${S.errores.opciones ? 'invalid' : ''}"><label for="f_menu">Escribe o pega el menú</label>
@@ -1490,13 +1530,13 @@ function vistaEditor() {
         ${vistaSueltos()}
       </section>
 
-      <section class="fsec panel" id="${c._modelo ? 's-flor' : 's-bloques'}" ${oculto(4)}>
-        ${c._modelo ? vistaFlor() : `<div class="fsec-head"><div><h2>Configurar plantillas</h2><p>Los datos que necesita cada plantilla que marcaste en el paso 2.</p></div></div>
+      <section class="fsec panel" id="${esEvento(c) ? 's-evento' : c._modelo ? 's-flor' : 's-bloques'}" ${oculto(4)}>
+        ${esEvento(c) ? vistaEvento() : c._modelo ? vistaFlor() : `<div class="fsec-head"><div><h2>Configurar plantillas</h2><p>Los datos que necesita cada plantilla que marcaste en el paso 2.</p></div></div>
         ${vistaBloques()}`}
       </section>
 
       <section class="fsec panel" id="s-ia" ${oculto(5)}>
-        ${vistaIA()}
+        ${esEvento(c) ? vistaIAEvento() : vistaIA()}
       </section>
 
       <section class="fsec panel" id="s-mensajes" ${oculto(6)}>
@@ -1530,12 +1570,12 @@ function vistaEditor() {
       </section>
       <section class="fsec panel" id="s-revisar" ${oculto(8)}>
         <div class="fsec-head"><div><h2>Revisar y crear</h2><p>Así se va a crear el worker. Si algo no está bien, toca "Cambiar" y vuelves a ese paso.</p></div></div>
-        ${vistaRevision()}
+        ${esEvento(c) ? vistaRevisionEvento() : vistaRevision()}
       </section>
       </form>
 
       <div class="sendbar panel" id="sendbar">
-        <div class="left">${S.enviando ? '<span class="dot warn"></span>Enviando a n8n…' : `Paso ${S.paso + 1} de ${PASOS.length} · ${pasos()[S.paso][1]}`}</div>
+        <div class="left">${S.enviando ? '<span class="dot warn"></span>Enviando a n8n…' : `Paso ${pasosVisibles().findIndex(([k]) => k === S.paso) + 1} de ${pasosVisibles().length} · ${(pasos()[S.paso] || [])[1]}`}</div>
         <div class="right">
           ${S.paso > 0 ? '<button type="button" class="btn" data-act="ant">Anterior</button>' : ''}
           <button type="button" class="btn ghost" data-act="guardar">Guardar borrador</button>
@@ -1901,6 +1941,7 @@ function vistaCredenciales() {
 
 /* Vista previa: simulador con la misma lógica que P01 y P12 */
 function vistaPreview() {
+  if (esEvento(S.edit.config)) return vistaPreviewEvento();
   const c = efectiva(S.edit.config);
   if (!S.chat) iniciarChat();
   const ini = (S.edit.config.negocio.nombre_asistente || S.edit.config.negocio.nombre || 'W').trim().charAt(0).toUpperCase();
@@ -1965,7 +2006,8 @@ function refrescarPreview() {
   box.replaceWith(tmp.firstElementChild); montarPreview();
 }
 function montarPreview() {
-  const chat = $('#chat'); chat.scrollTop = chat.scrollHeight;
+  const chat = $('#chat'); if (esEvento(S.edit.config)) return;
+  chat.scrollTop = chat.scrollHeight;
   $$('[data-say]').forEach(b => b.addEventListener('click', () => { hablar(b.dataset.say); refrescarPreview(); }));
   $('#pvForm').addEventListener('submit', (e) => { e.preventDefault(); const v = $('#pvText').value.trim(); if (!v) return; hablar(v); refrescarPreview(); $('#pvText').focus(); });
   $('#pvHorario').addEventListener('change', (e) => { S.chat.dentro = e.target.checked; S.chat.msgs.push({ sys: true, texto: e.target.checked ? 'Ahora dentro del horario' : 'Ahora fuera del horario' }); refrescarPreview(); });
@@ -1991,6 +2033,7 @@ function leerFormulario() {
     const it = c.p04?.items?.[Number(el.dataset.item)]; if (!it) return;
     if (el.dataset.ik === 'url' || el.dataset.ik === 'nombre') { it.archivo = it.archivo || {}; it.archivo[el.dataset.ik] = el.value; } else it[el.dataset.ik] = el.value;
   });
+  leerEvento(c);
   limpiarDependencias(c);
   asegurarSecciones(c);
   if (!isObj(c.ia)) c.ia = IA_INICIAL();
@@ -2051,7 +2094,10 @@ function montarEditor() {
       if (e.target.dataset.k === 'archivo_url') { const i = e.target.dataset.op, u = e.target.value.trim(), dl = linkDescarga(u), lb = document.getElementById(`op${i}rl`), dlb = document.getElementById(`op${i}dl`);
         if (lb) lb.textContent = u ? 'Texto que acompaña al documento (caption)' : 'Texto de respuesta';
         if (dlb) dlb.textContent = dl && dl !== u ? `Link de descarga que usará el worker: ${dl}` : ''; } } }
+    if (e.target.dataset.evo) { const [i, j] = e.target.dataset.evo.split(':').map(Number), p = S.edit.config.ev.pasos[i], o = p?.opciones?.[j], cnt = document.getElementById(`evc${i}_${j}`);
+      if (o && cnt) { o[e.target.dataset.k] = e.target.value; const largo = (texto(o.corto) || texto(o.texto)).length, max = maxCorto(p.opciones.length); cnt.textContent = `${largo}/${max}`; cnt.classList.toggle('bad', largo > max); } }
     leerFormulario();
+    if (e.target.dataset.path === 'ev.numero_publico' || e.target.dataset.path === 'ev.frase_qr') { const q = $('#evQR'); if (q) q.textContent = linkQR(S.edit.config.ev) || 'Aparece cuando pongas el número.'; }
     const h1 = $('.view-head h1'); if (h1) h1.textContent = S.edit.config.negocio.nombre || 'Worker sin nombre';
     if (!S.edit.manual && e.target.dataset.path !== 'horario.texto') { const ht = $('#f_horario_texto'); if (ht) ht.value = S.edit.config.horario.texto; }
     clearTimeout(tPreview); tPreview = setTimeout(() => { S.chat = null; refrescarPreview(); }, 350);
@@ -2067,6 +2113,9 @@ function montarEditor() {
       asegurarSecciones(c); limpiarDependencias(c); refrescarErrores(); S.chat = null; rerenderEditor(); return;
     }
     if (t.name === 'tipow') { leerFormulario(); aplicarModelo(t.value); S.errores = {}; S.chat = null; rerenderEditor(); return; }
+    if (t.dataset.evp && ['plantilla', 'id'].includes(t.dataset.k)) { const i = Number(t.dataset.evp); leerFormulario();
+      const vistos = $$(`[data-evr="${i}"]`).map(el => el.dataset.campo).join(','), ahora = t.dataset.k === 'plantilla' ? camposPlantilla(S.edit.config.ev.pasos[i]?.plantilla).join(',') : null;
+      if (ahora === null || ahora !== vistos) { refrescarErrores(); rerenderEditor(); } return; }
     if (t.name === 'paquete') { leerFormulario(); if (aplicarPaquete(t.value)) { S.chat = null; toast('Llené el menú con un ejemplo. Puedes cambiarlo en el paso 4.'); } rerenderEditor(); return; }
     if (t.type === 'radio' || t.dataset.bool || t.dataset.num || t.dataset.p11op || t.tagName === 'SELECT') { leerFormulario(); refrescarErrores(); S.chat = null; rerenderEditor(); }
   });
@@ -2105,6 +2154,7 @@ function montarEditor() {
   $$('[data-act="ver-json"]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); verJSON({ meta: S.edit.meta, config: S.edit.config }, S.edit.cred); }));
   $$('[data-act="guardar"]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); const w = S.workers.find(x => x.id === S.edit.id); guardarEnLista(w && w.estado !== 'error' ? null : 'borrador'); toast('Borrador guardado en este navegador'); rerenderEditor(); }));
   $$('[data-act="crear"]', m).forEach(b => b.addEventListener('click', crear));
+  montarEvento(m);
   montarPreview();
 }
 /* Quita una plantilla y lo que depende de ella (opciones del menú que la abren y plantillas que solo iban después). false si la persona cancela. */
@@ -2128,7 +2178,10 @@ function quitarPlantilla(code) {
   return true;
 }
 function irPaso(k) {
-  S.paso = Math.max(0, Math.min(PASOS.length - 1, k));
+  const dir = k < S.paso ? -1 : 1;
+  k = Math.max(0, Math.min(PASOS.length - 1, k));
+  while (!pasos()[k] && k > 0 && k < PASOS.length - 1) k += dir;
+  S.paso = k;
   rerenderEditor(); window.scrollTo(0, 0);
 }
 function siguiente() {
@@ -2163,7 +2216,7 @@ async function crear() {
     S.edit.cred.token = ''; S.edit.cred.app_secret = ''; S.edit.cred.ia_key = '';
     w.estado = d.activo ? 'activo' : 'creado';
     const sel = bloquesUsados(w.config);
-    if (d.config && isObj(d.config) && !w.config._modelo) { const queda = { _modelo: w.config._modelo, flor: w.config.flor, cw: w.config.cw }; w.config = d.config; Object.assign(w.config, queda); w.config._bloques = sel; normalizarConfig(w.config); }
+    if (d.config && isObj(d.config) && !w.config._modelo) { const queda = { _modelo: w.config._modelo, flor: w.config.flor, cw: w.config.cw, ev: w.config.ev }; w.config = d.config; Object.assign(w.config, queda); w.config._bloques = sel; normalizarConfig(w.config); }
     else if (d.worker_id) w.config.worker_id = d.worker_id;
     S.edit.config = clone(w.config);
     S.resultado = { ok: true, data: d, simulado: r.simulado };
@@ -2242,6 +2295,11 @@ function aplicarModelo(id) {
   if (!m) { if (String(E.meta.paquete || '').startsWith('modelo_')) E.meta.paquete = 'atencion_basica'; return; }
   E.meta.paquete = 'modelo_' + m.id; E.meta.tipo_negocio = m.tipo;
   c.ia.proveedor = 'openai'; ajustarModeloIA(c);
+  if (m.id === 'evento') {
+    if (!isObj(c.ev)) c.ev = EV_INICIAL();
+    if (!c.ev.pasos.length) { c.ev.pasos = PASOS_EJEMPLO_EVENTO(); E.evAbiertos = [1]; toast('Puse un ejemplo con una pregunta. Lo cambias en el paso "Pasos del evento".'); }
+    return;
+  }
   if (c.p01.opciones.length) return;
   E.menuTexto = MENU_FLORERIA; sincronizarMenu(MENU_FLORERIA);
   c.p01.opciones.forEach(o => { o.tipo = tipoDe(o); });
@@ -2258,7 +2316,7 @@ function vistaTipoWorker() {
       <label class="kind"><span class="kind-top"><input type="radio" name="tipow" value="" ${c._modelo ? '' : 'checked'}><b>Armar con plantillas</b></span><p>Eliges qué sabe hacer, plantilla por plantilla. El formulario pide solo lo que necesitan las que marques.</p></label>
     </div>
     ${m ? `<div class="kind-detail"><h3>Qué hace el worker ${m.nombre}</h3><ul class="feat">${m.funciones.map(f => `<li>${f}</li>`).join('')}</ul>
-      <p class="hint" style="margin:0">En los pasos siguientes solo te pido lo que usa: el menú, el catálogo, los distritos de envío, el link de pago, el asesor y Chatwoot.</p></div>` : ''}`;
+      <p class="hint" style="margin:0">En los pasos siguientes solo te pido lo que usa: ${m.pide}.</p></div>` : ''}`;
 }
 function vistaFlor() {
   const c = S.edit.config, f = c.flor, err = S.errores.flor;
@@ -2376,6 +2434,314 @@ function armarModelo(w, cred) {
   if (texto(cred?.ia_key) && ia.activa !== false) out.credenciales.ia = { api_key: texto(cred.ia_key) };
   if (cw.modo === 'nueva') out.alta_chatwoot = { nombre: texto(cw.nombre) || texto(c.negocio.nombre), correo: texto(cw.correo).toLowerCase() };
   return out;
+}
+
+/* ───────── Worker fijo Evento (Generador v0.9): encuestas, votaciones y simulaciones por WhatsApp ───────── */
+function EV_INICIAL() { return { numero_publico: '', frase_qr: '', abierta: true, modo: 'prueba', admins: '', pruebas: '', palabra_reinicio: '', exportar_nombre: true, ya_participo: '', cerrada: '', pasos: [] }; }
+const TIPOS_PASO = [
+  ['mensaje', 'Mensaje', 'Texto o imagen. Sale y sigue con el siguiente paso, sin esperar respuesta.'],
+  ['opciones', 'Pregunta de opciones', 'Elige una sola. Hasta 3 opciones salen como botones; de 4 a 10, como lista.'],
+  ['texto', 'Pregunta abierta', 'La persona responde con sus palabras y se guarda tal cual.'],
+  ['ia', 'Análisis con IA', 'La IA lee respuestas anteriores y envía un resultado con tu plantilla.']];
+function esEvento(c) { return c?._modelo === 'evento'; }
+const formatoOpciones = (n) => n <= 3 ? 'botones' : 'lista';
+const maxCorto = (n) => n <= 3 ? 20 : 24;
+const telefonosDe = (s) => String(s || '').split(/[\n,;]+/).map(x => x.replace(/[\s+\-()]/g, '')).filter(Boolean);
+/* Campos que la IA debe devolver: los {campo} de la plantilla (sin {nombre}, {r.…} ni {ia.…}) */
+const camposPlantilla = (s) => [...new Set([...String(s || '').matchAll(/\{([A-Za-z_][A-Za-z0-9_]*)(\?[^}]*)?\}/g)].map(m => m[1]).filter(k => k !== 'nombre'))];
+function idLibre(pasos, base = 'p') { const usados = new Set(pasos.map(p => p.id)); let n = pasos.length + 1; while (usados.has(base + n)) n++; return base + n; }
+function pasoNuevo(tipo, pasos) {
+  const p = { id: idLibre(pasos), tipo, texto: '' };
+  if (tipo === 'mensaje') p.imagen_url = '';
+  if (tipo === 'opciones') Object.assign(p, { instruccion: '', titulo_corto: '', al_responder: '', boton_lista: '', opciones: [{ texto: '', corto: '' }, { texto: '', corto: '' }] });
+  if (tipo === 'texto') Object.assign(p, { etiqueta: '', min_caracteres: '' });
+  if (tipo === 'ia') { delete p.texto; Object.assign(p, { instrucciones: '', entrada: pasos.filter(x => ['texto', 'opciones'].includes(x.tipo)).map(x => x.id), plantilla: '', respaldo: {} }); }
+  return p;
+}
+const PASOS_EJEMPLO_EVENTO = () => [
+  { id: 'bienvenida', tipo: 'mensaje', texto: '¡Hola{nombre}! 👋 Gracias por participar. Es solo una pregunta rápida.', imagen_url: '' },
+  { id: 'q1', tipo: 'opciones', texto: '¿Qué tema te interesa más?', instruccion: 'Toca una opción o responde 1, 2 o 3.', titulo_corto: '¿Qué tema interesa más?', al_responder: '✅ ¡Anotado!', boton_lista: '',
+    opciones: [{ texto: 'Personas y capacidades', corto: 'Personas' }, { texto: 'Tecnología e IA', corto: '' }, { texto: 'Infraestructura', corto: '' }] },
+  { id: 'cierre', tipo: 'mensaje', texto: '¡Gracias por participar! 🙌 Mira los resultados en la pantalla del evento.', imagen_url: '' }];
+
+function validarEvento(c, cred, add) {
+  const ev = { ...EV_INICIAL(), ...(c.ev || {}) }, ps = ev.pasos || [];
+  if (texto(ev.numero_publico) && !/^\d{8,15}$/.test(texto(ev.numero_publico).replace(/[\s+\-()]/g, ''))) add('ev.numero_publico', 'El número del QR va con código de país y solo números. Ej: 51999888777.');
+  for (const [k, nom] of [['admins', 'del equipo'], ['pruebas', 'de prueba']]) {
+    const malos = telefonosDe(ev[k]).filter(t => !/^\d{8,15}$/.test(t));
+    if (malos.length) add('ev.' + k, `No entendí "${malos[0]}" en los números ${nom}. Van con código de país, solo números, uno por línea.`);
+  }
+  if (!ps.length) { add('evpasos', 'Agrega al menos un paso.'); return; }
+  if (!ps.some(p => ['opciones', 'texto'].includes(p.tipo))) add('evpasos', 'El evento necesita al menos una pregunta (de opciones o abierta).');
+  const ids = new Set();
+  ps.forEach((p, i) => {
+    const k = 'evp' + i, n = `Paso ${i + 1}`, id = texto(p.id);
+    if (!/^[A-Za-z0-9]{1,30}$/.test(id)) add(k, `${n}: el nombre interno solo lleva letras y números, sin espacios ni tildes.`);
+    else if (ids.has(id)) add(k, `${n}: hay otro paso con el nombre interno "${id}".`);
+    ids.add(id);
+    if (p.tipo === 'mensaje') {
+      if (!texto(p.texto) && !texto(p.imagen_url)) add(k, `${n}: escribe el texto o pon el link de una imagen.`);
+      if (texto(p.imagen_url) && !/^https:\/\/\S+$/.test(texto(p.imagen_url))) add(k, `${n}: el link de la imagen debe empezar con https://`);
+    }
+    if (['opciones', 'texto'].includes(p.tipo) && !texto(p.texto)) add(k, `${n}: escribe la pregunta.`);
+    if (p.tipo === 'opciones') {
+      const os = p.opciones || [], max = maxCorto(os.length);
+      if (os.length < 2 || os.length > 10) add(k, `${n}: una pregunta de opciones lleva de 2 a 10 opciones.`);
+      os.forEach((o, j) => {
+        if (!texto(o.texto)) add(k, `${n}, opción ${j + 1}: escribe la opción.`);
+        else if ((texto(o.corto) || texto(o.texto)).length > max) add(k, `${n}, opción ${j + 1}: en ${os.length <= 3 ? 'un botón' : 'la lista'} caben ${max} letras. Escribe un texto corto.`);
+      });
+      if (texto(p.boton_lista).length > 20) add(k, `${n}: el botón que abre la lista puede tener hasta 20 letras.`);
+    }
+    if (p.tipo === 'texto' && texto(String(p.min_caracteres ?? '')) && !(Number(p.min_caracteres) >= 0)) add(k, `${n}: el mínimo de letras debe ser un número.`);
+    if (p.tipo === 'ia') {
+      if (!texto(p.instrucciones)) add(k, `${n}: escribe las instrucciones para la IA (el prompt).`);
+      const antes = new Set(ps.slice(0, i).map(x => x.id));
+      if (!(p.entrada || []).length) add(k, `${n}: marca qué respuestas lee la IA.`);
+      (p.entrada || []).forEach(e => { if (!antes.has(e)) add(k, `${n}: lee la respuesta "${e}", pero no hay un paso con ese nombre antes de este.`); });
+      if (!texto(p.plantilla)) add(k, `${n}: escribe la plantilla del mensaje que recibe la persona.`);
+    }
+  });
+  const key = texto(cred?.ia_key);
+  if (/^bearer\s/i.test(key)) add('ia', 'Pega la clave sin la palabra Bearer.');
+  else if (key && (key.length < 20 || /\s/.test(key))) add('ia', 'La clave de la IA no parece completa: cópiala otra vez.');
+}
+/* Avisos que no impiden crear (los mismos que da el Generador v0.9) */
+function avisosEvento(c, cred) {
+  const ev = { ...EV_INICIAL(), ...(c.ev || {}) }, out = [];
+  if (!telefonosDe(ev.admins).length) out.push('Sin números del equipo, nadie podrá usar #abrir, #cerrar, #estado ni #exportar.');
+  if (!texto(ev.numero_publico)) out.push('Falta el número del QR: sin él no se arma el link para el QR.');
+  if ((ev.pasos || []).some(p => p.tipo === 'ia') && !texto(cred?.ia_key)) out.push('Hay un análisis con IA y no pegaste la clave: se usa la clave de Nissitech del Generador, si tiene. Si no, la persona recibe siempre el texto de respaldo.');
+  return out;
+}
+function linkQR(ev) {
+  const num = texto(ev.numero_publico).replace(/[\s+\-()]/g, '');
+  return num ? `https://wa.me/${num}${texto(ev.frase_qr) ? '?text=' + encodeURIComponent(texto(ev.frase_qr)) : ''}` : '';
+}
+function armarEvento(w, cred) {
+  const c = w.config, ev = { ...EV_INICIAL(), ...(c.ev || {}) }, ia = c.ia || IA_INICIAL();
+  const limpio = (o) => { for (const k of Object.keys(o)) { if (isObj(o[k])) limpio(o[k]); if (vacio(o[k]) || (isObj(o[k]) && !Object.keys(o[k]).length)) delete o[k]; } return o; };
+  const pasos = (ev.pasos || []).map(p => {
+    const q = { id: texto(p.id), tipo: p.tipo };
+    if (p.tipo === 'mensaje') { q.texto = texto(p.texto); q.imagen_url = linkDescarga(p.imagen_url); }
+    if (p.tipo === 'opciones') { Object.assign(q, { texto: texto(p.texto), instruccion: texto(p.instruccion), titulo_corto: texto(p.titulo_corto), al_responder: texto(p.al_responder) });
+      if ((p.opciones || []).length > 3) q.boton_lista = texto(p.boton_lista);
+      q.opciones = (p.opciones || []).map((o, j) => { const x = { n: String(j + 1), texto: texto(o.texto) }; if (texto(o.corto)) x.corto = texto(o.corto); return x; }); }
+    if (p.tipo === 'texto') { Object.assign(q, { texto: texto(p.texto), etiqueta: texto(p.etiqueta) }); if (texto(String(p.min_caracteres ?? ''))) q.min_caracteres = Number(p.min_caracteres); }
+    if (p.tipo === 'ia') { const campos = camposPlantilla(p.plantilla), r = {};
+      for (const k of campos) r[k] = texto((p.respaldo || {})[k]);
+      Object.assign(q, { instrucciones: texto(p.instrucciones), entrada: (p.entrada || []).filter(Boolean), plantilla: texto(p.plantilla) });
+      if (campos.length) q.respaldo = r; }
+    for (const k of Object.keys(q)) if (vacio(q[k]) && k !== 'respaldo') delete q[k];
+    return q;
+  });
+  const conIA = pasos.some(p => p.tipo === 'ia');
+  const config = {
+    worker_id: texto(c.worker_id),
+    negocio: { nombre: texto(c.negocio.nombre), zona_horaria: c.negocio.zona_horaria },
+    whatsapp: { phone_number_id: texto(String(c.whatsapp.phone_number_id ?? '')), numero_publico: texto(ev.numero_publico).replace(/[\s+\-()]/g, '') },
+    evento: { frase_qr: texto(ev.frase_qr), abierta_por_defecto: ev.abierta !== false, modo_por_defecto: ev.modo === 'real' ? 'real' : 'prueba' },
+    equipo: { telefonos_admin: telefonosDe(ev.admins), telefonos_prueba: telefonosDe(ev.pruebas), palabra_reinicio: texto(ev.palabra_reinicio) },
+    datos: { exportar_telefono: true, exportar_nombre: ev.exportar_nombre !== false },
+    textos: { ya_participo: texto(ev.ya_participo), cerrada: texto(ev.cerrada) },
+    pasos
+  };
+  if (conIA) config.ia = { modelo: texto(ia.modelo) || 'gpt-4o-mini' };
+  limpio(config); config.pasos = pasos;
+  const out = { modelo: 'evento', config, meta: { modelo: 'evento', tipo_negocio: w.meta.tipo_negocio, etiquetas: w.meta.etiquetas || [], notas: w.meta.notas || '', origen: 'workeros-web', version_interfaz: '1.2' } };
+  if (cred && cred.modo === 'nuevas') out.credenciales = { modo: 'nuevas', nombre: texto(cred.nombre), token_meta: texto(cred.token), app_id: texto(cred.app_id), app_secret: texto(cred.app_secret) };
+  else out.credenciales = { modo: 'existentes' };
+  if (conIA && texto(cred?.ia_key)) out.credenciales.ia = { api_key: texto(cred.ia_key) };
+  return out;
+}
+
+/* Paso 4: los pasos del evento */
+function vistaPasosEvento() {
+  const ev = S.edit.config.ev, ps = ev.pasos, err = S.errores.evpasos;
+  return `<div class="fsec-head"><div><h2>Pasos del evento</h2><p>Lo que pasa cuando alguien escribe al número del evento, en orden. Cada persona recorre los pasos una sola vez. En los textos puedes usar <span class="mono">{nombre}</span> (su primer nombre) y <span class="mono">{r.q1}</span> (lo que respondió en el paso q1). Para negrita escribe *así*.</p></div></div>
+    ${err ? `<div class="notice bad"><div>${esc(err.join(' '))}</div></div>` : ''}
+    <div class="opts" id="evList">${ps.map((p, i) => vistaPasoEvento(p, i)).join('')}</div>
+    <div class="ev-add"><span class="flabel">Agregar paso</span><div class="ev-add-row">${TIPOS_PASO.map(([v, l, d]) => `<button type="button" class="btn" data-ev-add="${v}" title="${esc(d)}">+ ${l}</button>`).join('')}</div>
+      <ul class="ev-tipos">${TIPOS_PASO.map(([, l, d]) => `<li><b>${l}:</b> ${d}</li>`).join('')}</ul></div>`;
+}
+function resumenPaso(p) {
+  if (p.tipo === 'mensaje') return texto(p.texto) || (texto(p.imagen_url) ? 'Imagen' : '');
+  if (p.tipo === 'ia') return 'Lee ' + ((p.entrada || []).join(', ') || 'nada todavía');
+  return texto(p.texto);
+}
+function badgePaso(p) {
+  if (p.tipo === 'opciones') { const n = (p.opciones || []).length; return `<span class="badge">${n} ${n === 1 ? 'opción' : 'opciones'} · ${formatoOpciones(n)}</span>`; }
+  return `<span class="badge ${p.tipo === 'mensaje' ? 'asesor' : ''}">${TIPOS_PASO.find(([v]) => v === p.tipo)[1]}</span>`;
+}
+function vistaPasoEvento(p, i) {
+  const ps = S.edit.config.ev.pasos, abierta = (S.edit.evAbiertos || []).includes(i) || !!S.errores['evp' + i];
+  const f = (k, label, { tipo = 'text', ph = '', hint = '', rows = 3, vars = null, max = 0 } = {}) => {
+    const id = `ev${i}_${k}`, v = p[k] ?? '';
+    return `<div class="field"><label for="${id}">${label}</label>
+      ${vars ? `<div class="vars">${vars.map(x => `<button type="button" data-insert="${x}" data-target="${id}">{${x}}</button>`).join('')}</div>` : ''}
+      ${tipo === 'textarea' ? `<textarea id="${id}" data-evp="${i}" data-k="${k}" rows="${rows}" placeholder="${esc(ph)}">${esc(v)}</textarea>` : `<input type="${tipo}" id="${id}" data-evp="${i}" data-k="${k}" value="${esc(v)}" placeholder="${esc(ph)}">`}
+      ${max ? `<span class="hint">Hasta ${max} letras.</span>` : ''}${hint ? `<span class="hint">${hint}</span>` : ''}</div>`;
+  };
+  const varsTxt = ['nombre', ...ps.slice(0, i).filter(x => ['opciones', 'texto'].includes(x.tipo) && texto(x.id)).map(x => 'r.' + x.id)];
+  let cuerpo = '';
+  if (p.tipo === 'mensaje') cuerpo = `${f('texto', 'Texto', { tipo: 'textarea', rows: 4, vars: varsTxt, ph: '¡Hola{nombre}! 👋 Gracias por participar.' })}
+    ${f('imagen_url', 'Imagen (opcional)', { tipo: 'url', ph: 'https://drive.google.com/file/d/…/view', hint: 'Link de la imagen. Si es de Drive, compártela como "Cualquier persona con el enlace". Con imagen, el texto sale debajo como pie de foto.' })}`;
+  if (p.tipo === 'opciones') {
+    const os = p.opciones || [], n = os.length, max = maxCorto(n);
+    cuerpo = `${f('texto', 'Pregunta', { tipo: 'textarea', rows: 3, vars: varsTxt, ph: '*Pregunta 1 de 2*\n¿Qué priorizaría primero?' })}
+    <div class="field"><span class="flabel">Opciones</span>
+      <p class="hint ev-fmt">${n <= 3 ? `Con ${n} opciones sale con <b>botones</b>: caben ${max} letras en cada uno.` : `Con ${n} opciones sale como <b>lista</b>: caben ${max} letras en cada fila.`} Si la opción es más larga, escribe al lado un texto corto para el ${n <= 3 ? 'botón' : 'listado'}.</p>
+      <div class="ev-ops">${os.map((o, j) => { const largo = (texto(o.corto) || texto(o.texto)).length;
+        return `<div class="ev-op"><span class="ev-n">${j + 1}</span>
+          <input type="text" data-evo="${i}:${j}" data-k="texto" value="${esc(o.texto || '')}" placeholder="Opción ${j + 1}" aria-label="Opción ${j + 1}">
+          <input type="text" data-evo="${i}:${j}" data-k="corto" value="${esc(o.corto || '')}" placeholder="Corto (opcional)" aria-label="Texto corto de la opción ${j + 1}">
+          <span class="ev-cnt ${largo > max ? 'bad' : ''}" id="evc${i}_${j}">${largo}/${max}</span>
+          <button type="button" class="btn sm ghost" data-evo-del="${i}:${j}" aria-label="Quitar opción ${j + 1}" ${n <= 2 ? 'disabled' : ''}>Quitar</button></div>`; }).join('')}</div>
+      <button type="button" class="btn sm" data-evo-add="${i}" ${n >= 10 ? 'disabled' : ''} style="align-self:flex-start">+ Agregar opción</button>
+      ${n >= 10 ? '<span class="hint">WhatsApp permite hasta 10 opciones.</span>' : ''}</div>
+    ${n > 3 ? f('boton_lista', 'Texto del botón que abre la lista', { ph: 'Ver opciones', max: 20 }) : ''}
+    ${f('instruccion', 'Instrucción (opcional)', { ph: n <= 3 ? 'Toca una opción o responde 1, 2 o 3.' : 'Toca el botón o responde con un número.', hint: 'Sale debajo de la pregunta. También se repite si la persona responde algo que no es una opción.' })}
+    <details class="more"><summary>Más opciones</summary><div class="grid2" style="margin-top:10px">
+      ${f('al_responder', 'Mensaje al responder', { ph: '✅ ¡Anotado!', hint: 'Sale apenas elige. Vacío = pasa directo al siguiente paso.' })}
+      ${f('titulo_corto', 'Título para el resultado', { ph: '¿Dónde invertir primero?', hint: 'Nombre corto de la pregunta en #estado, en el CSV y en la pantalla de resultados.' })}
+      ${f('id', 'Nombre interno', { ph: 'q1', hint: `Letras y números. Se usa en <span class="mono">{r.${esc(p.id || 'q1')}}</span> y en el CSV.` })}</div></details>`;
+  }
+  if (p.tipo === 'texto') cuerpo = `${f('texto', 'Pregunta', { tipo: 'textarea', rows: 5, vars: varsTxt, ph: 'Carlos es uno de los colaboradores…\n\n👉 *¿Qué harías ahora como líder y por qué?*' })}
+    <details class="more"><summary>Más opciones</summary><div class="grid2" style="margin-top:10px">
+      ${f('min_caracteres', 'Mínimo de letras (opcional)', { tipo: 'number', ph: 'Ej: 20', hint: 'Si escribe menos, se le pide que cuente un poco más.' })}
+      ${f('etiqueta', 'Nombre de la columna en el CSV', { ph: 'Respuesta 1' })}
+      ${f('id', 'Nombre interno', { ph: 'r1', hint: `Letras y números. Se usa en <span class="mono">{r.${esc(p.id || 'r1')}}</span> y en el análisis con IA.` })}</div></details>`;
+  if (p.tipo === 'ia') {
+    const previas = ps.slice(0, i).filter(x => ['opciones', 'texto'].includes(x.tipo) && texto(x.id)), campos = camposPlantilla(p.plantilla);
+    cuerpo = `<div class="field"><span class="flabel">Qué respuestas lee</span>
+      ${previas.length ? `<div class="radio-row">${previas.map(x => `<label><input type="checkbox" data-ev-in="${i}" value="${esc(x.id)}" ${(p.entrada || []).includes(x.id) ? 'checked' : ''}><span class="mono">${esc(x.id)}</span>&nbsp;${esc((texto(x.etiqueta) || texto(x.titulo_corto) || resumenPaso(x)).slice(0, 40))}</label>`).join('')}</div>` : '<span class="hint">Primero agrega una pregunta antes de este paso.</span>'}</div>
+    ${f('instrucciones', 'Instrucciones para la IA (prompt)', { tipo: 'textarea', rows: 8, ph: 'Actúas como facilitador de aprendizaje. Analiza las respuestas y devuelve:\n- fortaleza\n- oportunidad\n- cierre', hint: 'Dile qué debe analizar y qué datos devolver. Cada dato que pongas entre llaves en la plantilla de abajo debe estar aquí con el mismo nombre.' })}
+    ${f('plantilla', 'Plantilla del mensaje', { tipo: 'textarea', rows: 5, ph: '*💡 INSIGHT*\n\n*Fortaleza:* {fortaleza}\n\n*Oportunidad:* {oportunidad}', hint: 'Lo que recibe la persona. Cada <span class="mono">{dato}</span> lo llena la IA.' })}
+    ${campos.length ? `<div class="field"><span class="flabel">Texto de respaldo</span><span class="hint">Si la IA falla o tarda más de 90 segundos, la persona recibe la plantilla con estos textos.</span>
+      <div class="grid2">${campos.map(k => `<div class="field"><label for="ev${i}_r_${k}" class="mono">{${esc(k)}}</label><input type="text" id="ev${i}_r_${k}" data-evr="${i}" data-campo="${esc(k)}" value="${esc((p.respaldo || {})[k] || '')}"></div>`).join('')}</div></div>` : ''}
+    <details class="more"><summary>Más opciones</summary><div class="grid2" style="margin-top:10px">${f('id', 'Nombre interno', { ph: 'insight', hint: `Sus datos se usan como <span class="mono">{ia.${esc(p.id || 'insight')}.dato}</span> en pasos siguientes.` })}</div></details>`;
+  }
+  const res = resumenPaso(p);
+  return `<div class="opt ${abierta ? 'open' : ''} ${S.errores['evp' + i] ? 'invalid' : ''}">
+    <div class="opt-head">
+      <button type="button" class="opt-toggle" data-ev-toggle="${i}" aria-expanded="${abierta}">
+        <span class="opt-num" aria-hidden="true">${i + 1}</span>
+        <span class="opt-title ${res ? '' : 'sin-titulo'}">${esc(res ? res.replace(/\s+/g, ' ').slice(0, 80) : 'Sin texto todavía')}</span>
+        ${badgePaso(p)}
+        <svg class="chev" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="opt-tools">
+        <button type="button" class="btn sm ghost" data-ev-mv="${i}" data-dir="-1" ${i === 0 ? 'disabled' : ''} aria-label="Subir paso ${i + 1}">↑</button>
+        <button type="button" class="btn sm ghost" data-ev-mv="${i}" data-dir="1" ${i === ps.length - 1 ? 'disabled' : ''} aria-label="Bajar paso ${i + 1}">↓</button>
+        <button type="button" class="btn sm ghost" data-ev-del="${i}" aria-label="Quitar paso ${i + 1}">Quitar</button>
+      </div>
+    </div>
+    ${abierta ? `<div class="opt-body"><div style="display:flex;flex-direction:column;gap:12px">${cuerpo}
+      ${S.errores['evp' + i] ? `<span class="ferr">${esc(S.errores['evp' + i].join(' '))}</span>` : ''}</div></div>` : ''}
+  </div>`;
+}
+/* Paso 5: votación y equipo */
+function vistaEvento() {
+  const ev = S.edit.config.ev;
+  return `<div class="fsec-head"><div><h2>Votación y equipo</h2><p>Cómo empieza el evento y quiénes lo controlan desde su WhatsApp, escribiendo al mismo número del evento.</p></div></div>
+    <div class="grid2">
+      <div class="field"><span class="flabel">Al crear el worker, la votación</span><div class="radio-row" role="radiogroup" aria-label="Estado inicial">
+        <label><input type="radio" name="evab" value="1" data-evb="abierta" ${ev.abierta !== false ? 'checked' : ''}>Está abierta</label>
+        <label><input type="radio" name="evab" value="0" data-evb="abierta" ${ev.abierta === false ? 'checked' : ''}>Está cerrada</label></div>
+        <span class="hint">El equipo la abre con <span class="mono">#abrir</span> y la cierra con <span class="mono">#cerrar</span>. Cerrada, el público recibe el mensaje de "cerrada".</span></div>
+      <div class="field"><span class="flabel">Las respuestas cuentan como</span><div class="radio-row" role="radiogroup" aria-label="Modo inicial">
+        <label><input type="radio" name="evmodo" value="prueba" data-evm="1" ${ev.modo !== 'real' ? 'checked' : ''}>Prueba</label>
+        <label><input type="radio" name="evmodo" value="real" data-evm="1" ${ev.modo === 'real' ? 'checked' : ''}>Real</label></div>
+        <span class="hint">Las pruebas se guardan aparte. El día del evento: <span class="mono">#modo real</span> y luego <span class="mono">#abrir</span>.</span></div>
+      ${campo('ev.admins', 'Números del equipo', { tipo: 'textarea', rows: 3, ph: '51999888777\n51988777666', hint: 'Pueden usar #abrir, #cerrar, #modo, #estado y #exportar (te envía un CSV que abre en Excel). Uno por línea, con código de país. Sus respuestas siempre cuentan como prueba.' })}
+      ${campo('ev.pruebas', 'Números de prueba (opcional)', { tipo: 'textarea', rows: 3, ph: '51977666555', hint: 'Sus respuestas siempre cuentan como prueba. Uno por línea.' })}
+      ${campo('ev.palabra_reinicio', 'Palabra para volver a probar (opcional)', { ph: 'reiniciar-prueba', hint: 'Si un número del equipo o de prueba la escribe, se borran solo sus respuestas y puede empezar de nuevo.' })}
+      <label class="switch" style="align-self:center"><input type="checkbox" data-bool="ev.exportar_nombre" ${ev.exportar_nombre !== false ? 'checked' : ''}>Incluir el nombre de WhatsApp en el CSV</label>
+    </div>
+    <h3 style="margin-bottom:0">Mensajes</h3>
+    <div class="grid2">
+      ${campo('ev.ya_participo', 'Si ya participó', { tipo: 'textarea', rows: 2, ph: 'Ya registramos tu participación ✅ ¡Gracias!', hint: 'Cuando alguien que ya terminó vuelve a escribir. Vacío = el de ejemplo.' })}
+      ${campo('ev.cerrada', 'Si la votación está cerrada', { tipo: 'textarea', rows: 2, ph: 'La actividad está cerrada en este momento. ¡Gracias por tu interés! 🙌', hint: 'Vacío = el de ejemplo.' })}
+    </div>`;
+}
+/* Paso 6 del evento: solo la clave y el modelo, cuando hay un análisis con IA */
+function vistaIAEvento() {
+  const c = S.edit.config, ia = c.ia || IA_INICIAL(), err = S.errores.ia;
+  return `<div class="fsec-head"><div><h2>Inteligencia artificial</h2><p>La usa el paso "Análisis con IA". Lee las respuestas que marcaste y llena tu plantilla. Usa OpenAI (ChatGPT).</p></div></div>
+    <div class="grid2">
+      <div class="field"><label for="f_ia_mod">Modelo</label><select id="f_ia_mod" data-path="ia.modelo">${MODELOS_IA.openai.map(([v, l]) => `<option value="${esc(v)}" ${ia.modelo === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>
+        <span class="hint">El modelo es el "cerebro" de la IA. El recomendado alcanza para un análisis corto y cuesta menos.</span></div>
+      <div class="field"><label for="cr_ia_key">Clave de la IA (API key)</label><input type="password" id="cr_ia_key" data-cred="ia_key" value="${esc(S.edit.cred.ia_key || '')}" placeholder="sk-…" autocomplete="off">
+        <span class="hint">Una <b>API key</b> es una contraseña larga que da OpenAI para usar su IA. Cada análisis se cobra en esa cuenta. Vacía = usa la clave de Nissitech del Generador, si tiene.</span></div>
+    </div>
+    ${err ? `<span class="ferr">${esc(err.join(' '))}</span>` : ''}
+    <div class="notice info"><div><b>La clave no se guarda en este panel.</b> Viaja una sola vez al Generador, que la guarda cifrada como credencial en n8n. Si guardas el borrador, tendrás que pegarla otra vez antes de crear.</div></div>
+    ${tutorialClaveIA('openai')}`;
+}
+function vistaRevisionEvento() {
+  const E = S.edit, c = E.config, ev = c.ev, ps = ev.pasos;
+  const fila = (k, v, paso) => `<div class="rrow"><span class="rk">${k}</span><div class="rv">${v}</div><button type="button" class="btn sm ghost" data-paso="${paso}">Cambiar</button></div>`;
+  const falta = '<span class="ferr">Falta</span>', errs = listaErrores(validar(c, E.cred)), avs = avisosEvento(c, E.cred), qr = linkQR(ev);
+  const adm = telefonosDe(ev.admins).length, pr = telefonosDe(ev.pruebas).length;
+  return `${errs.length ? `<div class="notice bad"><div><b>Antes de crear, corrige esto:</b><ul>${errs.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div></div>` : ''}
+  ${avs.length ? `<div class="notice"><div><b>Puedes crearlo igual, pero revisa:</b><ul>${avs.map(a => `<li>${esc(a)}</li>`).join('')}</ul></div></div>` : ''}
+  <div class="review">
+    ${fila('Evento', esc(c.negocio.nombre) || falta, 0)}
+    ${fila('Tipo de worker', 'Worker fijo · <b>Evento</b>', 1)}
+    ${fila('WhatsApp', `${c.whatsapp.phone_number_id ? `<span class="mono">${esc(c.whatsapp.phone_number_id)}</span>` : falta}<br><span class="hint">${qr ? `Link del QR: <span class="mono">${esc(qr)}</span>` : 'Sin número del QR'} · ${E.cred.modo === 'nuevas' ? `Credenciales nuevas: ${esc(E.cred.nombre)}` : 'Credenciales de Nissitech'}</span>`, 2)}
+    ${fila('Pasos', ps.length ? `<ol>${ps.map(p => `<li>${esc((resumenPaso(p) || 'Sin texto').replace(/\s+/g, ' ').slice(0, 70))} <span class="hint">· ${p.tipo === 'opciones' ? `${(p.opciones || []).length} opciones en ${formatoOpciones((p.opciones || []).length)}` : TIPOS_PASO.find(([v]) => v === p.tipo)[1].toLowerCase()}</span></li>`).join('')}</ol>` : falta, 3)}
+    ${fila('Votación', `Empieza ${ev.abierta !== false ? '<b>abierta</b>' : '<b>cerrada</b>'} · en modo ${ev.modo === 'real' ? '<b>real</b>' : '<b>prueba</b>'}<br><span class="hint">${adm} ${adm === 1 ? 'número' : 'números'} del equipo · ${pr} de prueba${texto(ev.palabra_reinicio) ? ` · palabra para volver a probar: <span class="mono">${esc(ev.palabra_reinicio)}</span>` : ''}</span>`, 4)}
+    ${ps.some(p => p.tipo === 'ia') ? fila('Inteligencia artificial', `OpenAI · <span class="mono">${esc(c.ia?.modelo || 'gpt-4o-mini')}</span><br><span class="hint">${texto(E.cred.ia_key) ? 'Con clave (API key) nueva' : 'Sin clave nueva: usa la de Nissitech, si tiene'}</span>`, 5) : ''}
+  </div>
+  <button type="button" class="btn ghost" data-act="ver-json" style="align-self:flex-start">Ver lo que se envía a n8n</button>`;
+}
+/* Vista previa: cómo verá el evento una persona, con respuestas de ejemplo */
+function vistaPreviewEvento() {
+  const c = S.edit.config, ps = c.ev.pasos, nombre = 'Ana', resp = {}, iaDatos = {};
+  const rell = (s) => String(s ?? '').replace(/\s*\{nombre\}/g, ' ' + nombre).replace(/\{r\.([A-Za-z0-9]+)\}/g, (m, id) => resp[id] ?? m).replace(/\{ia\.([A-Za-z0-9]+)\.([A-Za-z0-9_]+)\}/g, (m, id, k) => iaDatos[id]?.[k] ?? m);
+  const plant = (s, datos) => String(s ?? '').replace(/\{([A-Za-z_][A-Za-z0-9_]*)\?([^}]*)\}/g, (m, k, t) => texto(datos[k]) ? t.replace('$', datos[k]) : '').replace(/\{([A-Za-z_][A-Za-z0-9_]*)\}/g, (m, k) => k === 'nombre' ? nombre : (datos[k] ?? m));
+  const out = [`<div class="bub out">${esc(texto(c.ev.frase_qr) || 'Hola')}<span class="t">9:00</span></div>`];
+  for (const p of ps) {
+    if (p.tipo === 'mensaje') { if (!texto(p.texto) && !texto(p.imagen_url)) continue;
+      out.push(`<div class="bub in">${texto(p.imagen_url) ? '<div class="ev-img">Imagen</div>' : ''}${waFormat(rell(p.texto))}<span class="t">9:00</span></div>`); }
+    if (p.tipo === 'opciones') { const os = (p.opciones || []).filter(o => texto(o.texto)), cuerpo = waFormat(rell(p.texto)) + (texto(p.instruccion) ? '<br>' + waFormat(p.instruccion) : '');
+      const corto = (o) => texto(o.corto) || texto(o.texto);
+      if (os.length <= 3) out.push(`<div class="ev-inter"><div class="bub in">${cuerpo}<span class="t">9:01</span></div>${os.map(o => `<div class="wa-btn">${esc(corto(o).slice(0, 20))}</div>`).join('')}</div>`);
+      else out.push(`<div class="ev-inter"><div class="bub in">${cuerpo}<span class="t">9:01</span></div><div class="wa-btn">☰ ${esc(texto(p.boton_lista) || 'Ver opciones')}</div><div class="wa-list">${os.map(o => `<div>${esc(corto(o).slice(0, 24))}</div>`).join('')}</div></div>`);
+      if (os[0]) { resp[p.id] = texto(os[0].texto); out.push(`<div class="bub out">${esc(corto(os[0]))}<span class="t">9:01</span></div>`); }
+      if (texto(p.al_responder)) out.push(`<div class="bub in">${waFormat(rell(p.al_responder))}<span class="t">9:01</span></div>`); }
+    if (p.tipo === 'texto') { out.push(`<div class="bub in">${waFormat(rell(p.texto)) || '<i>Pregunta sin texto</i>'}<span class="t">9:02</span></div>`);
+      resp[p.id] = 'Primero conversaría con él…'; out.push(`<div class="bub out">${esc(resp[p.id])}<span class="t">9:03</span></div>`); }
+    if (p.tipo === 'ia') { const datos = { ...(p.respaldo || {}) }; iaDatos[p.id] = datos;
+      out.push(`<div class="sysline">La IA analiza ${esc((p.entrada || []).join(', ') || 'las respuestas')}. Aquí se ve con el texto de respaldo.</div>`);
+      if (texto(p.plantilla)) out.push(`<div class="bub in">${waFormat(plant(p.plantilla, datos))}<span class="t">9:04</span></div>`); }
+  }
+  return `<aside class="preview panel" aria-label="Vista previa en WhatsApp">
+    <div class="pv-head"><div class="avatar" aria-hidden="true">${esc((c.negocio.nombre || 'E').trim().charAt(0).toUpperCase())}</div>
+      <div class="who"><b>${esc(c.negocio.nombre || 'Tu evento')}</b><span>Vista previa · una persona de ejemplo</span></div></div>
+    <div class="chat" id="chat">${out.join('')}</div>
+    <div class="pv-foot"><span>Respuestas de ejemplo: elige la primera opción en cada pregunta.</span></div>
+  </aside>`;
+}
+function montarEvento(m) {
+  const ev = () => S.edit.config.ev;
+  $$('[data-ev-add]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); const ps = ev().pasos; ps.push(pasoNuevo(b.dataset.evAdd, ps)); S.edit.evAbiertos = [ps.length - 1]; delete S.errores.evpasos; rerenderEditor(); }));
+  $$('[data-ev-toggle]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); const i = Number(b.dataset.evToggle), a = S.edit.evAbiertos || []; S.edit.evAbiertos = a.includes(i) ? a.filter(x => x !== i) : [...a, i]; if (!S.edit.evAbiertos.includes(i)) delete S.errores['evp' + i]; rerenderEditor(); }));
+  $$('[data-ev-del]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); const i = Number(b.dataset.evDel); ev().pasos.splice(i, 1); S.edit.evAbiertos = (S.edit.evAbiertos || []).filter(x => x !== i).map(x => x > i ? x - 1 : x); refrescarErrores(); rerenderEditor(); }));
+  $$('[data-ev-mv]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); const i = Number(b.dataset.evMv), j = i + Number(b.dataset.dir), ps = ev().pasos; [ps[i], ps[j]] = [ps[j], ps[i]]; S.edit.evAbiertos = (S.edit.evAbiertos || []).map(x => x === i ? j : x === j ? i : x); refrescarErrores(); rerenderEditor(); }));
+  $$('[data-evo-add]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); const p = ev().pasos[Number(b.dataset.evoAdd)]; if ((p.opciones || []).length >= 10) return; p.opciones.push({ texto: '', corto: '' }); refrescarErrores(); rerenderEditor(); const ins = $$(`[data-evo^="${b.dataset.evoAdd}:"][data-k="texto"]`); ins.length && ins[ins.length - 1].focus(); }));
+  $$('[data-evo-del]', m).forEach(b => b.addEventListener('click', () => { leerFormulario(); const [i, j] = b.dataset.evoDel.split(':').map(Number); ev().pasos[i].opciones.splice(j, 1); refrescarErrores(); rerenderEditor(); }));
+}
+function leerEvento(c) {
+  if (!isObj(c.ev)) c.ev = EV_INICIAL();
+  const ps = c.ev.pasos;
+  $$('#wform [data-evp]').forEach(el => { const p = ps[Number(el.dataset.evp)]; if (p) p[el.dataset.k] = el.value; });
+  $$('#wform [data-evo]').forEach(el => { const [i, j] = el.dataset.evo.split(':').map(Number), o = ps[i]?.opciones?.[j]; if (o) o[el.dataset.k] = el.value; });
+  const marcados = {}; $$('#wform [data-ev-in]').forEach(el => { const i = el.dataset.evIn; (marcados[i] = marcados[i] || []); if (el.checked) marcados[i].push(el.value); });
+  for (const [i, v] of Object.entries(marcados)) if (ps[Number(i)]) ps[Number(i)].entrada = v;
+  $$('#wform [data-evr]').forEach(el => { const p = ps[Number(el.dataset.evr)]; if (p) { p.respaldo = isObj(p.respaldo) ? p.respaldo : {}; p.respaldo[el.dataset.campo] = el.value; } });
+  $$('#wform [data-evb]').forEach(el => { if (el.checked) c.ev.abierta = el.value === '1'; });
+  $$('#wform [data-evm]').forEach(el => { if (el.checked) c.ev.modo = el.value; });
 }
 
 /* ───────── Vista: Plantillas ───────── */
