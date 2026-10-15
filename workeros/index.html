@@ -2216,9 +2216,12 @@ function validarModelo(c, add) {
     if (tp === 'info' && !texto(o.respuesta) && !texto(o.archivo_url)) add(k, `Opción ${n}: escribe el texto de respuesta o pon un documento.`);
     if (['info', 'catalogo', 'pedido'].includes(tp) && texto(o.archivo_url) && !esLink(o.archivo_url)) add(k, `Opción ${n}: el link del documento debe empezar con https://`);
     if (tp === 'ia' && c.ia?.activa === false) add(k, `Opción ${n}: la pregunta libre necesita la IA prendida en el paso 6.`);
+    if (tp === 'catalogo' && texto(o.catalogo_url) && !/docs\.google\.com\/spreadsheets\/d\//.test(o.catalogo_url)) add(k, `Opción ${n}: la hoja de códigos debe ser una hoja de Google (docs.google.com/spreadsheets/…).`);
+    if (tp === 'catalogo' && !texto(o.catalogo_url) && !texto(f.catalogo_url)) add(k, `Opción ${n}: pega el link de la hoja con los códigos de este catálogo.`);
   });
   const vende = ops.some(o => ['catalogo', 'pedido'].includes(tipoDe(o)));
-  if (vende && !texto(f.catalogo_url)) add('flor', 'Pega el link de la hoja de Google del catálogo.');
+  const conHoja = ops.some(o => tipoDe(o) === 'catalogo' && texto(o.catalogo_url));
+  if (ops.some(o => tipoDe(o) === 'pedido') && !conHoja && !texto(f.catalogo_url)) add('flor', 'La opción "Ya sé qué quiero" necesita al menos una hoja de códigos: ponla en una opción de catálogo o aquí, en la hoja general.');
   if (texto(f.catalogo_url) && !esLink(f.catalogo_url)) add('flor', 'El link del catálogo debe empezar con https://');
   const zs = leerZonasFlor(f.zonas_texto), zm = lineasDe(f.zonas_texto).filter((l, j) => !zs[j]);
   if (zm.length) add('flor', `No entendí la zona "${zm[0]}". Escríbela como "Miraflores, San Isidro: 10".`);
@@ -2261,7 +2264,7 @@ function vistaFlor() {
   const c = S.edit.config, f = c.flor, err = S.errores.flor;
   return `<div class="fsec-head"><div><h2>Catálogo, envío y pago</h2><p>Lo que necesita el worker Florería para vender: de dónde lee los productos, a qué distritos llega y cómo se paga.</p></div></div>
     <div class="blk"><div class="blk-head"><h3>Catálogo</h3></div>
-      <div class="grid2">${campo('flor.catalogo_url', 'Hoja de Google del catálogo', { req: true, ph: 'https://docs.google.com/spreadsheets/d/…/edit', hint: 'Columnas: <span class="mono">CODIGO, NOMBRE, PRECIO, CATEGORIA, DESCRIPCION, IMAGEN, STOCK, ACTIVO</span>. ' + hintHoja })}
+      <div class="grid2">${campo('flor.catalogo_url', 'Hoja general del catálogo (opcional)', { ph: 'https://docs.google.com/spreadsheets/d/…/edit', hint: 'Solo si prefieres una sola hoja para todo, en vez de una por opción del menú. Lleva además la columna <span class="mono">CATEGORIA</span>, igual a la categoría de cada opción. ' + hintHoja })}
       ${campo('moneda', 'Moneda', { ph: 'S/', hint: 'Se usa en precios, envío y total. Ej: S/, $, COP.' })}</div></div>
     <div class="blk"><div class="blk-head"><h3>Envío</h3></div>
       <div class="grid2">${campo('flor.zonas_texto', 'Distritos y costo de envío', { tipo: 'textarea', rows: 5, req: true, ph: 'Miraflores, San Isidro, Barranco: 10\nSurco, La Molina: 15', hint: 'Una zona por línea: los distritos separados por coma, dos puntos y el costo. Si el distrito no está, el worker ofrece un asesor.' })}
@@ -2278,7 +2281,8 @@ function vistaFlor() {
 }
 function resumenFlor(c, falta) {
   const f = c.flor || FLOR_INICIAL(), zs = leerZonasFlor(f.zonas_texto).filter(Boolean);
-  return `${texto(f.catalogo_url) ? 'Catálogo conectado' : 'Catálogo ' + falta} · ${zs.length} ${zs.length === 1 ? 'zona' : 'zonas'} de envío · ${texto(f.pago_link) ? 'pago con link' : 'sin link de pago'}<br><span class="hint">${texto(f.registro_url) ? 'Anota los pedidos en una hoja de Google' : 'Sin hoja de pedidos'}</span>`;
+  const nHojas = (c.p01?.opciones || []).filter(o => tipoDe(o) === 'catalogo' && texto(o.catalogo_url)).length;
+  return `${nHojas ? `${nHojas} ${nHojas === 1 ? 'hoja' : 'hojas'} de códigos` : texto(f.catalogo_url) ? 'Catálogo conectado' : 'Catálogo ' + falta} · ${zs.length} ${zs.length === 1 ? 'zona' : 'zonas'} de envío · ${texto(f.pago_link) ? 'pago con link' : 'sin link de pago'}<br><span class="hint">${texto(f.registro_url) ? 'Anota los pedidos en una hoja de Google' : 'Sin hoja de pedidos'}</span>`;
 }
 function vistaOpcionModelo(o, i) {
   const abierta = S.edit.abiertas.includes(i) || !!S.errores['op' + i], tp = tipoDe(o);
@@ -2296,7 +2300,8 @@ function vistaOpcionModelo(o, i) {
       <div class="field"><span class="flabel">Qué hace</span><div class="radio-col" role="radiogroup" aria-label="Qué hace la opción ${i + 1}">
         ${TIPOS_OPCION.map(([v, l, d]) => `<label><input type="radio" name="tp${i}" value="${v}" data-op="${i}" data-k="tipo" ${tp === v ? 'checked' : ''}><span><b>${l}</b><span class="hint">${d}</span></span></label>`).join('')}
       </div></div>
-      ${tp === 'catalogo' ? `<div class="field"><label for="op${i}c">Categoría (opcional)</label><input type="text" id="op${i}c" data-op="${i}" data-k="categoria" value="${esc(o.categoria || '')}" placeholder="Ej: Ramos"><span class="hint">Igual a la columna CATEGORIA de la hoja. Si el cliente escribe un nombre en vez del código, el worker prefiere los productos de esta categoría.</span></div>` : ''}
+      ${tp === 'catalogo' ? `<div class="field"><label for="op${i}h">Hoja de Google con los códigos de esta opción</label><input type="url" id="op${i}h" data-op="${i}" data-k="catalogo_url" value="${esc(o.catalogo_url || '')}" placeholder="https://docs.google.com/spreadsheets/d/…/edit"><span class="hint">Solo los productos de este catálogo. Columnas: <span class="mono">CODIGO, NOMBRE, PRECIO, PRECIO_OFERTA, DESCRIPCION, IMAGEN, STOCK</span>. Dentro de esta opción el worker solo acepta estos códigos. ${hintHoja}</span></div>
+      <div class="field"><label for="op${i}c">Categoría (opcional)</label><input type="text" id="op${i}c" data-op="${i}" data-k="categoria" value="${esc(o.categoria || '')}" placeholder="Ej: Ramos"><span class="hint">Solo hace falta si dejas vacía la hoja de arriba y usas la hoja general: el worker toma de ella las filas con esta CATEGORIA.</span></div>` : ''}
       ${conDoc ? `<div class="filebox">
         <span class="flabel"><b style="font-weight:600">${tp === 'catalogo' ? 'Catálogo en PDF (opcional)' : 'Documento (opcional)'}</b></span>
         <div class="grid2">
@@ -2339,7 +2344,7 @@ function armarModelo(w, cred) {
     const tipo = tipoDe(o), op = { numero: String(i + 1), titulo: texto(o.titulo), descripcion: texto(o.descripcion), tipo, palabras: (o.palabras || []).filter(Boolean) };
     if (['info', 'catalogo', 'pedido'].includes(tipo)) op.mensaje = texto(o.respuesta);
     if (['info', 'catalogo'].includes(tipo) && texto(o.archivo_url)) { op.archivo_url = linkDescarga(o.archivo_url); op.archivo_nombre = texto(o.archivo_nombre) || 'Documento.pdf'; }
-    if (tipo === 'catalogo') op.categoria = texto(o.categoria);
+    if (tipo === 'catalogo') { op.categoria = texto(o.categoria); if (texto(o.catalogo_url)) op.catalogo_url = texto(o.catalogo_url); }
     for (const k of Object.keys(op)) if (vacio(op[k])) delete op[k];
     return op;
   });
