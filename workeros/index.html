@@ -482,7 +482,10 @@ const TIPOS_OPCION = [
   ['asesor', 'Pasa a un asesor', 'Le avisa a una persona del equipo (en Chatwoot, si lo activas).'],
   ['ia', 'Pregunta libre con IA', 'El cliente escribe lo que quiera y la IA responde con la información del negocio.']];
 const MENU_FLORERIA = '¿Qué te gustaría hacer hoy?\n\n1. Ver catálogo\n   Ramos y arreglos para toda ocasión\n2. Ya sé qué quiero\n   Tengo el código del arreglo\n3. Mi pedido\n   Estado de mi pedido\n4. Horario y ubicación\n5. Hablar con un asesor';
-const FLOR_INICIAL = () => ({ catalogo_url: '', zonas_texto: '', turnos_texto: 'Mañana (9 a 12)\nTarde (12 a 4)\nNoche (4 a 8)', dias_entrega: [1, 2, 3, 4, 5, 6, 0], pago_link: '', pago_boton: '', registro_url: '', telefono_asesor: '', msg_fuera_horario: '' });
+const MSG_PAGO_FLOR = '✅ ¡Pedido *{pedido}* registrado!\n💰 Total a pagar: *{total}*\n\nPaga con el botón 👇 y luego envíame aquí la *captura del comprobante* 🧾';
+const MSG_RECORDAR_PAGO_FLOR = 'Tu pedido *{pedido}* está registrado 🌸 Total: *{total}*. Puedes pagarlo aquí 👇 Cuando pagues, envíame la *captura del comprobante* 🧾';
+const COLS_PEDIDOS = 'Pedido, Fecha de registro, Cliente, WhatsApp, Producto, Categoría, Precio, Envío, Total, Recibe, Teléfono de entrega, Dirección, Distrito, Fecha de entrega, Turno, Dedicatoria, Estado de pago, Estado del pedido';
+const FLOR_INICIAL = () => ({ catalogo_url: '', zonas_texto: '', turnos_texto: 'Mañana (9 a 12)\nTarde (12 a 4)\nNoche (4 a 8)', dias_entrega: [1, 2, 3, 4, 5, 6, 0], pago_link: '', pago_boton: '', msg_pago: '', registro_url: '', telefono_asesor: '', msg_fuera_horario: '' });
 const CW_INICIAL = () => ({ modo: 'ninguno', nombre: '', correo: '', url: '', account_id: '', inbox_id: '' });
 const ORDEN_BLOQUES = ['P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P09', 'P08', 'P10', 'P11', 'P17'];
 const OPCIONES_P11 = [['pedidos', 'Mis pedidos'], ['estado', 'Estado del último pedido'], ['repetir', 'Repetir el último pedido'], ['citas', 'Mis citas'], ['datos', 'Mis datos'], ['promociones', 'Promociones'], ['puntos', 'Puntos']];
@@ -1552,7 +1555,7 @@ function selectSiguiente(code, s, label = 'Al terminar, pasa a') {
   return `<div class="field"><label for="f_${code}_sig">${label}</label><select id="f_${code}_sig" data-path="${code.toLowerCase()}.siguiente">${opts.map(([k, l]) => `<option value="${k}" ${k === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></div>`;
 }
 const COLS_P05 = [['nombre', 'Nombre del producto', 'NOMBRE'], ['precio', 'Precio', 'PRECIO'], ['codigo', 'Código', 'CODIGO'], ['categoria', 'Categoría', 'CATEGORIA'], ['descripcion', 'Descripción', 'DESCRIPCION'], ['imagen', 'Link de la foto', 'IMAGEN']];
-const hintHoja = 'Compártela como "Cualquier persona con el enlace · Lector" y pega el link normal de la hoja.';
+const hintHoja = 'Compártela como "Cualquier persona con el enlace · Lector" y pega el link de la barra del navegador, con la pestaña abierta (termina en <span class="mono">#gid=…</span>).';
 function camposBloque(code, s) {
   const k = code.toLowerCase();
   switch (code) {
@@ -1776,7 +1779,7 @@ function pintarResultado() {
     const d = r.data;
     return `<div class="notice ok" style="margin-top:14px"><div><b>Worker creado${r.simulado ? ' (simulado)' : ''}.</b> ${esc(d.nombre || '')} con id <span class="mono">${esc(d.workflowId)}</span> y worker_id <span class="mono">${esc(d.worker_id)}</span>. ${esc(d.siguiente_paso || '')}${d.credenciales?.creadas ? ` Credenciales creadas en n8n: <span class="mono">${esc([d.credenciales.token, d.credenciales.trigger].filter(Boolean).join(', '))}</span>.` : ''}
       ${(d.plantillas || []).length ? `<div style="margin-top:6px">Plantillas copiadas: <span class="mono">${esc([].concat(d.plantillas).map(x => typeof x === 'string' ? x : (x.codigo || x.code || JSON.stringify(x))).join(', '))}</span></div>` : ''}
-      ${d.chatwoot ? `<div style="margin-top:6px">Chatwoot: ${d.chatwoot.cuenta_nueva ? 'cuenta nueva' : 'cuenta que ya existía'} · cuenta <span class="mono">${esc(d.chatwoot.account_id ?? '—')}</span> · bandeja <span class="mono">${esc(d.chatwoot.inbox_id ?? '—')}</span>.${d.chatwoot.cuenta_nueva ? (d.chatwoot.correo_enviado ? ' Ya le llegó el correo de bienvenida con su usuario y contraseña.' : ' <b>No se pudo enviar el correo de bienvenida</b>: revisa el flujo "Alta en Chatwoot" en n8n.') : ''}</div>` : ''}
+      ${d.chatwoot ? `<div style="margin-top:6px">Chatwoot: ${d.chatwoot.cuenta_nueva ? 'cuenta nueva' : 'cuenta que ya existía'} · cuenta <span class="mono">${esc(d.chatwoot.account_id ?? '—')}</span> · bandeja <span class="mono">${esc(d.chatwoot.inbox_id ?? '—')}</span>.${d.chatwoot.cuenta_nueva ? (d.chatwoot.correo_enviado ? (d.chatwoot.usuario_existente ? ' Ese correo ya tenía usuario en Chatwoot: entra con la contraseña que ya usa (el correo de bienvenida se lo explica).' : ' Ya le llegó el correo de bienvenida con su usuario y contraseña.') : ' <b>No se pudo enviar el correo de bienvenida</b>: revisa el flujo "Alta en Chatwoot" en n8n.') : ''}</div>` : ''}
       ${(d.avisos || []).length ? `<div style="margin-top:8px"><b>Avisos del Generador:</b><ul>${d.avisos.map(a => `<li>${esc(a)}</li>`).join('')}</ul></div>` : ''}
       <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${d.enlace ? `<a class="btn sm" href="${esc(d.enlace)}" target="_blank" rel="noopener">Abrir en n8n</a>` : ''}<a class="btn sm ghost" href="#workers">Ver en la lista</a></div></div></div>`;
   }
@@ -2227,6 +2230,7 @@ function validarModelo(c, add) {
   if (texto(f.pago_boton).length > 20) add('flor', 'El texto del botón de pago puede tener hasta 20 letras.');
   if (texto(f.pago_link) && !esLink(f.pago_link)) add('flor', 'El link de pago debe empezar con https://');
   if (texto(f.registro_url) && !esLink(f.registro_url)) add('flor', 'El link de la hoja de pedidos debe empezar con https://');
+  else if (texto(f.registro_url) && !/docs\.google\.com\/spreadsheets\/d\//.test(f.registro_url)) add('flor', 'La hoja de pedidos debe ser una hoja de Google (docs.google.com/spreadsheets/…). Excel y OneDrive no sirven.');
   if (texto(f.telefono_asesor) && !/^\d{8,15}$/.test(texto(f.telefono_asesor).replace(/[\s+-]/g, ''))) add('asesor', 'El WhatsApp del asesor va con código de país y solo números. Ej: 51999888777.');
 }
 function aplicarModelo(id) {
@@ -2265,10 +2269,11 @@ function vistaFlor() {
       <div class="field"><span class="flabel">Días con entrega</span><div class="days" role="group" aria-label="Días con entrega">${DIAS.map(([n, l, nom]) => `<button type="button" data-dia-flor="${n}" aria-pressed="${(f.dias_entrega || []).includes(n)}" title="${nom}">${l}</button>`).join('')}</div></div></div></div>
     <div class="blk"><div class="blk-head"><h3>Pago</h3></div>
       <div class="grid2">${campo('flor.pago_link', 'Link de pago', { req: true, ph: 'https://…/?ref={pedido}&monto={monto}', hint: 'La página donde el cliente paga (por ejemplo, la de EasyPay). Si tu link lo acepta, escribe <span class="mono">{pedido}</span> y <span class="mono">{monto}</span> y el worker pone el número de pedido y el total.' })}
-      ${campo('flor.pago_boton', 'Texto del botón', { ph: 'Pagar ahora', hint: 'Hasta 20 letras. Vacío = "Pagar ahora".' })}</div>
+      ${campo('flor.pago_boton', 'Texto del botón', { ph: 'Pagar ahora', hint: 'Hasta 20 letras. Vacío = "Pagar ahora".' })}
+      ${campo('flor.msg_pago', 'Mensaje con el link de pago', { tipo: 'textarea', rows: 3, vars: ['pedido', 'total'], ph: MSG_PAGO_FLOR, hint: 'Va justo encima del botón. Pide la captura del comprobante para que llegue al asesor. Vacío = el de ejemplo.', full: true })}</div>
       <div class="notice info"><div><b>Así funciona el pago:</b> el worker envía el total con un botón que abre el link. Cuando el cliente manda la foto del comprobante, llega a Chatwoot con la nota "validar pago" para que el asesor revise que llegó el dinero. El worker no valida comprobantes.</div></div></div>
     <div class="blk"><div class="blk-head"><h3>Registro de pedidos</h3></div>
-      <div class="grid2">${campo('flor.registro_url', 'Hoja de Google de pedidos (opcional)', { ph: 'https://docs.google.com/spreadsheets/d/…/edit', hint: 'Cada pedido se anota como una fila en la pestaña "Pedidos". La hoja debe estar compartida como Editor con la cuenta de Google conectada en n8n.' })}</div></div>
+      <div class="grid2">${campo('flor.registro_url', 'Hoja de Google de pedidos (opcional)', { ph: 'https://docs.google.com/spreadsheets/d/…/edit', hint: `Tiene que ser una hoja de Google (no Excel ni OneDrive) con una pestaña llamada "Pedidos" y estos títulos en la fila 1: <span class="mono">${COLS_PEDIDOS}</span>. Compártela como Editor con la cuenta de Google conectada en n8n.`, full: true })}</div></div>
     ${err ? `<span class="ferr">${esc(err.join(' '))}</span>` : ''}`;
 }
 function resumenFlor(c, falta) {
@@ -2291,14 +2296,14 @@ function vistaOpcionModelo(o, i) {
       <div class="field"><span class="flabel">Qué hace</span><div class="radio-col" role="radiogroup" aria-label="Qué hace la opción ${i + 1}">
         ${TIPOS_OPCION.map(([v, l, d]) => `<label><input type="radio" name="tp${i}" value="${v}" data-op="${i}" data-k="tipo" ${tp === v ? 'checked' : ''}><span><b>${l}</b><span class="hint">${d}</span></span></label>`).join('')}
       </div></div>
-      ${tp === 'catalogo' ? `<div class="field"><label for="op${i}c">Categoría (opcional)</label><input type="text" id="op${i}c" data-op="${i}" data-k="categoria" value="${esc(o.categoria || '')}" placeholder="Ej: Ramos"><span class="hint">Igual a la columna CATEGORIA de la hoja. Si la escribes, solo muestra esa categoría. Vacío = todo el catálogo.</span></div>` : ''}
+      ${tp === 'catalogo' ? `<div class="field"><label for="op${i}c">Categoría (opcional)</label><input type="text" id="op${i}c" data-op="${i}" data-k="categoria" value="${esc(o.categoria || '')}" placeholder="Ej: Ramos"><span class="hint">Igual a la columna CATEGORIA de la hoja. Si el cliente escribe un nombre en vez del código, el worker prefiere los productos de esta categoría.</span></div>` : ''}
       ${conDoc ? `<div class="filebox">
         <span class="flabel"><b style="font-weight:600">${tp === 'catalogo' ? 'Catálogo en PDF (opcional)' : 'Documento (opcional)'}</b></span>
         <div class="grid2">
           <div class="field"><label for="op${i}u">Link compartido de Drive</label><input type="url" id="op${i}u" data-op="${i}" data-k="archivo_url" value="${esc(o.archivo_url || '')}" placeholder="https://drive.google.com/file/d/…/view"></div>
           <div class="field"><label for="op${i}n">Nombre del archivo</label><input type="text" id="op${i}n" data-op="${i}" data-k="archivo_nombre" value="${esc(o.archivo_nombre || '')}" placeholder="Ej: Catálogo 2026.pdf"></div>
         </div>
-        <span class="hint">En Drive, el archivo debe estar compartido como "Cualquier persona con el enlace".</span><span class="dl" id="op${i}dl">${dl && dl !== texto(o.archivo_url) ? `Link de descarga que usará el worker: ${esc(dl)}` : ''}</span>
+        <span class="hint">En Drive, el archivo debe estar compartido como "Cualquier persona con el enlace".${tp === 'catalogo' ? ' Es lo que ve el cliente: pon los códigos de la columna CODIGO junto a cada producto.' : ''}</span><span class="dl" id="op${i}dl">${dl && dl !== texto(o.archivo_url) ? `Link de descarga que usará el worker: ${esc(dl)}` : ''}</span>
       </div>` : ''}
       ${conTexto ? `<div class="field"><label for="op${i}r" id="op${i}rl">${tp === 'info' ? 'Texto de respuesta' : 'Mensaje antes de pedir el arreglo (opcional)'}</label><div class="vars">${['nombre', 'negocio', 'asistente'].map(x => `<button type="button" data-insert="${x}" data-target="op${i}r">{${x}}</button>`).join('')}</div><textarea id="op${i}r" data-op="${i}" data-k="respuesta" rows="3" placeholder="${tp === 'info' ? 'Ej: 📍 Av. Larco 123, Miraflores. 🕘 Lunes a sábado, 9 am a 8 pm' : 'Ej: 🌹 Te comparto nuestro catálogo'}">${esc(o.respuesta)}</textarea></div>` : ''}
       ${tp === 'asesor' ? '<p class="hint">El cliente recibe el aviso de asesor del paso 8 y la conversación pasa a una persona.</p>' : tp === 'seguimiento' ? '<p class="hint">El worker busca el último pedido del cliente y le dice en qué estado está. No hay que llenar nada.</p>' : tp === 'ia' ? `<p class="hint">Usa la IA del paso 6${S.edit.config.ia?.activa === false ? ' (ahora está apagada: préndela allí)' : ''} y lo que escribas en "Lo que sabe del negocio".</p>` : tp === 'pedido' ? '<p class="hint">Después pide el código o el nombre del arreglo y arma el pedido con la entrega.</p>' : ''}
@@ -2319,7 +2324,7 @@ function vistaChatwoot() {
       <label><input type="radio" name="cwmodo" value="nueva" data-cw="modo" ${cw.modo === 'nueva' ? 'checked' : ''}>Crear una cuenta nueva</label>
       <label><input type="radio" name="cwmodo" value="existente" data-cw="modo" ${cw.modo === 'existente' ? 'checked' : ''}>Usar una cuenta que ya existe</label>
     </div>
-    ${cw.modo === 'nueva' ? `<div class="grid2">${campo('cw.nombre', 'Nombre de quien la usará', { ph: 'Ej: Rosa Pérez', hint: 'La dueña o el asesor. Vacío = el nombre del negocio.' })}${campo('cw.correo', 'Correo', { tipo: 'email', req: true, ph: 'rosa@correo.com', hint: 'Le llega un correo de bienvenida con su usuario y contraseña.' })}</div>
+    ${cw.modo === 'nueva' ? `<div class="grid2">${campo('cw.nombre', 'Nombre de quien la usará', { ph: 'Ej: Rosa Pérez', hint: 'La dueña o el asesor. Vacío = el nombre del negocio.' })}${campo('cw.correo', 'Correo', { tipo: 'email', req: true, ph: 'rosa@correo.com', hint: 'Le llega un correo de bienvenida con su usuario y contraseña. Si ese correo ya tiene usuario en Chatwoot, entra con la contraseña que ya usa.' })}</div>
       <div class="notice info"><div>El Generador crea la cuenta con el nombre del negocio, su bandeja y la conexión con el worker. La contraseña no pasa por este panel: solo va en el correo.</div></div>` : ''}
     ${cw.modo === 'existente' ? `<div class="grid2">${campo('cw.url', 'Dirección de Chatwoot', { req: true, ph: 'https://chatwoot.tu-dominio.com', hint: 'La dirección con la que entras a Chatwoot, sin nada después del dominio.' })}${campo('cw.account_id', 'Número de cuenta (account_id)', { req: true, ph: 'Ej: 4', hint: 'Al entrar a la cuenta, es el número que sale en la dirección después de <span class="mono">/accounts/</span>.' })}${campo('cw.inbox_id', 'Número de bandeja (inbox_id)', { req: true, ph: 'Ej: 4', hint: 'En Configuración → Bandejas de entrada, abre la bandeja: es el número después de <span class="mono">/inboxes/</span>.' })}</div>` : ''}
     ${cw.modo === 'ninguno' ? `<span class="hint">Sin Chatwoot, el cliente recibe el aviso de asesor y una persona le escribe por el WhatsApp del negocio.${S.edit.config._modelo ? ' <b>Ojo:</b> sin Chatwoot el worker Florería no recibe fotos ni archivos, así que tampoco el comprobante de pago.' : ''}</span>` : ''}
@@ -2348,7 +2353,8 @@ function armarModelo(w, cred) {
     palabras: { menu: c.p01.palabras_menu || [], despedida: c.p01.palabras_despedida || [], asesor: c.p12.palabras_asesor || [] },
     menu: { titulo: texto(c.p01.instruccion_menu), opciones },
     mensajes: { bienvenida: texto(c.p01.saludo), fuera_horario: texto(f.msg_fuera_horario), no_entendi: texto(c.p01.msg_opcion_invalida), despedida: texto(c.p01.msg_despedida),
-      derivacion: texto(c.p12.msg_derivacion), derivacion_fuera_horario: texto(c.p12.msg_fuera_horario) },
+      derivacion: texto(c.p12.msg_derivacion), derivacion_fuera_horario: texto(c.p12.msg_fuera_horario),
+      instrucciones_pago: texto(f.msg_pago) || MSG_PAGO_FLOR, recordar_pago: MSG_RECORDAR_PAGO_FLOR },
     catalogo: { fuente_url: texto(f.catalogo_url) },
     pedido: { turnos: lineasDe(f.turnos_texto), dias_entrega: f.dias_entrega || [] },
     delivery: { zonas: leerZonasFlor(f.zonas_texto).filter(Boolean) },
