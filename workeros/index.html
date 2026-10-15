@@ -482,7 +482,10 @@ const TIPOS_OPCION = [
   ['asesor', 'Pasa a un asesor', 'Le avisa a una persona del equipo (en Chatwoot, si lo activas).'],
   ['ia', 'Pregunta libre con IA', 'El cliente escribe lo que quiera y la IA responde con la información del negocio.']];
 const MENU_FLORERIA = '¿Qué te gustaría hacer hoy?\n\n1. Ver catálogo\n   Ramos y arreglos para toda ocasión\n2. Ya sé qué quiero\n   Tengo el código del arreglo\n3. Mi pedido\n   Estado de mi pedido\n4. Horario y ubicación\n5. Hablar con un asesor';
-const FLOR_INICIAL = () => ({ catalogo_url: '', zonas_texto: '', turnos_texto: 'Mañana (9 a 12)\nTarde (12 a 4)\nNoche (4 a 8)', dias_entrega: [1, 2, 3, 4, 5, 6, 0], pago_link: '', pago_boton: '', registro_url: '', telefono_asesor: '', msg_fuera_horario: '' });
+const MSG_PAGO_FLOR = '✅ ¡Pedido *{pedido}* registrado!\n💰 Total a pagar: *{total}*\n\nPaga con el botón 👇 y luego envíame aquí la *captura del comprobante* 🧾';
+const MSG_RECORDAR_PAGO_FLOR = 'Tu pedido *{pedido}* está registrado 🌸 Total: *{total}*. Puedes pagarlo aquí 👇 Cuando pagues, envíame la *captura del comprobante* 🧾';
+const COLS_PEDIDOS = 'Pedido, Fecha de registro, Cliente, WhatsApp, Producto, Categoría, Precio, Envío, Total, Recibe, Teléfono de entrega, Dirección, Distrito, Fecha de entrega, Turno, Dedicatoria, Estado de pago, Estado del pedido';
+const FLOR_INICIAL = () => ({ catalogo_url: '', zonas_texto: '', turnos_texto: 'Mañana (9 a 12)\nTarde (12 a 4)\nNoche (4 a 8)', dias_entrega: [1, 2, 3, 4, 5, 6, 0], pago_link: '', pago_boton: '', msg_pago: '', registro_url: '', telefono_asesor: '', msg_fuera_horario: '' });
 const CW_INICIAL = () => ({ modo: 'ninguno', nombre: '', correo: '', url: '', account_id: '', inbox_id: '' });
 const ORDEN_BLOQUES = ['P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P09', 'P08', 'P10', 'P11', 'P17'];
 const OPCIONES_P11 = [['pedidos', 'Mis pedidos'], ['estado', 'Estado del último pedido'], ['repetir', 'Repetir el último pedido'], ['citas', 'Mis citas'], ['datos', 'Mis datos'], ['promociones', 'Promociones'], ['puntos', 'Puntos']];
@@ -2227,6 +2230,7 @@ function validarModelo(c, add) {
   if (texto(f.pago_boton).length > 20) add('flor', 'El texto del botón de pago puede tener hasta 20 letras.');
   if (texto(f.pago_link) && !esLink(f.pago_link)) add('flor', 'El link de pago debe empezar con https://');
   if (texto(f.registro_url) && !esLink(f.registro_url)) add('flor', 'El link de la hoja de pedidos debe empezar con https://');
+  else if (texto(f.registro_url) && !/docs\.google\.com\/spreadsheets\/d\//.test(f.registro_url)) add('flor', 'La hoja de pedidos debe ser una hoja de Google (docs.google.com/spreadsheets/…). Excel y OneDrive no sirven.');
   if (texto(f.telefono_asesor) && !/^\d{8,15}$/.test(texto(f.telefono_asesor).replace(/[\s+-]/g, ''))) add('asesor', 'El WhatsApp del asesor va con código de país y solo números. Ej: 51999888777.');
 }
 function aplicarModelo(id) {
@@ -2265,10 +2269,11 @@ function vistaFlor() {
       <div class="field"><span class="flabel">Días con entrega</span><div class="days" role="group" aria-label="Días con entrega">${DIAS.map(([n, l, nom]) => `<button type="button" data-dia-flor="${n}" aria-pressed="${(f.dias_entrega || []).includes(n)}" title="${nom}">${l}</button>`).join('')}</div></div></div></div>
     <div class="blk"><div class="blk-head"><h3>Pago</h3></div>
       <div class="grid2">${campo('flor.pago_link', 'Link de pago', { req: true, ph: 'https://…/?ref={pedido}&monto={monto}', hint: 'La página donde el cliente paga (por ejemplo, la de EasyPay). Si tu link lo acepta, escribe <span class="mono">{pedido}</span> y <span class="mono">{monto}</span> y el worker pone el número de pedido y el total.' })}
-      ${campo('flor.pago_boton', 'Texto del botón', { ph: 'Pagar ahora', hint: 'Hasta 20 letras. Vacío = "Pagar ahora".' })}</div>
+      ${campo('flor.pago_boton', 'Texto del botón', { ph: 'Pagar ahora', hint: 'Hasta 20 letras. Vacío = "Pagar ahora".' })}
+      ${campo('flor.msg_pago', 'Mensaje con el link de pago', { tipo: 'textarea', rows: 3, vars: ['pedido', 'total'], ph: MSG_PAGO_FLOR, hint: 'Va justo encima del botón. Pide la captura del comprobante para que llegue al asesor. Vacío = el de ejemplo.', full: true })}</div>
       <div class="notice info"><div><b>Así funciona el pago:</b> el worker envía el total con un botón que abre el link. Cuando el cliente manda la foto del comprobante, llega a Chatwoot con la nota "validar pago" para que el asesor revise que llegó el dinero. El worker no valida comprobantes.</div></div></div>
     <div class="blk"><div class="blk-head"><h3>Registro de pedidos</h3></div>
-      <div class="grid2">${campo('flor.registro_url', 'Hoja de Google de pedidos (opcional)', { ph: 'https://docs.google.com/spreadsheets/d/…/edit', hint: 'Cada pedido se anota como una fila en la pestaña "Pedidos". La hoja debe estar compartida como Editor con la cuenta de Google conectada en n8n.' })}</div></div>
+      <div class="grid2">${campo('flor.registro_url', 'Hoja de Google de pedidos (opcional)', { ph: 'https://docs.google.com/spreadsheets/d/…/edit', hint: `Tiene que ser una hoja de Google (no Excel ni OneDrive) con una pestaña llamada "Pedidos" y estos títulos en la fila 1: <span class="mono">${COLS_PEDIDOS}</span>. Compártela como Editor con la cuenta de Google conectada en n8n.`, full: true })}</div></div>
     ${err ? `<span class="ferr">${esc(err.join(' '))}</span>` : ''}`;
 }
 function resumenFlor(c, falta) {
@@ -2348,7 +2353,8 @@ function armarModelo(w, cred) {
     palabras: { menu: c.p01.palabras_menu || [], despedida: c.p01.palabras_despedida || [], asesor: c.p12.palabras_asesor || [] },
     menu: { titulo: texto(c.p01.instruccion_menu), opciones },
     mensajes: { bienvenida: texto(c.p01.saludo), fuera_horario: texto(f.msg_fuera_horario), no_entendi: texto(c.p01.msg_opcion_invalida), despedida: texto(c.p01.msg_despedida),
-      derivacion: texto(c.p12.msg_derivacion), derivacion_fuera_horario: texto(c.p12.msg_fuera_horario) },
+      derivacion: texto(c.p12.msg_derivacion), derivacion_fuera_horario: texto(c.p12.msg_fuera_horario),
+      instrucciones_pago: texto(f.msg_pago) || MSG_PAGO_FLOR, recordar_pago: MSG_RECORDAR_PAGO_FLOR },
     catalogo: { fuente_url: texto(f.catalogo_url) },
     pedido: { turnos: lineasDe(f.turnos_texto), dias_entrega: f.dias_entrega || [] },
     delivery: { zonas: leerZonasFlor(f.zonas_texto).filter(Boolean) },
